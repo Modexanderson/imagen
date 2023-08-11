@@ -1,14 +1,14 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-// import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ShowSnackBar {
   void showSnackBar(
     BuildContext context,
     String title, {
     SnackBarAction? action,
-    Duration duration = const Duration(seconds: 1),
+    Duration duration = const Duration(seconds: 3),
     bool noAction = false,
   }) {
     try {
@@ -19,7 +19,7 @@ class ShowSnackBar {
           //   bottom: MediaQuery.of(context).size.height - 160,
           // ),
           elevation: 6,
-          backgroundColor: Colors.orange,
+          // backgroundColor: const Color(0xFF0A84FF),
           behavior: SnackBarBehavior.floating,
           content: Text(
             title,
@@ -30,7 +30,7 @@ class ShowSnackBar {
               : action ??
                   SnackBarAction(
                     textColor: Theme.of(context).colorScheme.secondary,
-                    label: 'OK',
+                    label: AppLocalizations.of(context)!.ok,
                     onPressed: () {},
                   ),
         ),

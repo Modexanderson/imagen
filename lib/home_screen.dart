@@ -4,10 +4,10 @@ import 'package:brain_fusion/brain_fusion.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:imagen/constants.dart';
 import 'package:imagen/drawer.dart';
 import 'package:imagen/snack_bar.dart';
 import 'package:lottie/lottie.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -54,31 +54,62 @@ class _HomeScreenState extends State<HomeScreen> {
   var _selectedResolution = Resolution.r1x1;
   Uint8List? _generatedImageData;
 
-  /// The [_generate] function to generate image data.
-  Future<Uint8List> _generate(
-      String query, AIStyle style, Resolution resolution) async {
-    /// Call the runAI method with the required parameters.
-    Uint8List image = await _ai.runAI(query, style, resolution);
-    return image;
-  }
+  // /// The [_generate] function to generate image data.
+  // Future<Uint8List> _generate(
+  //     String query, AIStyle style, Resolution resolution) async {
+  //   /// Call the runAI method with the required parameters.
+  //   Uint8List image = await _ai.runAI(query, style, resolution);
+  //   return image;
+  // }
+
+  // Future<void> _generateImage(
+  //     String query, AIStyle style, Resolution resolution) async {
+  //   try {
+  //     setState(() {
+  //       _generatedImageData = null; // Clear previous image data
+  //     });
+
+  //     Uint8List image = await _generate(query, style, resolution);
+  //     setState(() {
+  //       _generatedImageData = image; // Store the new generated image data
+  //       _isLoading = false;
+  //     });
+  //   } catch (error) {
+  //     setState(() {
+  //       _generatedImageData = null; // Clear image data in case of error
+  //       var _error = error.toString(); // Store the error message
+  //     });
+  //   }
+  // }
+  bool _isGenerating = false;
 
   Future<void> _generateImage(
       String query, AIStyle style, Resolution resolution) async {
-    try {
-      setState(() {
-        _generatedImageData = null; // Clear previous image data
-      });
+    if (_isGenerating) {
+      try {
+        // Set the flag to true to indicate the function is running.
+        _isGenerating = true;
 
-      Uint8List image = await _generate(query, style, resolution);
-      setState(() {
-        _generatedImageData = image; // Store the new generated image data
-      });
-    } catch (error) {
-      setState(() {
-        _generatedImageData = null; // Clear image data in case of error
-        var _error = error.toString(); // Store the error message
-      });
+        // Call the runAI method with the required parameters.
+        Uint8List image = await _ai.runAI(query, style, resolution);
+
+        // You can return, process, or store the image here.
+        // ...
+      } catch (e) {
+        setState(() {
+          _generatedImageData = null; // Clear image data in case of error
+          var _error = e.toString(); // Store the error message
+        });
+        // Handle any exceptions if needed.
+      } finally {
+        // Reset the flag to false when the function completes or exits.
+        _isGenerating = false;
+      }
     }
+  }
+
+  void stopGeneration() {
+    _isGenerating = false;
   }
 
   @override
@@ -89,48 +120,72 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   bool _isButtonClicked = false;
+  bool _isLoading = false;
 
-  Future<void> _downloadImage(Uint8List imageBytes) async {
-    final result = await ImageGallerySaver.saveImage(imageBytes);
+// Future<String?> _downloadImage(
+  //     Uint8List imageBytes, String customPart) async {
+  //   DateTime now = DateTime.now();
+
+  //   int year = now.year;
+  //   int month = now.month;
+  //   int day = now.day;
+  //   int hour = now.hour;
+  //   int minute = now.minute;
+  //   int second = now.second;
+  //   final time = '$year-$month-$day $hour:$minute:$second';
+  //   final imageName = '$customPart$time';
+
+  //   Directory directory = await getTemporaryDirectory();
+  //   File imageFile = File('${directory.path}/$imageName');
+
+  //   await imageFile.writeAsBytes(imageBytes);
+
+  //   // Copy the image to the gallery
+  //   final result = await ImageGallerySaver.saveFile(imageFile.path,
+  //       isReturnPathOfIOS: true);
+
+  //   if (result['isSuccess']) {
+  //     // Image saved successfully
+  //     print('Image saved to gallery with custom name: $imageName');
+  //     return imageFile.path; // Return the path
+  //   } else {
+  //     // Image save failed
+  //     print('Failed to save image to gallery');
+  //     return null;
+  //   }
+  // }
+
+  Future<void> _downloadImage(
+    Uint8List imageBytes,
+    String customPart_,
+  ) async {
+    DateTime now = DateTime.now();
+
+    int year = now.year;
+    int month = now.month;
+    int day = now.day;
+    int hour = now.hour;
+    int minute = now.minute;
+    int second = now.second;
+    final time = '$year-$month-$day $hour:$minute:$second';
+    final imageName = '$customPart_$time';
+    final result =
+        await ImageGallerySaver.saveImage(imageBytes, name: imageName);
 
     if (result['isSuccess']) {
+      ShowSnackBar()
+          .showSnackBar(context, 'Image successfully saved to gallery');
       // Image saved successfully
-      print('Image saved to gallery');
+      if (kDebugMode) {
+        print('Image successfully saved to gallery');
+      }
     } else {
+      ShowSnackBar().showSnackBar(context, 'Failed to save image to gallery');
       // Image save failed
-      print('Failed to save image to gallery');
+      if (kDebugMode) {
+        print('Failed to save image to gallery');
+      }
     }
-  }
-
-  void _showStylesDialog() {
-    showDialog<AIStyle>(
-      context: context,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          title: const Text('Pick a Style'),
-          children: [
-            Container(
-              padding: EdgeInsets.zero,
-              child: Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 10,
-                children: formattedStyleText.entries.map((entry) {
-                  return TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _selectedStyle = entry.key;
-                      });
-                      Navigator.pop(context);
-                    },
-                    child: Text(entry.value),
-                  );
-                }).toList(),
-              ),
-            )
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -142,9 +197,13 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       drawer: const AppDrawer(),
       appBar: AppBar(
-        title: const Text(
-          'Imagen',
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+        title: Text(
+          AppLocalizations.of(
+            context,
+          )!
+              .appTitle,
+          style: const TextStyle(
+              fontSize: 40, fontWeight: FontWeight.bold, fontFamily: 'Alva'),
         ),
       ),
       body: SingleChildScrollView(
@@ -159,58 +218,73 @@ class _HomeScreenState extends State<HomeScreen> {
                 TextFormField(
                   controller: _textEditingController,
                   decoration: const InputDecoration(
-                    hintText:
-                        "Enter prompt, e.g: cyberpunk anatomical heart model",
-                    labelText: "Enter prompt",
+                    hintText: AppLocalizations.of(context)!.enterPromptExample,
+                    labelText: AppLocalizations.of(context)!.enterPrompt,
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
                   validator: (value) {
                     if (_textEditingController.text.isEmpty) {
-                      return 'Input Some Texts...';
+                      return AppLocalizations.of(context)!.inputSomeText;
                     }
                     return null;
                   },
                   autovalidateMode: AutovalidateMode.onUserInteraction,
-
-                  //  TextField(
-                  //   controller: _textEditingController,
-                  //   decoration: const InputDecoration(
-                  //     hintText: 'Enter query text...',
-                  //   ),
-                  // ),
+                ),
+                const SizedBox(
+                  height: 10,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    DropdownButton(
-                      value: _selectedStyle,
-                      underline: const SizedBox(),
-                      items: formattedStyleText.entries
-                          .map((entry) => DropdownMenuItem<AIStyle>(
-                                value: entry.key,
-                                child: Text(entry.value),
-                              ))
-                          .toList(),
-                      onChanged: (AIStyle? newValue) {
-                        setState(() {
-                          _selectedStyle = newValue!;
-                        });
-                      },
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          AppLocalizations.of(context)!.imageStyle,
+                          style: TextStyle(
+                              fontSize: 10, fontWeight: FontWeight.bold),
+                        ),
+                        DropdownButton(
+                          value: _selectedStyle,
+                          underline: const SizedBox(),
+                          items: formattedStyleText.entries
+                              .map((entry) => DropdownMenuItem<AIStyle>(
+                                    value: entry.key,
+                                    child: Text(entry.value),
+                                  ))
+                              .toList(),
+                          onChanged: (AIStyle? newValue) {
+                            setState(() {
+                              _selectedStyle = newValue!;
+                            });
+                          },
+                        ),
+                      ],
                     ),
-                    DropdownButton(
-                      value: _selectedResolution,
-                      underline: const SizedBox(),
-                      items: formattedResolution.entries
-                          .map((entry) => DropdownMenuItem<Resolution>(
-                                value: entry.key,
-                                child: Text(entry.value),
-                              ))
-                          .toList(),
-                      onChanged: (Resolution? newValue) {
-                        setState(() {
-                          _selectedResolution = newValue!;
-                        });
-                      },
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          AppLocalizations.of(context)!.resolution,
+                          style: TextStyle(
+                              fontSize: 10, fontWeight: FontWeight.bold),
+                        ),
+                        DropdownButton(
+                          value: _selectedResolution,
+                          underline: const SizedBox(),
+                          items: formattedResolution.entries
+                              .map((entry) => DropdownMenuItem<Resolution>(
+                                    value: entry.key,
+                                    child: Text(entry.value),
+                                  ))
+                              .toList(),
+                          onChanged: (Resolution? newValue) {
+                            setState(() {
+                              _selectedResolution = newValue!;
+                            });
+                          },
+                        ),
+                      ],
                     ),
                     // IconButton(
                     //     icon: Column(
@@ -227,152 +301,142 @@ class _HomeScreenState extends State<HomeScreen> {
                     //     })
                   ],
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_textEditingController.text.isEmpty) {
-                      ShowSnackBar()
-                          .showSnackBar(context, "Input Some Texts...");
-                    } else {
-                      setState(() {
-                        _isButtonClicked = true;
-                      });
-                      _generateImage(
-                        _textEditingController.text,
-                        _selectedStyle,
-                        _selectedResolution,
-                      );
-                    }
-                  },
-                  style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all<Color>(kPrimaryColor),
-                    foregroundColor: MaterialStateProperty.all<Color>(
-                      Colors.white, // Use white text for better visibility
-                    ),
-                    elevation: MaterialStateProperty.all(10),
-                    fixedSize: MaterialStateProperty.all(
-                        const Size.fromWidth(double.maxFinite)),
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
+                _isLoading
+                    ? const SizedBox()
+                    : ElevatedButton(
+                        onPressed: () {
+                          if (_textEditingController.text.isEmpty) {
+                            ShowSnackBar().showSnackBar(context,
+                                AppLocalizations.of(context)!.inputSomeText);
+                          } else {
+                            setState(() {
+                              _isButtonClicked = true;
+                              _isLoading = true;
+                            });
+                            _generateImage(
+                              _textEditingController.text,
+                              _selectedStyle,
+                              _selectedResolution,
+                            );
+                          }
+                        },
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              Theme.of(context).colorScheme.secondary),
+                          elevation: MaterialStateProperty.all(10),
+                          fixedSize: MaterialStateProperty.all(
+                              const Size.fromWidth(double.maxFinite)),
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                          padding:
+                              MaterialStateProperty.all<EdgeInsetsGeometry>(
+                            const EdgeInsets.symmetric(
+                                vertical: 12.0, horizontal: 20.0),
+                          ),
+                        ),
+                        child: const Text(AppLocalizations.of(context)!.create),
                       ),
-                    ),
-                    padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                      const EdgeInsets.symmetric(
-                          vertical: 12.0, horizontal: 20.0),
-                    ),
-                  ),
-                  child: const Text('Create'),
-                ),
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.blue, // Set the border color
-                          width: 2.0, // Set the border width
-                        ),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .secondary, // Set the border color
+                        width: 2.0, // Set the border width
                       ),
-                      height: size,
-                      width: size,
-                      child: _isButtonClicked
-                          ? _generatedImageData != null
-                              ? Column(
+                    ),
+                    height: size,
+                    width: size,
+                    child: _isButtonClicked
+                        ? _generatedImageData != null
+                            ? Image.memory(_generatedImageData!)
+                            // : LoadingDialogWidget(
+                            //     generatedImageData:
+                            //         _generatedImageData == null,
+                            //   )
+                            : Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Image.memory(_generatedImageData!),
-                                    const SizedBox(
-                                      height: 20,
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        _downloadImage(_generatedImageData!);
-                                      },
-                                      style: ButtonStyle(
-                                        backgroundColor:
-                                            MaterialStateProperty.all<Color>(
-                                                kPrimaryColor),
-                                        foregroundColor:
-                                            MaterialStateProperty.all<Color>(
-                                          Colors
-                                              .white, // Use white text for better visibility
-                                        ),
-                                        elevation:
-                                            MaterialStateProperty.all(10),
-                                        fixedSize: MaterialStateProperty.all(
-                                            const Size.fromWidth(
-                                                double.maxFinite)),
-                                        shape: MaterialStateProperty.all<
-                                            RoundedRectangleBorder>(
-                                          RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                          ),
-                                        ),
-                                        padding: MaterialStateProperty.all<
-                                            EdgeInsetsGeometry>(
-                                          const EdgeInsets.symmetric(
-                                              vertical: 12.0, horizontal: 20.0),
-                                        ),
+                                    Lottie.asset(
+                                        'assets/animations/infinite-loader.json',
+                                        width:
+                                            MediaQuery.of(context).size.width /
+                                                4),
+                                    const SizedBox(height: 0),
+                                    const Text(
+                                      AppLocalizations.of(context)!
+                                          .creatingProcess,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                      child: const Text('Download'),
                                     ),
+                                    TextButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            stopGeneration();
+                                            _isLoading = false;
+                                            _isButtonClicked = false;
+
+                                            ShowSnackBar().showSnackBar(
+                                                context,
+                                                AppLocalizations.of(context)!
+                                                    .processCanceled);
+                                          });
+                                        },
+                                        child: Text(
+                                            AppLocalizations.of(context)!
+                                                .cancel))
                                   ],
-                                )
-                              : Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Lottie.asset(
-                                          'assets/animations/infinite-loader.json',
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width /
-                                              4),
-                                      const SizedBox(height: 0),
-                                      const Text(
-                                        'Loading...',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                )
-                          : const SizedBox()),
-                )
+                                ),
+                              )
+                        : const SizedBox(),
+                  ),
+                ),
+                _generatedImageData != null
+                    ? ElevatedButton(
+                        onPressed: () {
+                          _downloadImage(
+                            _generatedImageData!,
+                            _textEditingController.text,
+                          );
+                        },
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              Theme.of(context).colorScheme.secondary),
+                          foregroundColor: MaterialStateProperty.all<Color>(
+                            Colors
+                                .white, // Use white text for better visibility
+                          ),
+                          elevation: MaterialStateProperty.all(10),
+                          fixedSize: MaterialStateProperty.all(
+                              const Size.fromWidth(double.maxFinite)),
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                          padding:
+                              MaterialStateProperty.all<EdgeInsetsGeometry>(
+                            const EdgeInsets.symmetric(
+                                vertical: 12.0, horizontal: 20.0),
+                          ),
+                        ),
+                        child: Text(AppLocalizations.of(context)!.down),
+                      )
+                    : const SizedBox(),
               ]),
         ),
       ),
     );
   }
-
-  // Widget _showGeneratedImage() {
-  //   return Container(
-  //     child: FutureBuilder<Uint8List>(
-  //       /// Call the [_generate] function to get the image data.
-  //       future: _generate(
-  //           _textEditingController.text, _selectedStyle, Resolution.r1x1),
-  //       builder: (context, snapshot) {
-  //         if (snapshot.connectionState == ConnectionState.waiting) {
-  //           /// While waiting for the image data, display a loading indicator.
-  //           return const CircularProgressIndicator();
-  //         } else if (snapshot.hasError) {
-  //           if (kDebugMode) {
-  //             print(snapshot.error);
-  //           }
-
-  //           /// If an error occurred while getting the image data, display an error message.
-  //           return Text('Error: ${snapshot.error}');
-  //         } else if (snapshot.hasData) {
-  //           /// If the image data is available, display the image using Image.memory().
-  //           return Image.memory(snapshot.data!);
-  //         } else {
-  //           /// If no data is available, display a placeholder or an empty container.
-  //           return Container();
-  //         }
-  //       },
-  //     ),
-  //   );
-  // }
 }

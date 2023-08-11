@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:imagen/settings.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -10,41 +12,64 @@ class AppDrawer extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: [
           const DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.blue,
-            ),
-            child: Text(
-              'AI Image Generator',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
+            child: Center(
+              child: Text(
+                AppLocalizations.of(context)!.AIImageGenerator,
+                style: TextStyle(
+                  fontSize: 24,
+                ),
               ),
             ),
           ),
           ListTile(
-            title: const Text('Home'),
-            onTap: () {
-              Navigator.pop(context); // Close the drawer
-              // Navigate to the home page
-            },
+              leading: const Icon(Icons.home_outlined),
+              title: Text(
+                AppLocalizations.of(context)!.home,
+                style: const TextStyle(fontSize: 15),
+              ),
+              onTap: () {
+                Navigator.of(context).pop();
+              }),
+          const SizedBox(
+            height: 20,
           ),
           ListTile(
-            title: const Text('Settings'),
-            onTap: () {
-              // Navigate to the settings page
-            },
+              leading: const Icon(Icons.settings_outlined),
+              title: Text(
+                AppLocalizations.of(context)!.settings,
+                style: const TextStyle(fontSize: 15),
+              ),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Settings(
+                          // callback: callback,
+                          ),
+                    ));
+              }),
+          const SizedBox(
+            height: 20,
           ),
+          // ListTile(
+          //     leading: const Icon(Icons.privacy_tip_outlined),
+          //     title: const Text(
+          //       AppL,
+          //       style: TextStyle(fontSize: 15),
+          //     ),
+          //     onTap: () {}),
+          // const SizedBox(
+          //   height: 20,
+          // ),
           ListTile(
-            title: const Text('Privacy Policy'),
-            onTap: () {},
-          ),
-          ListTile(
-            title: const Text('About'),
-            onTap: () {
-              Navigator.pop(context); // Close the drawer
-              // Navigate to the about page
-            },
-          ),
+              leading: const Icon(Icons.info_outline),
+              title: Text(
+                AppLocalizations.of(context)!.about,
+                style: const TextStyle(fontSize: 15),
+              ),
+              onTap: () {}),
+          const SizedBox(),
+          const Divider(),
         ],
       ),
     );
