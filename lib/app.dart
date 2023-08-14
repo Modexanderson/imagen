@@ -120,7 +120,7 @@ class _MyAppState extends State<MyApp> {
       DeviceOrientation.landscapeRight,
     ]);
     return MaterialApp(
-      title: AppLocalizations.of(context)!.appTitle,
+      title: 'IMAGEN',
       themeMode: AppTheme.themeMode,
       theme: AppTheme.lightTheme(
         context: context,

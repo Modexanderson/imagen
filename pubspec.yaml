@@ -70,6 +70,12 @@ dev_dependencies:
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icons/logo.png"
+# flutter pub run flutter_launcher_icons:main
+
 # The following section is specific to Flutter packages.
 flutter:
   # The following line ensures that the Material Icons font is
@@ -112,3 +118,18 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+flutter_native_splash:
+  color: "#ffffff"
+  color_dark: "#080812"
+  image: assets/icons/logo.png
+  # Android 12 handles the splash screen differently than previous versions.  Please visit
+  # https://developer.android.com/guide/topics/ui/splash-screen
+  # Following are Android 12 specific parameter.
+  android_12:
+    color: "#ffffff"
+    color_dark: "#080812"
+    image: assets/icons/logo.png
+    fullscreen: true
+  web: false
+# dart run flutter_native_splash:create

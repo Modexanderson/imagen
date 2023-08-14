@@ -98,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
       } catch (e) {
         setState(() {
           _generatedImageData = null; // Clear image data in case of error
-          var _error = e.toString(); // Store the error message
+          var error = e.toString(); // Store the error message
         });
         // Handle any exceptions if needed.
       } finally {
@@ -217,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 TextFormField(
                   controller: _textEditingController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: AppLocalizations.of(context)!.enterPromptExample,
                     labelText: AppLocalizations.of(context)!.enterPrompt,
                     floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -239,9 +239,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           AppLocalizations.of(context)!.imageStyle,
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 10, fontWeight: FontWeight.bold),
                         ),
                         DropdownButton(
@@ -264,9 +264,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           AppLocalizations.of(context)!.resolution,
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 10, fontWeight: FontWeight.bold),
                         ),
                         DropdownButton(
@@ -338,7 +338,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 vertical: 12.0, horizontal: 20.0),
                           ),
                         ),
-                        child: const Text(AppLocalizations.of(context)!.create),
+                        child: Text(AppLocalizations.of(context)!.create),
                       ),
                 Padding(
                   padding: const EdgeInsets.all(20),
@@ -370,11 +370,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                             MediaQuery.of(context).size.width /
                                                 4),
                                     const SizedBox(height: 0),
-                                    const Text(
+                                    Text(
                                       AppLocalizations.of(context)!
                                           .creatingProcess,
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -431,7 +431,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 vertical: 12.0, horizontal: 20.0),
                           ),
                         ),
-                        child: Text(AppLocalizations.of(context)!.down),
+                        child: Text(AppLocalizations.of(context)!.download),
                       )
                     : const SizedBox(),
               ]),

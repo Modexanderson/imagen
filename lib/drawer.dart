@@ -1,9 +1,23 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:imagen/settings.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
+
+  void _launchPrivacyPolicy() async {
+    const _privacyPolicy =
+        'https://www.privacypolicies.com/live/6913039d-ae2e-4e47-9937-de2ea5fc269d';
+    if (await canLaunch(_privacyPolicy)) {
+      await launch(_privacyPolicy);
+    } else {
+      if (kDebugMode) {
+        print('Could not launch website call.');
+      }
+    }
+  }
 
   @override
   Drawer build(BuildContext context) {
@@ -11,13 +25,25 @@ class AppDrawer extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          const DrawerHeader(
+          DrawerHeader(
             child: Center(
-              child: Text(
-                AppLocalizations.of(context)!.AIImageGenerator,
-                style: TextStyle(
-                  fontSize: 24,
-                ),
+              child: Column(
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.aiImageGenerator,
+                    style: const TextStyle(
+                      fontSize: 24,
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    AppLocalizations.of(context)!.appTitle,
+                    style: const TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Alva'),
+                  ),
+                ],
               ),
             ),
           ),
@@ -67,7 +93,9 @@ class AppDrawer extends StatelessWidget {
                 AppLocalizations.of(context)!.about,
                 style: const TextStyle(fontSize: 15),
               ),
-              onTap: () {}),
+              onTap: () {
+                _launchPrivacyPolicy();
+              }),
           const SizedBox(),
           const Divider(),
         ],

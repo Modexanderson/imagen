@@ -11,7 +11,7 @@ Future<void> showTextInputDialog({
   await showDialog(
     context: context,
     builder: (BuildContext ctxt) {
-      final _controller = TextEditingController(text: initialText);
+      final controller = TextEditingController(text: initialText);
       return AlertDialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
@@ -33,7 +33,7 @@ Future<void> showTextInputDialog({
             ),
             TextField(
               autofocus: true,
-              controller: _controller,
+              controller: controller,
               keyboardType: keyboardType,
               textAlignVertical: TextAlignVertical.bottom,
               onSubmitted: (value) {
@@ -52,7 +52,7 @@ Future<void> showTextInputDialog({
             onPressed: () {
               Navigator.pop(context);
             },
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             style: TextButton.styleFrom(
@@ -63,9 +63,9 @@ Future<void> showTextInputDialog({
               backgroundColor: Theme.of(context).colorScheme.secondary,
             ),
             onPressed: () {
-              onSubmitted(_controller.text.trim());
+              onSubmitted(controller.text.trim());
             },
-            child: Text(
+            child: const Text(
               'Ok',
             ),
           ),

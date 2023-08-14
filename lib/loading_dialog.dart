@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -40,10 +39,10 @@ class _LoadingDialogWidgetState extends State<LoadingDialogWidget>
               width: MediaQuery.of(context).size.width / 4,
               controller: _lottieController.view),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             AppLocalizations.of(context)!.creatingProcess,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),

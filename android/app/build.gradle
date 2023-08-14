@@ -56,10 +56,26 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+           minifyEnabled true
+            shrinkResources true
+           signingConfig signingConfigs.debug
+           ndk {
+                debugSymbolLevel 'FULL'
+            }
         }
+    }
+    aaptOptions {
+        cruncherEnabled = false // Disable built-in PNG crunching
+    }
+
+    dexOptions {
+        javaMaxHeapSize "4g"
+        preDexLibraries = false
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
     }
 }
 
