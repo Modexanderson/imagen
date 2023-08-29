@@ -8,6 +8,7 @@ import 'package:imagen/drawer.dart';
 import 'package:imagen/snack_bar.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:upgrader/upgrader.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -194,247 +195,260 @@ class _HomeScreenState extends State<HomeScreen> {
     final double size = Platform.isAndroid || Platform.isIOS
         ? MediaQuery.of(context).size.width
         : MediaQuery.of(context).size.height / 2;
-    return Scaffold(
-      drawer: const AppDrawer(),
-      appBar: AppBar(
-        title: Text(
-          AppLocalizations.of(
-            context,
-          )!
-              .appTitle,
-          style: const TextStyle(
-              fontSize: 40, fontWeight: FontWeight.bold, fontFamily: 'Alva'),
+    return UpgradeAlert(
+      upgrader: Upgrader(
+          durationUntilAlertAgain: const Duration(days: 1),
+          dialogStyle: Platform.isIOS
+              ? UpgradeDialogStyle.cupertino
+              : UpgradeDialogStyle.material,
+          canDismissDialog: true,
+          shouldPopScope: () {
+            return true;
+          }),
+      child: Scaffold(
+        drawer: const AppDrawer(),
+        appBar: AppBar(
+          title: Text(
+            AppLocalizations.of(
+              context,
+            )!
+                .appTitle,
+            style: const TextStyle(
+                fontSize: 40, fontWeight: FontWeight.bold, fontFamily: 'Alva'),
+          ),
         ),
-      ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(
-                  height: 10,
-                ),
-                TextFormField(
-                  controller: _textEditingController,
-                  decoration: InputDecoration(
-                    hintText: AppLocalizations.of(context)!.enterPromptExample,
-                    labelText: AppLocalizations.of(context)!.enterPrompt,
-                    floatingLabelBehavior: FloatingLabelBehavior.always,
+        body: SingleChildScrollView(
+          child: Center(
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(
+                    height: 10,
                   ),
-                  validator: (value) {
-                    if (_textEditingController.text.isEmpty) {
-                      return AppLocalizations.of(context)!.inputSomeText;
-                    }
-                    return null;
-                  },
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.imageStyle,
-                          style: const TextStyle(
-                              fontSize: 10, fontWeight: FontWeight.bold),
-                        ),
-                        DropdownButton(
-                          value: _selectedStyle,
-                          underline: const SizedBox(),
-                          items: formattedStyleText.entries
-                              .map((entry) => DropdownMenuItem<AIStyle>(
-                                    value: entry.key,
-                                    child: Text(entry.value),
-                                  ))
-                              .toList(),
-                          onChanged: (AIStyle? newValue) {
-                            setState(() {
-                              _selectedStyle = newValue!;
-                            });
-                          },
-                        ),
-                      ],
+                  TextFormField(
+                    controller: _textEditingController,
+                    decoration: InputDecoration(
+                      hintText:
+                          AppLocalizations.of(context)!.enterPromptExample,
+                      labelText: AppLocalizations.of(context)!.enterPrompt,
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.resolution,
-                          style: const TextStyle(
-                              fontSize: 10, fontWeight: FontWeight.bold),
-                        ),
-                        DropdownButton(
-                          value: _selectedResolution,
-                          underline: const SizedBox(),
-                          items: formattedResolution.entries
-                              .map((entry) => DropdownMenuItem<Resolution>(
-                                    value: entry.key,
-                                    child: Text(entry.value),
-                                  ))
-                              .toList(),
-                          onChanged: (Resolution? newValue) {
-                            setState(() {
-                              _selectedResolution = newValue!;
-                            });
+                    validator: (value) {
+                      if (_textEditingController.text.isEmpty) {
+                        return AppLocalizations.of(context)!.inputSomeText;
+                      }
+                      return null;
+                    },
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)!.imageStyle,
+                            style: const TextStyle(
+                                fontSize: 10, fontWeight: FontWeight.bold),
+                          ),
+                          DropdownButton(
+                            value: _selectedStyle,
+                            underline: const SizedBox(),
+                            items: formattedStyleText.entries
+                                .map((entry) => DropdownMenuItem<AIStyle>(
+                                      value: entry.key,
+                                      child: Text(entry.value),
+                                    ))
+                                .toList(),
+                            onChanged: (AIStyle? newValue) {
+                              setState(() {
+                                _selectedStyle = newValue!;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)!.resolution,
+                            style: const TextStyle(
+                                fontSize: 10, fontWeight: FontWeight.bold),
+                          ),
+                          DropdownButton(
+                            value: _selectedResolution,
+                            underline: const SizedBox(),
+                            items: formattedResolution.entries
+                                .map((entry) => DropdownMenuItem<Resolution>(
+                                      value: entry.key,
+                                      child: Text(entry.value),
+                                    ))
+                                .toList(),
+                            onChanged: (Resolution? newValue) {
+                              setState(() {
+                                _selectedResolution = newValue!;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                      // IconButton(
+                      //     icon: Column(
+                      //       children: [
+                      //         const Icon(
+                      //           Icons.draw,
+                      //         ),
+                      //         const Text('Style'),
+                      //         Text(formattedStyleText[_selectedStyle].toString())
+                      //       ],
+                      //     ),
+                      //     onPressed: () {
+                      //       _showStylesDialog();
+                      //     })
+                    ],
+                  ),
+                  _isLoading
+                      ? const SizedBox()
+                      : ElevatedButton(
+                          onPressed: () {
+                            if (_textEditingController.text.isEmpty) {
+                              ShowSnackBar().showSnackBar(context,
+                                  AppLocalizations.of(context)!.inputSomeText);
+                            } else {
+                              setState(() {
+                                _isButtonClicked = true;
+                                _isLoading = true;
+                              });
+                              _generateImage(
+                                _textEditingController.text,
+                                _selectedStyle,
+                                _selectedResolution,
+                              );
+                            }
                           },
-                        ),
-                      ],
-                    ),
-                    // IconButton(
-                    //     icon: Column(
-                    //       children: [
-                    //         const Icon(
-                    //           Icons.draw,
-                    //         ),
-                    //         const Text('Style'),
-                    //         Text(formattedStyleText[_selectedStyle].toString())
-                    //       ],
-                    //     ),
-                    //     onPressed: () {
-                    //       _showStylesDialog();
-                    //     })
-                  ],
-                ),
-                _isLoading
-                    ? const SizedBox()
-                    : ElevatedButton(
-                        onPressed: () {
-                          if (_textEditingController.text.isEmpty) {
-                            ShowSnackBar().showSnackBar(context,
-                                AppLocalizations.of(context)!.inputSomeText);
-                          } else {
-                            setState(() {
-                              _isButtonClicked = true;
-                              _isLoading = true;
-                            });
-                            _generateImage(
-                              _textEditingController.text,
-                              _selectedStyle,
-                              _selectedResolution,
-                            );
-                          }
-                        },
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(
-                              Theme.of(context).colorScheme.secondary),
-                          elevation: MaterialStateProperty.all(10),
-                          fixedSize: MaterialStateProperty.all(
-                              const Size.fromWidth(double.maxFinite)),
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                Theme.of(context).colorScheme.secondary),
+                            elevation: MaterialStateProperty.all(10),
+                            fixedSize: MaterialStateProperty.all(
+                                const Size.fromWidth(double.maxFinite)),
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            padding:
+                                MaterialStateProperty.all<EdgeInsetsGeometry>(
+                              const EdgeInsets.symmetric(
+                                  vertical: 12.0, horizontal: 20.0),
                             ),
                           ),
-                          padding:
-                              MaterialStateProperty.all<EdgeInsetsGeometry>(
-                            const EdgeInsets.symmetric(
-                                vertical: 12.0, horizontal: 20.0),
-                          ),
+                          child: Text(AppLocalizations.of(context)!.create),
                         ),
-                        child: Text(AppLocalizations.of(context)!.create),
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .secondary, // Set the border color
+                          width: 2.0, // Set the border width
+                        ),
                       ),
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .secondary, // Set the border color
-                        width: 2.0, // Set the border width
-                      ),
-                    ),
-                    height: size,
-                    width: size,
-                    child: _isButtonClicked
-                        ? _generatedImageData != null
-                            ? Image.memory(_generatedImageData!)
-                            // : LoadingDialogWidget(
-                            //     generatedImageData:
-                            //         _generatedImageData == null,
-                            //   )
-                            : Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Lottie.asset(
-                                        'assets/animations/infinite-loader.json',
-                                        width:
-                                            MediaQuery.of(context).size.width /
-                                                4),
-                                    const SizedBox(height: 0),
-                                    Text(
-                                      AppLocalizations.of(context)!
-                                          .creatingProcess,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
+                      height: size,
+                      width: size,
+                      child: _isButtonClicked
+                          ? _generatedImageData != null
+                              ? Image.memory(_generatedImageData!)
+                              // : LoadingDialogWidget(
+                              //     generatedImageData:
+                              //         _generatedImageData == null,
+                              //   )
+                              : Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Lottie.asset(
+                                          'assets/animations/infinite-loader.json',
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width /
+                                              4),
+                                      const SizedBox(height: 0),
+                                      Text(
+                                        AppLocalizations.of(context)!
+                                            .creatingProcess,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                    ),
-                                    TextButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            stopGeneration();
-                                            _isLoading = false;
-                                            _isButtonClicked = false;
+                                      TextButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              stopGeneration();
+                                              _isLoading = false;
+                                              _isButtonClicked = false;
 
-                                            ShowSnackBar().showSnackBar(
-                                                context,
-                                                AppLocalizations.of(context)!
-                                                    .processCanceled);
-                                          });
-                                        },
-                                        child: Text(
-                                            AppLocalizations.of(context)!
-                                                .cancel))
-                                  ],
-                                ),
-                              )
-                        : const SizedBox(),
+                                              ShowSnackBar().showSnackBar(
+                                                  context,
+                                                  AppLocalizations.of(context)!
+                                                      .processCanceled);
+                                            });
+                                          },
+                                          child: Text(
+                                              AppLocalizations.of(context)!
+                                                  .cancel))
+                                    ],
+                                  ),
+                                )
+                          : const SizedBox(),
+                    ),
                   ),
-                ),
-                _generatedImageData != null
-                    ? ElevatedButton(
-                        onPressed: () {
-                          _downloadImage(
-                            _generatedImageData!,
-                            _textEditingController.text,
-                          );
-                        },
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(
-                              Theme.of(context).colorScheme.secondary),
-                          foregroundColor: MaterialStateProperty.all<Color>(
-                            Colors
-                                .white, // Use white text for better visibility
-                          ),
-                          elevation: MaterialStateProperty.all(10),
-                          fixedSize: MaterialStateProperty.all(
-                              const Size.fromWidth(double.maxFinite)),
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
+                  _generatedImageData != null
+                      ? ElevatedButton(
+                          onPressed: () {
+                            _downloadImage(
+                              _generatedImageData!,
+                              _textEditingController.text,
+                            );
+                          },
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                Theme.of(context).colorScheme.secondary),
+                            foregroundColor: MaterialStateProperty.all<Color>(
+                              Colors
+                                  .white, // Use white text for better visibility
+                            ),
+                            elevation: MaterialStateProperty.all(10),
+                            fixedSize: MaterialStateProperty.all(
+                                const Size.fromWidth(double.maxFinite)),
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            padding:
+                                MaterialStateProperty.all<EdgeInsetsGeometry>(
+                              const EdgeInsets.symmetric(
+                                  vertical: 12.0, horizontal: 20.0),
                             ),
                           ),
-                          padding:
-                              MaterialStateProperty.all<EdgeInsetsGeometry>(
-                            const EdgeInsets.symmetric(
-                                vertical: 12.0, horizontal: 20.0),
-                          ),
-                        ),
-                        child: Text(AppLocalizations.of(context)!.download),
-                      )
-                    : const SizedBox(),
-              ]),
+                          child: Text(AppLocalizations.of(context)!.download),
+                        )
+                      : const SizedBox(),
+                ]),
+          ),
         ),
       ),
     );
