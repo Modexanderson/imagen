@@ -38,6 +38,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   device_info_plus: ^9.0.1
   file_picker: ^5.2.7
+  flutter_bloc: ^8.1.2
+  equatable: ^2.0.5
   flutter_archive: ^5.0.0
 
   flutter_localizations:
@@ -49,6 +51,7 @@ dependencies:
   image_gallery_saver: ^2.0.3
   intl: ^0.18.0
   lottie: ^2.5.0
+  package_info_plus: ^4.1.0
   path_provider: ^2.0.9
   permission_handler: ^10.2.0
   rate_my_app: ^1.1.3

@@ -1,11 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:imagen/settings.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../Pages/settings.dart';
+
 class AppDrawer extends StatelessWidget {
-  const AppDrawer({super.key});
+  final String appVersion;
+  const AppDrawer({required this.appVersion, super.key});
 
   void _launchPrivacyPolicy() async {
     const _privacyPolicy =
@@ -35,13 +37,20 @@ class AppDrawer extends StatelessWidget {
                       fontSize: 24,
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Text(
                     AppLocalizations.of(context)!.appTitle,
                     style: const TextStyle(
                         fontSize: 40,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Alva'),
+                  ),
+                  Text(
+                    'v$appVersion',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),

@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -6,8 +8,8 @@ import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../widgets/snack_bar.dart';
 import 'picker.dart';
-import 'snack_bar.dart';
 
 Future<void> createBackup(
   BuildContext context,

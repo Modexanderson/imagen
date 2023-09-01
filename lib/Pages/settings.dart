@@ -4,15 +4,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:imagen/gradient_container.dart';
-import 'package:imagen/snack_bar.dart';
-import 'package:imagen/text_input_dialog.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import 'app.dart';
-import 'backup_restore.dart';
-import 'box_switch_tile.dart';
-import 'config.dart';
+import '../app.dart';
+import '../utils/backup_restore.dart';
+import '../utils/box_switch_tile.dart';
+import '../widgets/config.dart';
+import '../widgets/gradient_container.dart';
+import '../widgets/snack_bar.dart';
+import '../widgets/text_input_dialog.dart';
 
 class Settings extends StatefulWidget {
   const Settings({super.key});

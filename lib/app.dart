@@ -1,18 +1,20 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:imagen/rate_app_init_widget.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import 'app_theme.dart';
-import 'config.dart';
-import 'home_screen.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'Pages/home_page.dart';
+import 'widgets/app_theme.dart';
+import 'widgets/config.dart';
+import 'widgets/rate_app_init_widget.dart';
 
 Future<void> openHiveBox(String boxName, {bool limit = false}) async {
   final box = await Hive.openBox(boxName).onError((error, stackTrace) async {
@@ -36,7 +38,6 @@ Future<void> openHiveBox(String boxName, {bool limit = false}) async {
 }
 
 class MyApp extends StatefulWidget {
-  // final bool showHome;
   const MyApp({Key? key}) : super(key: key);
 
   @override
@@ -96,7 +97,6 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
@@ -137,7 +137,8 @@ class _MyAppState extends State<MyApp> {
           //     ?
           //  RateStarScreen(rateMyApp: rateMyApp)
           RateAppInitWidget(
-        builder: (rateMyApp) => const HomeScreen(),
+        builder: (rateMyApp) => const HomePage(),
+        // const HomePage(),
       ),
       locale: _locale,
       localizationsDelegates: const [
@@ -170,5 +171,65 @@ class _MyAppState extends State<MyApp> {
       //   return HandleRoute.handleRoute(settings.name);
       // },
     );
+    // return MultiBlocProvider(
+    //   providers: [
+    //     BlocProvider(
+    //       create: (_) => AppLanguageCubit(const Locale(englishLanguage, 'US'))
+    //         ..loadLanguage(),
+    //     ),
+    //     BlocProvider(
+    //       create: (_) => AppThemeCubit(material)..loadTheme(),
+    //     ),
+    //     BlocProvider(
+    //       create: (_) => AppModeCubit(system)..loadMode(),
+    //     ),
+    //     BlocProvider(
+    //       create: (_) => AppDirectoryCubit(pathHint)..loadPath(),
+    //     ),
+    //   ],
+    //   child: BlocBuilder<AppThemeCubit, AppThemeState>(
+    //     builder: (context, appTheme) {
+    //       return BlocBuilder<AppModeCubit, AppModeState>(
+    //         builder: (context, appMode) {
+    //           return BlocBuilder<AppLanguageCubit, AppLanguageState>(
+    //             builder: (context, language) {
+    //               return Shortcuts(
+    //                 shortcuts: <LogicalKeySet, Intent>{
+    //                   LogicalKeySet(LogicalKeyboardKey.select):
+    //                       const ActivateIntent(),
+    //                 },
+    //                 child: MaterialApp(
+    //                   localizationsDelegates:
+    //                       AppLocalizations.localizationsDelegates,
+    //                   supportedLocales: AppLocalizations.supportedLocales,
+    //                   locale: language.locale,
+    //                   scrollBehavior: CustomScroll(),
+    //                   initialRoute: '/',
+    //                   routes: {
+    //                     '/': (_) => const HomePage(),
+    //                     '/Settings': (_) => const Settings(),
+    //                   },
+    //                   debugShowCheckedModeBanner: false,
+    //                   themeMode: getMode(appMode.mode),
+    //                   theme: appTheme.theme.lightTheme,
+    //                   darkTheme: appTheme.theme.darkTheme,
+    //                 ),
+    //               );
+    //             },
+    //           );
+    //         },
+    //       );
+    //     },
+    //   ),
+    // );
   }
+}
+
+class CustomScroll extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+      };
 }
