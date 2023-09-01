@@ -25,7 +25,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late ImageCubit _imageCubit;
-  String appVersion = '';
+  String _appVersion = '';
   final TextEditingController _textEditingController = TextEditingController();
   var scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -96,8 +96,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _getAppVersion() async {
-    await PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
-      appVersion = packageInfo.version;
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    final String appVersion = packageInfo.version;
+
+    setState(() {
+      _appVersion = appVersion;
     });
   }
 
@@ -137,7 +140,7 @@ class _HomePageState extends State<HomePage> {
         create: (context) => _imageCubit,
         child: Scaffold(
           key: scaffoldKey,
-          drawer: AppDrawer(appVersion: appVersion),
+          drawer: AppDrawer(appVersion: _appVersion),
           appBar: AppBar(
             title: Text(
               AppLocalizations.of(
