@@ -76,7 +76,7 @@ dev_dependencies:
 flutter_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/icons/logo.png"
+  image_path: "assets/icons/imagen_black.png"
 # flutter pub run flutter_launcher_icons:main
 
 # The following section is specific to Flutter packages.
@@ -132,7 +132,7 @@ flutter_native_splash:
   android_12:
     color: "#ffffff"
     color_dark: "#080812"
-    image: assets/icons/logo.png
+    image: assets/icons/imagen_black.png
     fullscreen: true
   web: false
 # dart run flutter_native_splash:create
