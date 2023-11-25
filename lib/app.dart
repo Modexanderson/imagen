@@ -11,7 +11,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:path_provider/path_provider.dart';
 
-import 'Pages/home_page.dart';
+import 'pages/home_page.dart';
 import 'widgets/app_theme.dart';
 import 'widgets/config.dart';
 import 'widgets/rate_app_init_widget.dart';

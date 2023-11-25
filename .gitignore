@@ -1,5 +1,6 @@
 # Miscellaneous
 *.class
+*.env.dart
 *.log
 *.pyc
 *.swp

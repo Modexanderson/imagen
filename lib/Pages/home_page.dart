@@ -2,7 +2,6 @@
 
 import 'dart:io' show Platform;
 
-import 'package:brain_fusion/brain_fusion.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +10,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lottie/lottie.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:upgrader/upgrader.dart';
+import '../api/enums.dart';
 import '../bloc/image_cubit.dart';
 
 import '../widgets/drawer.dart';
@@ -31,6 +31,7 @@ class _HomePageState extends State<HomePage> {
 
   final Map<AIStyle, String> formattedStyleText = {
     AIStyle.noStyle: 'no style',
+    AIStyle.kandinskyPainter: 'Kadinsky Painter',
     AIStyle.render3D: '3D render',
     AIStyle.anime: 'anime',
     AIStyle.moreDetails: 'More Detailed',
