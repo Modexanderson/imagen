@@ -16,7 +16,7 @@ class RateAppInitWidget extends StatefulWidget {
 
 class _RateAppInitWidgetState extends State<RateAppInitWidget> {
   RateMyApp? rateMyApp;
-  static const playStoreId = 'com.Imagen.android';
+  static const playStoreId = 'com.imagen.android';
   static const appStoreId = '';
 
   @override

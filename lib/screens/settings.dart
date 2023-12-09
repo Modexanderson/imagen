@@ -7,9 +7,9 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../app.dart';
+import '../models/config.dart';
 import '../utils/backup_restore.dart';
 import '../utils/box_switch_tile.dart';
-import '../widgets/config.dart';
 import '../widgets/gradient_container.dart';
 import '../widgets/snack_bar.dart';
 import '../widgets/text_input_dialog.dart';

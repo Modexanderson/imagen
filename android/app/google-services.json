@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "302883549378",
+    "project_id": "imagen-923c4",
+    "storage_bucket": "imagen-923c4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:302883549378:android:3df0ab7db651db325b0b5b",
+        "android_client_info": {
+          "package_name": "com.imagen.android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdfjCQF3SgV2II1LBqFfAwGg8yYB1v_8Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

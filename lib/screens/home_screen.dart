@@ -2,6 +2,7 @@
 
 import 'dart:io' show Platform;
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,18 +14,21 @@ import 'package:upgrader/upgrader.dart';
 import '../api/enums.dart';
 import '../bloc/image_cubit.dart';
 
+import '../services/authentification_service.dart';
+import '../services/database/user_database_helper.dart';
 import '../widgets/drawer.dart';
 import '../widgets/snack_bar.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomeScreenState extends State<HomeScreen> {
   late ImageCubit _imageCubit;
+  double _userCredits = 0.0;
   String _appVersion = '';
   final TextEditingController _textEditingController = TextEditingController();
   var scaffoldKey = GlobalKey<ScaffoldState>();
@@ -110,6 +114,35 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _getAppVersion();
     _imageCubit = ImageCubit();
+
+    // Fetch and display user credits
+    _fetchUserCredits();
+  }
+
+  String userUid = AuthentificationService().currentUser.uid;
+
+  Future<void> _fetchUserCredits() async {
+    try {
+      DocumentSnapshot userSnapshot = await UserDatabaseHelper().getUserData(
+          userUid); // Implement this method in your UserDatabaseHelper
+
+      // Extract and update credits
+      double credits = (userSnapshot.data()
+              as Map<String, dynamic>?)?[UserDatabaseHelper.CREDITS] ??
+          0;
+      setState(() {
+        _userCredits = credits;
+      });
+    } catch (e) {
+      print('Error fetching user credits: $e');
+    }
+  }
+
+  Stream<DocumentSnapshot<Object?>> getUserDataStream() {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(userUid)
+        .snapshots();
   }
 
   @override
@@ -143,16 +176,73 @@ class _HomePageState extends State<HomePage> {
           key: scaffoldKey,
           drawer: AppDrawer(appVersion: _appVersion),
           appBar: AppBar(
-            title: Text(
-              AppLocalizations.of(
-                context,
-              )!
-                  .appTitle,
-              style: const TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Alva'),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  AppLocalizations.of(
+                    context,
+                  )!
+                      .appTitle,
+                  style: const TextStyle(
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Alva',
+                  ),
+                ),
+                
+                StreamBuilder<DocumentSnapshot>(
+                  stream: getUserDataStream(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      // While waiting for data, you can show a loading indicator or a default value.
+                      return const CircularProgressIndicator();
+                    }
+
+                    if (snapshot.hasError) {
+                      // If there's an error, you can display an error message.
+                      return Text('Error: ${snapshot.error}');
+                    }
+
+                    if (!snapshot.hasData || !snapshot.data!.exists) {
+                      // If there's no data or the document doesn't exist, handle it accordingly.
+                      return const Text('No data available');
+                    }
+
+                    // Cast the data to Map<String, dynamic>
+                    final Map<String, dynamic>? userData =
+                        snapshot.data!.data() as Map<String, dynamic>?;
+
+                    if (userData == null) {
+                      return const Text('User data is null');
+                    }
+
+                    // Assuming 'credits' is the field in your document that holds the user's credits.
+                    double credits = userData['credits'] ?? 0;
+
+                    return Row(
+                      children: [
+                        // Replace the text with an icon (e.g., Icons.monetization_on)
+                        const Icon(Icons.monetization_on, size: 40),
+                        const SizedBox(
+                            width:
+                                4), // Adjust the spacing between icon and credits
+                        Text(
+                          '$credits',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                )
+              ],
             ),
+            actions: [
+              // Other actions if needed
+            ],
           ),
           body: SingleChildScrollView(
             child: Center(
@@ -243,16 +333,53 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox();
                     } else {
                       return ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           if (_textEditingController.text.isEmpty) {
-                            ShowSnackBar().showSnackBar(context,
-                                AppLocalizations.of(context)!.inputSomeText);
-                          } else {
-                            _imageCubit.generate(
-                              _textEditingController.text,
-                              _selectedStyle,
-                              _selectedResolution,
+                            ShowSnackBar().showSnackBar(
+                              context,
+                              AppLocalizations.of(context)!.inputSomeText,
                             );
+                          } else {
+                            try {
+                              Uint8List image = await _imageCubit.generate(
+                                _textEditingController.text,
+                                _selectedStyle,
+                                _selectedResolution,
+                              );
+
+                              // If image generation is successful, deduct credits
+                              bool deductionResult;
+
+                              // Check if the generated image is not empty
+                              if (image.isNotEmpty) {
+                                deductionResult = await UserDatabaseHelper()
+                                    .deductCreditsForUser(userUid, 0.5);
+
+                                if (deductionResult) {
+                                  // If credits deducted successfully, proceed with the image
+                                  // display or any other actions you need to perform.
+                                } else {
+                                  // Insufficient credits. Show a message.
+                                  ShowSnackBar().showSnackBar(
+                                    context,
+                                    'Insufficient credits. Deduction failed.',
+                                  );
+                                }
+                              } else {
+                                // Handle the case where the image is not generated successfully
+                                ShowSnackBar().showSnackBar(
+                                  context,
+                                  'Image generation failed. Credits not deducted.',
+                                );
+                              }
+                            } catch (error) {
+                              // Handle the image generation error
+                              print('Error during image generation: $error');
+                              ShowSnackBar().showSnackBar(
+                                context,
+                                'An error occurred during image generation.',
+                              );
+                            }
                           }
                         },
                         style: ButtonStyle(
@@ -427,51 +554,63 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   BlocBuilder<ImageCubit, ImageState>(
-                      builder: (context, state) {
-                    if (state is ImageLoaded) {
-                      return Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: SizedBox(
-                            height: 60,
-                            width: MediaQuery.of(context).size.width * 0.9,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                _downloadImage(
-                                  image!,
-                                  _textEditingController.text,
-                                );
-                              },
-                              style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all<
-                                        Color>(
-                                    Theme.of(context).colorScheme.secondary),
-                                foregroundColor:
-                                    MaterialStateProperty.all<Color>(
-                                  Colors
-                                      .white, // Use white text for better visibility
-                                ),
-                                elevation: MaterialStateProperty.all(10),
-                                fixedSize: MaterialStateProperty.all(
-                                    const Size.fromWidth(double.maxFinite)),
-                                shape: MaterialStateProperty.all<
-                                    RoundedRectangleBorder>(
-                                  RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
+                    builder: (context, state) {
+                      if (state is ImageLoaded) {
+                        image = state.image;
+
+                        if (image != null) {
+                          return Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: SizedBox(
+                              height: 60,
+                              width: MediaQuery.of(context).size.width * 0.9,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  _downloadImage(
+                                    image!,
+                                    _textEditingController.text,
+                                  );
+                                },
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                    Theme.of(context).colorScheme.secondary,
+                                  ),
+                                  foregroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                    Colors.white,
+                                  ),
+                                  elevation: MaterialStateProperty.all(10),
+                                  fixedSize: MaterialStateProperty.all(
+                                    const Size.fromWidth(double.maxFinite),
+                                  ),
+                                  shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                  ),
+                                  padding: MaterialStateProperty.all<
+                                      EdgeInsetsGeometry>(
+                                    const EdgeInsets.symmetric(
+                                      vertical: 12.0,
+                                      horizontal: 20.0,
+                                    ),
                                   ),
                                 ),
-                                padding: MaterialStateProperty.all<
-                                    EdgeInsetsGeometry>(
-                                  const EdgeInsets.symmetric(
-                                      vertical: 12.0, horizontal: 20.0),
-                                ),
+                                child: Text(
+                                    AppLocalizations.of(context)!.download),
                               ),
-                              child:
-                                  Text(AppLocalizations.of(context)!.download),
-                            )),
-                      );
-                    }
-                    return const SizedBox();
-                  })
+                            ),
+                          );
+                        } else {
+                          // Handle the case where 'image' is null
+                          return const SizedBox();
+                        }
+                      }
+                      return const SizedBox();
+                    },
+                  )
                 ],
               ),
             ),

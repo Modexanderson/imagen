@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'config.dart';
+import '../models/config.dart';
 
 class GradientContainer extends StatefulWidget {
   final Widget? child;

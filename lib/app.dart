@@ -11,9 +11,9 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:path_provider/path_provider.dart';
 
-import 'pages/home_page.dart';
-import 'widgets/app_theme.dart';
-import 'widgets/config.dart';
+import 'models/app_theme.dart';
+import 'models/config.dart';
+import 'widgets/authentification_wrapper.dart';
 import 'widgets/rate_app_init_widget.dart';
 
 Future<void> openHiveBox(String boxName, {bool limit = false}) async {
@@ -136,10 +136,8 @@ class _MyAppState extends State<MyApp> {
           // widget.showHome
           //     ?
           //  RateStarScreen(rateMyApp: rateMyApp)
-          RateAppInitWidget(
-        builder: (rateMyApp) => const HomePage(),
+           const AuthentificationWrapper(),
         // const HomePage(),
-      ),
       locale: _locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -167,61 +165,8 @@ class _MyAppState extends State<MyApp> {
         Locale('ur', ''), // Urdu
       ],
       navigatorKey: navigatorKey,
-      // onGenerateRoute: (RouteSettings settings) {
-      //   return HandleRoute.handleRoute(settings.name);
-      // },
+      
     );
-    // return MultiBlocProvider(
-    //   providers: [
-    //     BlocProvider(
-    //       create: (_) => AppLanguageCubit(const Locale(englishLanguage, 'US'))
-    //         ..loadLanguage(),
-    //     ),
-    //     BlocProvider(
-    //       create: (_) => AppThemeCubit(material)..loadTheme(),
-    //     ),
-    //     BlocProvider(
-    //       create: (_) => AppModeCubit(system)..loadMode(),
-    //     ),
-    //     BlocProvider(
-    //       create: (_) => AppDirectoryCubit(pathHint)..loadPath(),
-    //     ),
-    //   ],
-    //   child: BlocBuilder<AppThemeCubit, AppThemeState>(
-    //     builder: (context, appTheme) {
-    //       return BlocBuilder<AppModeCubit, AppModeState>(
-    //         builder: (context, appMode) {
-    //           return BlocBuilder<AppLanguageCubit, AppLanguageState>(
-    //             builder: (context, language) {
-    //               return Shortcuts(
-    //                 shortcuts: <LogicalKeySet, Intent>{
-    //                   LogicalKeySet(LogicalKeyboardKey.select):
-    //                       const ActivateIntent(),
-    //                 },
-    //                 child: MaterialApp(
-    //                   localizationsDelegates:
-    //                       AppLocalizations.localizationsDelegates,
-    //                   supportedLocales: AppLocalizations.supportedLocales,
-    //                   locale: language.locale,
-    //                   scrollBehavior: CustomScroll(),
-    //                   initialRoute: '/',
-    //                   routes: {
-    //                     '/': (_) => const HomePage(),
-    //                     '/Settings': (_) => const Settings(),
-    //                   },
-    //                   debugShowCheckedModeBanner: false,
-    //                   themeMode: getMode(appMode.mode),
-    //                   theme: appTheme.theme.lightTheme,
-    //                   darkTheme: appTheme.theme.darkTheme,
-    //                 ),
-    //               );
-    //             },
-    //           );
-    //         },
-    //       );
-    //     },
-    //   ),
-    // );
   }
 }
 
