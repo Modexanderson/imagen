@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:imagen/widgets/snack_bar.dart';
 import 'package:logger/logger.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../exceptions/credential_actions_exception.dart';
 import '../exceptions/messaged_firebase_auth_exception.dart';
@@ -34,11 +36,11 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
           SizedBox(height: getProportionateScreenHeight(30)),
           SizedBox(height: SizeConfig.screenHeight! * 0.1),
           DefaultButton(
-            text: "Send verification email",
+            text: AppLocalizations.of(context)!.sendVerificationEmail,
             press: sendVerificationEmailButtonCallback,
           ),
           SizedBox(height: SizeConfig.screenHeight! * 0.1),
-          NoAccountText(),
+          const NoAccountText(),
           SizedBox(height: getProportionateScreenHeight(30)),
         ],
       ),
@@ -49,17 +51,17 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
     return TextFormField(
       controller: emailFieldController,
       keyboardType: TextInputType.emailAddress,
-      decoration: const InputDecoration(
-        hintText: "Enter your email",
-        labelText: "Email",
+      decoration:  InputDecoration(
+        hintText: AppLocalizations.of(context)!.enterEmail,
+        labelText: AppLocalizations.of(context)!.email,
         floatingLabelBehavior: FloatingLabelBehavior.always,
-        suffixIcon: Icon(Icons.mail,),
+        suffixIcon: const Icon(Icons.mail,),
       ),
       validator: (value) {
         if (value!.isEmpty) {
-          return kEmailNullError;
+          return AppStrings.getEmailNullError(context);;
         } else if (!emailValidatorRegExp.hasMatch(value)) {
-          return kInvalidEmailError;
+          return AppStrings.getInvalidEmailError(context);
         }
         return null;
       },
@@ -82,16 +84,15 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
           builder: (context) {
             return AsyncProgressDialog(
               resultFuture,
-              message: const Text("Sending verification email"),
+              message: Text( AppLocalizations.of(context)!.sendingVerificationEmail),
             );
           },
         );
         if (resultStatus == true) {
-          snackbarMessage = "Password Reset Link sent to your email";
+          snackbarMessage = AppLocalizations.of(context)!.passwordResetLink;
         } else {
           throw FirebaseCredentialActionAuthUnknownReasonFailureException(
-              message:
-                  "Sorry, could not process your request now, try again later");
+              message: AppLocalizations.of(context)!.sorryRequestProcess);
         }
       } on MessagedFirebaseAuthException catch (e) {
         snackbarMessage = e.message;
@@ -99,11 +100,7 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
         snackbarMessage = e.toString();
       } finally {
         Logger().i(snackbarMessage);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(snackbarMessage!),
-          ),
-        );
+        ShowSnackBar().showSnackBar(context, snackbarMessage!);
       }
     }
   }

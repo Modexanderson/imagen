@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 import '../models/constants.dart';
 import '../models/size_config.dart';
@@ -29,12 +31,11 @@ class ForgotPasswordScreen extends StatelessWidget {
             child: Column(
               children: [
                 SizedBox(height: SizeConfig.screenHeight! * 0.04),
-                Text(
-                  "Forgot Password",
+                Text(AppLocalizations.of(context)!.forgotPassword,
                   style: headingStyle,
                 ),
-                const Text(
-                  "Please enter your email and we will send \nyou a link to return to your account",
+                Text(
+                  AppLocalizations.of(context)!.pleaseEnterMailForReturnLink,
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: SizeConfig.screenHeight! * 0.1),

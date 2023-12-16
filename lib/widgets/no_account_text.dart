@@ -1,4 +1,4 @@
-
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../models/size_config.dart';
@@ -15,7 +15,7 @@ class NoAccountText extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          "Don't have an account? ",
+          AppLocalizations.of(context)!.noAccount,
           style: TextStyle(
             fontSize: getProportionateScreenWidth(16),
           ),
@@ -26,8 +26,9 @@ class NoAccountText extends StatelessWidget {
                 MaterialPageRoute(builder: (context) => SignUpScreen()));
           },
           child: Text(
-            "Sign Up",
+            AppLocalizations.of(context)!.signUp,
             style: TextStyle(
+              decoration: TextDecoration.underline,
               fontSize: getProportionateScreenWidth(16),
               // color: kPrimaryColor,
             ),

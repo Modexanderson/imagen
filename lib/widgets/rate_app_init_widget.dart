@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:imagen/widgets/snack_bar.dart';
 import 'package:rate_my_app/rate_my_app.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -81,13 +82,8 @@ class _RateAppInitWidgetState extends State<RateAppInitWidget> {
         rateMyApp!,
         text: AppLocalizations.of(context)!.ok,
         callback: () async {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                AppLocalizations.of(context)!.thanksFeedback,
-              ),
-            ),
-          );
+          ShowSnackBar().showSnackBar(context, AppLocalizations.of(context)!.thanksFeedback);
+          
           final launchAppStore = stars! >= 3;
           const event = RateMyAppEventType.rateButtonPressed;
           await rateMyApp?.callEvent(event);

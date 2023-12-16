@@ -1,6 +1,9 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:purchases_flutter/object_wrappers.dart';
+import 'package:provider/provider.dart';
 
+import '../../api/purchase_api.dart';
 import '../authentification_service.dart';
 
 class UserDatabaseHelper {
@@ -10,7 +13,7 @@ class UserDatabaseHelper {
   static const String CREDITS = 'credits';
 
   UserDatabaseHelper._privateConstructor({this.phone});
-  static UserDatabaseHelper _instance =
+  static final UserDatabaseHelper _instance =
       UserDatabaseHelper._privateConstructor();
   factory UserDatabaseHelper() {
     return _instance;
@@ -27,7 +30,7 @@ class UserDatabaseHelper {
   Future<void> createNewUser(String uid) async {
     await firestore.collection(USERS_COLLECTION_NAME).doc(uid).set({
       DP_KEY: null,
-      CREDITS: 5,
+      CREDITS: 5.0,
     });
   }
 
@@ -69,6 +72,55 @@ class UserDatabaseHelper {
       return false;
     }
   }
+
+  Future<void> updateRevenueCatPayment(String uid, Package package) async {
+    try {
+      final userDocRef = firestore.collection(USERS_COLLECTION_NAME).doc(uid);
+
+      // Get the current credits value
+    final DocumentSnapshot userSnapshot = await userDocRef.get();
+    final double currentCredits =
+        (userSnapshot.data() as Map<String, dynamic>?)?[CREDITS] ?? 0;
+
+    switch (package.offeringIdentifier) {
+      case Coins.idCoins10:
+      // Update the user's credits
+        await userDocRef.update({
+          CREDITS: currentCredits + 10});
+          break;
+      case Coins.idCoins10:
+      // Update the user's credits
+        await userDocRef.update({
+          CREDITS: currentCredits + 10});
+          break;
+      default:
+        break;
+    }
+    } catch (e) {
+    // Handle exceptions (e.g., Firestore errors)
+    print('Error updating user credits after payment: $e');
+  }
+  }
+
+  Future<void> updateCreditsAfterPayment(String uid, double amount) async {
+  try {
+    final userDocRef = firestore.collection(USERS_COLLECTION_NAME).doc(uid);
+
+    // Get the current credits value
+    final DocumentSnapshot userSnapshot = await userDocRef.get();
+    final double currentCredits =
+        (userSnapshot.data() as Map<String, dynamic>?)?[CREDITS] ?? 0;
+
+    // Update the user's credits
+    await userDocRef.update({
+      CREDITS: currentCredits + amount,
+    });
+  } catch (e) {
+    // Handle exceptions (e.g., Firestore errors)
+    print('Error updating user credits after payment: $e');
+  }
+}
+
 
   Future<void> deleteCurrentUserData() async {
     final uid = AuthentificationService().currentUser.uid;

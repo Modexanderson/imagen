@@ -3,20 +3,29 @@
 import 'dart:io' show Platform;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:imagen/widgets/default_button.dart';
 import 'package:lottie/lottie.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:upgrader/upgrader.dart';
 import '../api/enums.dart';
+import '../api/purchase_api.dart';
 import '../bloc/image_cubit.dart';
 
 import '../services/authentification_service.dart';
 import '../services/database/user_database_helper.dart';
+import '../widgets/async_progress_dialog.dart';
+import '../widgets/binance_pay_widget.dart';
 import '../widgets/drawer.dart';
+import '../widgets/revenue_cat_widget.dart';
+import '../widgets/show_confirmation_dialog.dart';
 import '../widgets/snack_bar.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -66,37 +75,43 @@ class _HomeScreenState extends State<HomeScreen> {
 
   var _selectedStyle = AIStyle.noStyle;
   var _selectedResolution = Resolution.r1x1;
+  Future<String> _downloadImage(
+      Uint8List imageBytes, String customPart_) async {
+    try {
+      DateTime now = DateTime.now();
 
-  Future<void> _downloadImage(
-    Uint8List imageBytes,
-    String customPart_,
-  ) async {
-    DateTime now = DateTime.now();
+      int year = now.year;
+      int month = now.month;
+      int day = now.day;
+      int hour = now.hour;
+      int minute = now.minute;
+      int second = now.second;
+      final time = '$year-$month-$day $hour:$minute:$second';
+      final imageName = '$customPart_$time';
 
-    int year = now.year;
-    int month = now.month;
-    int day = now.day;
-    int hour = now.hour;
-    int minute = now.minute;
-    int second = now.second;
-    final time = '$year-$month-$day $hour:$minute:$second';
-    final imageName = '$customPart_$time';
-    final result =
-        await ImageGallerySaver.saveImage(imageBytes, name: imageName);
+      final result =
+          await ImageGallerySaver.saveImage(imageBytes, name: imageName);
 
-    if (result['isSuccess']) {
-      ShowSnackBar()
-          .showSnackBar(context, 'Image successfully saved to gallery');
-      // Image saved successfully
-      if (kDebugMode) {
-        print('Image successfully saved to gallery');
+      if (result['isSuccess']) {
+        ShowSnackBar()
+            .showSnackBar(context, AppLocalizations.of(context)!.imageSaved);
+        // Image saved successfully
+        if (kDebugMode) {
+          print('Image successfully saved to gallery');
+        }
+        return result['filePath'] ?? ''; // Return the file path
+      } else {
+        ShowSnackBar().showSnackBar(
+            context, AppLocalizations.of(context)!.imageSavedFailed);
+        // Image save failed
+        if (kDebugMode) {
+          print('Failed to save image to gallery');
+        }
+        return ''; // Return an empty string if saving fails
       }
-    } else {
-      ShowSnackBar().showSnackBar(context, 'Failed to save image to gallery');
-      // Image save failed
-      if (kDebugMode) {
-        print('Failed to save image to gallery');
-      }
+    } catch (error) {
+      print('Error saving image to gallery: $error');
+      throw error; // Rethrow the error
     }
   }
 
@@ -138,6 +153,39 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<double> getDebitValue() async {
+    try {
+      // Retrieve the document from Firestore
+      DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+          .collection('debit_collection')
+          .doc('debit_doc')
+          .get();
+
+      // Check if the document exists and contains the 'credit' field
+      if (documentSnapshot.exists && documentSnapshot.data() != null) {
+        // Explicitly cast the data to Map<String, dynamic>
+        Map<String, dynamic> data =
+            documentSnapshot.data() as Map<String, dynamic>;
+
+        // Retrieve the credit value
+        double debitValue = (data['debitValue'] ?? 0.0).toDouble();
+
+        // Retrieve the credit value
+        // double debitValue = (data['debitValue'] ?? 0.0).toDouble();
+        // // Retrieve the credit value
+        // double debitValue = documentSnapshot.data()!['debitValue'];
+
+        return debitValue;
+      } else {
+        print('Document does not exist or credit field is missing.');
+        return 0.0; // or handle the default value appropriately
+      }
+    } catch (e) {
+      print('Error retrieving credit value: $e');
+      return 0.0; // or handle the default value appropriately
+    }
+  }
+
   Stream<DocumentSnapshot<Object?>> getUserDataStream() {
     return FirebaseFirestore.instance
         .collection('users')
@@ -152,9 +200,64 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  void showPaymentOptions(BuildContext context, dynamic widget) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return widget;
+        });
+  }
+
+  void showPaymentDialog(BuildContext context, dynamic widget) {
+    showCupertinoDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return widget;
+        });
+  }
+
+  List<Package> packages = [];
+
+  Future fetchOffers(BuildContext context) async {
+    final offerings = await PurchaseApi.fetchOffersByIds(Coins.allIds);
+
+    if (offerings.isEmpty) {
+      ShowSnackBar()
+          .showSnackBar(context, AppLocalizations.of(context)!.noPlansFound);
+    } else {
+      packages = offerings
+          .map((offer) => offer.availablePackages)
+          .expand((pair) => pair)
+          .toList();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Uint8List? image;
+    // Mapping of payment options
+    List<Map<String, dynamic>> paymentOptions = [
+      {
+        'name': 'Card Payment',
+        'image': 'assets/icons/stripe_method.svg',
+        'onTap': () {
+          fetchOffers(context);
+          print(packages);
+          showPaymentDialog(context, revenueCatWidget(packages));
+        },
+      },
+      // {'name': 'Crypto Payment', 'image': 'assets/icons/0xprocessing_method.svg', 'onTap': {}},
+      // {'name': 'Payeer', 'image': 'assets/icons/payeer_method.svg', 'onTap': {}},
+      // {'name': 'Enot', 'image': 'assets/icons/enot_method.svg', 'onTap': {}},
+      {
+        'name': 'Binance Pay',
+        'image': 'assets/icons/binancePay_method.svg',
+        'onTap': () {
+          showPaymentDialog(context, binancePayWidget());
+        }
+      },
+      // Add more payment options as needed
+    ];
 
     /// The size of the container for the generated image.
     final double size = Platform.isAndroid || Platform.isIOS
@@ -190,7 +293,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontFamily: 'Alva',
                   ),
                 ),
-                
                 StreamBuilder<DocumentSnapshot>(
                   stream: getUserDataStream(),
                   builder: (context, snapshot) {
@@ -201,12 +303,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     if (snapshot.hasError) {
                       // If there's an error, you can display an error message.
-                      return Text('Error: ${snapshot.error}');
+                      return Text(AppLocalizations.of(context)!.error +
+                          snapshot.error.toString());
                     }
 
                     if (!snapshot.hasData || !snapshot.data!.exists) {
                       // If there's no data or the document doesn't exist, handle it accordingly.
-                      return const Text('No data available');
+                      return Text(AppLocalizations.of(context)!.noData);
                     }
 
                     // Cast the data to Map<String, dynamic>
@@ -214,35 +317,94 @@ class _HomeScreenState extends State<HomeScreen> {
                         snapshot.data!.data() as Map<String, dynamic>?;
 
                     if (userData == null) {
-                      return const Text('User data is null');
+                      return Text(AppLocalizations.of(context)!.nullUserData);
                     }
 
                     // Assuming 'credits' is the field in your document that holds the user's credits.
-                    double credits = userData['credits'] ?? 0;
+                    double credits = userData['credits'] ?? 0.0;
 
-                    return Row(
-                      children: [
-                        // Replace the text with an icon (e.g., Icons.monetization_on)
-                        const Icon(Icons.monetization_on, size: 40),
-                        const SizedBox(
-                            width:
-                                4), // Adjust the spacing between icon and credits
-                        Text(
-                          '$credits',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                    return InkWell(
+                      onTap: () {
+                        showPaymentOptions(
+                          context,
+                          Container(
+                            constraints: BoxConstraints(
+                              maxHeight:
+                                  MediaQuery.of(context).size.height * 0.75,
+                            ),
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              children: [
+                                Text(
+                                  AppLocalizations.of(context)!.selectPayment,
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 16,
+                                ),
+                                const Divider(),
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  primary: false,
+                                  itemCount: paymentOptions.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return InkWell(
+                                      onTap: () {
+                                        paymentOptions[index]['onTap']();
+                                      },
+                                      child: Card(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .secondary,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        margin: const EdgeInsets.all(16.0),
+                                        child: Container(
+                                          height:
+                                              100, // Adjust the height as needed
+                                          padding: const EdgeInsets.all(16.0),
+                                          child: Center(
+                                            child: SvgPicture.asset(
+                                                paymentOptions[index]['image']),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                const Divider(),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        );
+                      },
+                      child: Row(
+                        children: [
+                          // Replace the text with an icon (e.g., Icons.monetization_on)
+                          const Icon(Icons.monetization_on, size: 40),
+                          const SizedBox(
+                              width:
+                                  4), // Adjust the spacing between icon and credits
+                          Text(
+                            '$credits',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   },
                 )
               ],
             ),
-            actions: [
-              // Other actions if needed
-            ],
           ),
           body: SingleChildScrollView(
             child: Center(
@@ -253,21 +415,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(
                     height: 10,
                   ),
-                  TextFormField(
-                    controller: _textEditingController,
-                    decoration: InputDecoration(
-                      hintText:
-                          AppLocalizations.of(context)!.enterPromptExample,
-                      labelText: AppLocalizations.of(context)!.enterPrompt,
-                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextFormField(
+                      controller: _textEditingController,
+                      decoration: InputDecoration(
+                        hintText:
+                            AppLocalizations.of(context)!.enterPromptExample,
+                        labelText: AppLocalizations.of(context)!.enterPrompt,
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                      ),
+                      validator: (value) {
+                        if (_textEditingController.text.isEmpty) {
+                          return AppLocalizations.of(context)!.inputSomeText;
+                        }
+                        return null;
+                      },
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                     ),
-                    validator: (value) {
-                      if (_textEditingController.text.isEmpty) {
-                        return AppLocalizations.of(context)!.inputSomeText;
-                      }
-                      return null;
-                    },
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
                   ),
                   const SizedBox(
                     height: 10,
@@ -332,75 +497,107 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (state is ImageLoading) {
                       const SizedBox();
                     } else {
-                      return ElevatedButton(
-                        onPressed: () async {
-                          if (_textEditingController.text.isEmpty) {
-                            ShowSnackBar().showSnackBar(
-                              context,
-                              AppLocalizations.of(context)!.inputSomeText,
-                            );
-                          } else {
-                            try {
-                              Uint8List image = await _imageCubit.generate(
-                                _textEditingController.text,
-                                _selectedStyle,
-                                _selectedResolution,
+                      return Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: DefaultButton(
+                          press: () async {
+                            bool allowed =
+                                AuthentificationService().currentUserVerified;
+                            if (!allowed) {
+                              final reverify = await showConfirmationDialog(
+                                context,
+                                "You haven't verified your email address. This action is only allowed for verified users.",
+                                positiveResponse: "Resend verification email",
+                                negativeResponse: "Go back",
                               );
 
-                              // If image generation is successful, deduct credits
-                              bool deductionResult;
+                              if (reverify) {
+                                try {
+                                  bool verificationResult =
+                                      await AuthentificationService()
+                                          .sendVerificationEmailToCurrentUser();
 
-                              // Check if the generated image is not empty
-                              if (image.isNotEmpty) {
-                                deductionResult = await UserDatabaseHelper()
-                                    .deductCreditsForUser(userUid, 0.5);
-
-                                if (deductionResult) {
-                                  // If credits deducted successfully, proceed with the image
-                                  // display or any other actions you need to perform.
-                                } else {
-                                  // Insufficient credits. Show a message.
+                                  if (verificationResult) {
+                                    ShowSnackBar().showSnackBar(
+                                      context,
+                                      "Verification email sent successfully",
+                                    );
+                                  } else {
+                                    // Handle case where verification email sending failed
+                                    ShowSnackBar().showSnackBar(
+                                      context,
+                                      "Failed to send verification email",
+                                    );
+                                  }
+                                } catch (error) {
+                                  // Handle other exceptions
+                                  print(
+                                      'Error during email verification: $error');
                                   ShowSnackBar().showSnackBar(
                                     context,
-                                    'Insufficient credits. Deduction failed.',
+                                    "An error occurred during email verification",
                                   );
                                 }
-                              } else {
-                                // Handle the case where the image is not generated successfully
-                                ShowSnackBar().showSnackBar(
-                                  context,
-                                  'Image generation failed. Credits not deducted.',
-                                );
                               }
-                            } catch (error) {
-                              // Handle the image generation error
-                              print('Error during image generation: $error');
+                              return;
+                            }
+
+                            if (_textEditingController.text.isEmpty) {
                               ShowSnackBar().showSnackBar(
                                 context,
-                                'An error occurred during image generation.',
+                                AppLocalizations.of(context)!.inputSomeText,
                               );
+                            } else {
+                              try {
+                                Uint8List image = await _imageCubit.generate(
+                                  _textEditingController.text,
+                                  _selectedStyle,
+                                  _selectedResolution,
+                                );
+
+                                // If image generation is successful, deduct credits
+                                bool deductionResult;
+
+                                // Check if the generated image is not empty
+                                if (image.isNotEmpty) {
+                                  double debitValue = await getDebitValue();
+                                  print('Credit value retrieved: $debitValue');
+                                  deductionResult = await UserDatabaseHelper()
+                                      .deductCreditsForUser(
+                                          userUid, debitValue);
+
+                                  if (deductionResult) {
+                                    // If credits deducted successfully, proceed with the image
+                                    // display or any other actions you need to perform.
+                                  } else {
+                                    // Insufficient credits. Show a message.
+                                    ShowSnackBar().showSnackBar(
+                                      context,
+                                      AppLocalizations.of(context)!
+                                          .insufficientCredits,
+                                    );
+                                  }
+                                } else {
+                                  // Handle the case where the image is not generated successfully
+                                  ShowSnackBar().showSnackBar(
+                                    context,
+                                    AppLocalizations.of(context)!
+                                        .failedGeneration,
+                                  );
+                                }
+                              } catch (error) {
+                                // Handle the image generation error
+                                print('Error during image generation: $error');
+                                ShowSnackBar().showSnackBar(
+                                  context,
+                                  AppLocalizations.of(context)!
+                                      .errorImageGeneration,
+                                );
+                              }
                             }
-                          }
-                        },
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(
-                              Theme.of(context).colorScheme.secondary),
-                          elevation: MaterialStateProperty.all(10),
-                          fixedSize: MaterialStateProperty.all(
-                              const Size.fromWidth(double.maxFinite)),
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                          ),
-                          padding:
-                              MaterialStateProperty.all<EdgeInsetsGeometry>(
-                            const EdgeInsets.symmetric(
-                                vertical: 12.0, horizontal: 20.0),
-                          ),
+                          },
+                          text: AppLocalizations.of(context)!.create,
                         ),
-                        child: Text(AppLocalizations.of(context)!.create),
                       );
                     }
                     return const SizedBox();
@@ -564,42 +761,17 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: SizedBox(
                               height: 60,
                               width: MediaQuery.of(context).size.width * 0.9,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  _downloadImage(
-                                    image!,
-                                    _textEditingController.text,
-                                  );
-                                },
-                                style: ButtonStyle(
-                                  backgroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                    Theme.of(context).colorScheme.secondary,
-                                  ),
-                                  foregroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                    Colors.white,
-                                  ),
-                                  elevation: MaterialStateProperty.all(10),
-                                  fixedSize: MaterialStateProperty.all(
-                                    const Size.fromWidth(double.maxFinite),
-                                  ),
-                                  shape: MaterialStateProperty.all<
-                                      RoundedRectangleBorder>(
-                                    RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                    ),
-                                  ),
-                                  padding: MaterialStateProperty.all<
-                                      EdgeInsetsGeometry>(
-                                    const EdgeInsets.symmetric(
-                                      vertical: 12.0,
-                                      horizontal: 20.0,
-                                    ),
-                                  ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: DefaultButton(
+                                  press: () {
+                                    _downloadImage(
+                                      image!,
+                                      _textEditingController.text,
+                                    );
+                                  },
+                                  text: AppLocalizations.of(context)!.download,
                                 ),
-                                child: Text(
-                                    AppLocalizations.of(context)!.download),
                               ),
                             ),
                           );

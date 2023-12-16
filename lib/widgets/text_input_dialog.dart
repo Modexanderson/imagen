@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 Future<void> showTextInputDialog({
   required BuildContext context,
@@ -52,7 +52,7 @@ Future<void> showTextInputDialog({
             onPressed: () {
               Navigator.pop(context);
             },
-            child: const Text('Cancel'),
+            child: Text( AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             style: TextButton.styleFrom(
@@ -65,8 +65,8 @@ Future<void> showTextInputDialog({
             onPressed: () {
               onSubmitted(controller.text.trim());
             },
-            child: const Text(
-              'Ok',
+            child: Text(
+              AppLocalizations.of(context)!.ok,
             ),
           ),
           const SizedBox(

@@ -73,24 +73,23 @@ class _AsyncProgressDialogState extends State<AsyncProgressDialog> {
   Widget _buildDialog(BuildContext context) {
     var content;
     if (widget.message == null) {
-      content = Center(
-        child: Container(
-          height: 100,
-          width: 100,
-          alignment: Alignment.center,
-          decoration: widget.decoration ?? _DefaultDecoration,
-          child: widget.progress ?? CircularProgressIndicator(),
-        ),
+      content = Container(
+        height: 200,
+        width: 100,
+        alignment: Alignment.center,
+        decoration: widget.decoration ?? _DefaultDecoration,
+        child: widget.progress ?? const CircularProgressIndicator(),
       );
     } else {
       content = Container(
-        height: 100,
+        height: 200,
+         width: 100,
         padding: const EdgeInsets.all(20),
         decoration: widget.decoration ?? _DefaultDecoration,
         child:
-            Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
-          widget.progress ?? CircularProgressIndicator(),
-          SizedBox(width: 20),
+            Column(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+          widget.progress ?? const CircularProgressIndicator(),
+          const SizedBox(height: 20),
           _buildText(context)
         ]),
       );
@@ -108,7 +107,7 @@ class _AsyncProgressDialogState extends State<AsyncProgressDialog> {
 
   Widget _buildText(BuildContext context) {
     if (widget.message == null) {
-      return SizedBox.shrink();
+      return const SizedBox.shrink();
     }
     return Expanded(
       flex: 1,

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'size_config.dart';
 
-const String appName = "Commerce Hub";
 
 // const kPrimaryColor = Colors.blue;
 // const kPrimaryLightColor = Color(0xFFFFECDF);
@@ -25,19 +25,34 @@ final headingStyle = TextStyle(
 );
 
 const defaultDuration = Duration(milliseconds: 250);
+class AppStrings {
+  static String getEmailNullError(BuildContext context) {
+    return AppLocalizations.of(context)!.pleaseEnterEmail;
+  }
+  static String getInvalidEmailError(BuildContext context) {
+    return AppLocalizations.of(context)!.pleaseEnterValidEmail;
+  }
+
+  static String getPassNullError(BuildContext context) {
+    return AppLocalizations.of(context)!.pleaseEnterPassword;
+  }
+
+  static String getShortPassError(BuildContext context) {
+    return AppLocalizations.of(context)!.passwordShort;
+  }
+
+  static String getMatchPassError(BuildContext context) {
+    return AppLocalizations.of(context)!.passwordNotMatch;
+  }
+
+  static String getFieldRequiredMessage(BuildContext context) {
+    return AppLocalizations.of(context)!.fieldRequired;
+  }
+}
 
 // Form Error
 final RegExp emailValidatorRegExp =
     RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
-const String kEmailNullError = "Please Enter your email";
-const String kInvalidEmailError = "Please Enter Valid Email";
-const String kPassNullError = "Please Enter your password";
-const String kShortPassError = "Password is too short";
-const String kMatchPassError = "Passwords don't match";
-const String kNamelNullError = "Please Enter your name";
-const String kPhoneNumberNullError = "Please Enter your phone number";
-const String kAddressNullError = "Please Enter your address";
-const String FIELD_REQUIRED_MSG = "This field is required";
 
 final otpInputDecoration = InputDecoration(
   contentPadding:
@@ -50,6 +65,6 @@ final otpInputDecoration = InputDecoration(
 OutlineInputBorder outlineInputBorder() {
   return OutlineInputBorder(
     borderRadius: BorderRadius.circular(getProportionateScreenWidth(15)),
-    borderSide: BorderSide(color: Colors.grey),
+    borderSide: const BorderSide(color: Colors.grey),
   );
 }

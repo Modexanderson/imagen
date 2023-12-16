@@ -18,14 +18,22 @@ class DefaultButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       height: getProportionateScreenHeight(56),
-      child: TextButton(
-        style: TextButton.styleFrom(
-          // backgroundColor: color,
+      child: ElevatedButton(
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all<Color>(
+              Theme.of(context).colorScheme.secondary),
+          elevation: MaterialStateProperty.all(10),
+          fixedSize:
+              MaterialStateProperty.all(const Size.fromWidth(double.maxFinite)),
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+          padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+            const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
+          ),
         ),
-        // color: color,
-        // shape: RoundedRectangleBorder(
-        // borderRadius: BorderRadius.circular(20),
-        // ),
         onPressed: () {
           press!();
         },

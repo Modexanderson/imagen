@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:imagen/widgets/snack_bar.dart';
 import 'package:logger/logger.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../exceptions/firebase_sign_up_exception.dart';
 import '../exceptions/messaged_firebase_auth_exception.dart';
 import '../models/constants.dart';
 import '../models/size_config.dart';
 import '../services/authentification_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../services/database/user_database_helper.dart';
 import 'async_progress_dialog.dart';
 import 'default_button.dart';
@@ -16,6 +19,8 @@ class SignUpForm extends StatefulWidget {
 }
 
 class _SignUpFormState extends State<SignUpForm> {
+  bool isPasswordVisible = false;
+
   final _formKey = GlobalKey<FormState>();
   final TextEditingController emailFieldController = TextEditingController();
   final TextEditingController passwordFieldController = TextEditingController();
@@ -46,7 +51,7 @@ class _SignUpFormState extends State<SignUpForm> {
             buildConfirmPasswordFormField(),
             SizedBox(height: getProportionateScreenHeight(40)),
             DefaultButton(
-              text: "Sign up",
+              text: AppLocalizations.of(context)!.signUp,
               press: signUpButtonCallback,
             ),
           ],
@@ -58,20 +63,31 @@ class _SignUpFormState extends State<SignUpForm> {
   Widget buildConfirmPasswordFormField() {
     return TextFormField(
       controller: confirmPasswordFieldController,
-      obscureText: true,
-      decoration: const InputDecoration(
-          hintText: "Re-enter your password",
-          labelText: "Confirm Password",
-          floatingLabelBehavior: FloatingLabelBehavior.always,
-          suffixIcon: Icon(Icons.lock)),
+      obscureText: !isPasswordVisible,
+      decoration: InputDecoration(
+        hintText: AppLocalizations.of(context)!.reenterPassword,
+        labelText: AppLocalizations.of(context)!.confirmPassword,
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+        suffixIcon: GestureDetector(
+          onTap: () {
+            // Toggle the visibility of the password
+            setState(() {
+              isPasswordVisible = !isPasswordVisible;
+            });
+          },
+          child: Icon(
+            isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+          ),
+        ),
+      ),
       validator: (value) {
         if (confirmPasswordFieldController.text.isEmpty) {
-          return kPassNullError;
+          return AppStrings.getPassNullError(context);
         } else if (confirmPasswordFieldController.text !=
             passwordFieldController.text) {
-          return kMatchPassError;
+          return AppStrings.getMatchPassError(context);
         } else if (confirmPasswordFieldController.text.length < 8) {
-          return kShortPassError;
+          return AppStrings.getShortPassError(context);
         }
         return null;
       },
@@ -83,16 +99,16 @@ class _SignUpFormState extends State<SignUpForm> {
     return TextFormField(
       controller: emailFieldController,
       keyboardType: TextInputType.emailAddress,
-      decoration: const InputDecoration(
-          hintText: "Enter your email",
-          labelText: "Email",
+      decoration: InputDecoration(
+          hintText: AppLocalizations.of(context)!.enterEmail,
+          labelText: AppLocalizations.of(context)!.email,
           floatingLabelBehavior: FloatingLabelBehavior.always,
-          suffixIcon: Icon(Icons.mail)),
+          suffixIcon: const Icon(Icons.mail)),
       validator: (value) {
         if (emailFieldController.text.isEmpty) {
-          return kEmailNullError;
+          return AppStrings.getEmailNullError(context);
         } else if (!emailValidatorRegExp.hasMatch(emailFieldController.text)) {
-          return kInvalidEmailError;
+          return AppStrings.getInvalidEmailError(context);
         }
         return null;
       },
@@ -103,17 +119,28 @@ class _SignUpFormState extends State<SignUpForm> {
   Widget buildPasswordFormField() {
     return TextFormField(
       controller: passwordFieldController,
-      obscureText: true,
-      decoration: const InputDecoration(
-          hintText: "Enter your password",
-          labelText: "Password",
-          floatingLabelBehavior: FloatingLabelBehavior.always,
-          suffixIcon: Icon(Icons.lock)),
+      obscureText: !isPasswordVisible,
+      decoration: InputDecoration(
+        hintText: AppLocalizations.of(context)!.enterPassword,
+        labelText: AppLocalizations.of(context)!.password,
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+        suffixIcon: GestureDetector(
+          onTap: () {
+            // Toggle the visibility of the password
+            setState(() {
+              isPasswordVisible = !isPasswordVisible;
+            });
+          },
+          child: Icon(
+            isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+          ),
+        ),
+      ),
       validator: (value) {
         if (passwordFieldController.text.isEmpty) {
-          return kPassNullError;
+          return AppStrings.getPassNullError(context);
         } else if (passwordFieldController.text.length < 8) {
-          return kShortPassError;
+          return AppStrings.getShortPassError(context);
         }
         return null;
       },
@@ -133,19 +160,22 @@ class _SignUpFormState extends State<SignUpForm> {
           password: passwordFieldController.text,
         );
 
-        signUpFuture.then((value) {print('Value from signUpFuture: $value'); signUpStatus = value;});
+        signUpFuture.then((value) {
+          print('Value from signUpFuture: $value');
+          signUpStatus = value;
+        });
         signUpStatus = await showDialog(
           context: context,
           builder: (context) {
             return AsyncProgressDialog(
               signUpFuture,
-              message: const Text("Creating new account"),
+              message: Text(AppLocalizations.of(context)!.creatingNewAccount),
             );
           },
         );
         if (signUpStatus == true) {
           snackbarMessage =
-              "Registered successfully, Please verify your email id";
+              AppLocalizations.of(context)!.successfulRegistration;
         } else {
           throw FirebaseSignUpAuthUnknownReasonFailureException();
         }
@@ -155,12 +185,8 @@ class _SignUpFormState extends State<SignUpForm> {
         snackbarMessage = e.toString();
       } finally {
         Logger().i(snackbarMessage);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.white,
-            content: Text(snackbarMessage!),
-          ),
-        );
+        ShowSnackBar().showSnackBar(context, snackbarMessage!);
+
         if (signUpStatus == true) {
           Navigator.pop(context);
         }

@@ -12,7 +12,12 @@
           "package_name": "com.imagen.android"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "302883549378-mshaeclhl5o5n4ibis06g011nbo8kf6u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCdfjCQF3SgV2II1LBqFfAwGg8yYB1v_8Q"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "302883549378-mshaeclhl5o5n4ibis06g011nbo8kf6u.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "302883549378-dlbe504h578tlhelpl6o2eg71vaiaend.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.imagen.android.RunnerTests"
+              }
+            }
+          ]
         }
       }
     }

@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -28,10 +25,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -49,6 +43,16 @@ class DefaultFirebaseOptions {
     }
   }
 
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyAjtC9zdAuta9vePBnmZBPWxW4UoJd8GRI',
+    appId: '1:302883549378:web:d49c5a17834318ea5b0b5b',
+    messagingSenderId: '302883549378',
+    projectId: 'imagen-923c4',
+    authDomain: 'imagen-923c4.firebaseapp.com',
+    storageBucket: 'imagen-923c4.appspot.com',
+    measurementId: 'G-2NZXV6CTRB',
+  );
+
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCdfjCQF3SgV2II1LBqFfAwGg8yYB1v_8Q',
     appId: '1:302883549378:android:3df0ab7db651db325b0b5b',
@@ -59,10 +63,21 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCQRVoaDX6DsOZ2AGEGKRdc17oVSQfhFhY',
-    appId: '1:302883549378:ios:429cf6cc34adeea65b0b5b',
+    appId: '1:302883549378:ios:c6aa707941e53cc65b0b5b',
     messagingSenderId: '302883549378',
     projectId: 'imagen-923c4',
     storageBucket: 'imagen-923c4.appspot.com',
-    iosBundleId: 'com.imagen.android',
+    iosClientId: '302883549378-m2nivt2kpudb8udhnd3rqoov2ki4p4a9.apps.googleusercontent.com',
+    iosBundleId: 'com.imagen.ios',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyCQRVoaDX6DsOZ2AGEGKRdc17oVSQfhFhY',
+    appId: '1:302883549378:ios:c08bafc49821525f5b0b5b',
+    messagingSenderId: '302883549378',
+    projectId: 'imagen-923c4',
+    storageBucket: 'imagen-923c4.appspot.com',
+    iosClientId: '302883549378-r9rl235ec7n1merq9io169t9n167l26d.apps.googleusercontent.com',
+    iosBundleId: 'com.imagen.macos.RunnerTests',
   );
 }

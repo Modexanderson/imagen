@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../exceptions/credential_actions_exception.dart';
 import '../exceptions/firebase_sign_in_exceptions.dart';
@@ -141,6 +143,82 @@ class AuthentificationService {
     }
   }
 
+  Future<bool> signUpWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleSignInAccount =
+          await GoogleSignIn().signIn();
+      if (googleSignInAccount == null) {
+        // The user canceled the sign-in process
+        return false;
+      }
+
+      final GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
+
+      final UserCredential userCredential =
+          await _firebaseAuth!.signInWithCredential(credential);
+
+      final String uid = userCredential.user!.uid;
+
+      if (!userCredential.user!.emailVerified) {
+        await userCredential.user!.sendEmailVerification();
+      }
+
+      await UserDatabaseHelper().createNewUser(uid);
+
+      return true;
+    } on FirebaseAuthException catch (e) {
+      // Handle FirebaseAuthException
+      print(e.message);
+      return false;
+    } catch (e) {
+      // Handle other exceptions
+      print(e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> signUpWithApple() async {
+    try {
+      final AuthorizationCredentialAppleID appleCredential =
+          await SignInWithApple.getAppleIDCredential(scopes: [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ]);
+
+      final String nonce = generateNonce(); // Generate a nonce
+      final AuthCredential credential = OAuthProvider('apple.com').credential(
+        idToken: appleCredential.identityToken,
+        rawNonce: nonce,
+      );
+
+      final UserCredential userCredential =
+          await _firebaseAuth!.signInWithCredential(credential);
+
+      final String uid = userCredential.user!.uid;
+
+      if (!userCredential.user!.emailVerified) {
+        await userCredential.user!.sendEmailVerification();
+      }
+
+      await UserDatabaseHelper().createNewUser(uid);
+
+      return true;
+    } on FirebaseAuthException catch (e) {
+      // Handle FirebaseAuthException
+      print(e.message);
+      return false;
+    } catch (e) {
+      // Handle other exceptions
+      print(e.toString());
+      return false;
+    }
+  }
+
   Future<void> signOut() async {
     await firebaseAuth.signOut();
   }
@@ -150,8 +228,14 @@ class AuthentificationService {
     return currentUser.emailVerified;
   }
 
-  Future<void> sendVerificationEmailToCurrentUser() async {
-    await firebaseAuth.currentUser!.sendEmailVerification();
+  Future<bool> sendVerificationEmailToCurrentUser() async {
+    try {
+      await firebaseAuth.currentUser!.sendEmailVerification();
+      return true; // Email verification succeeded
+    } catch (error) {
+      print("Error during email verification: $error");
+      return false; // Email verification failed
+    }
   }
 
   User get currentUser {

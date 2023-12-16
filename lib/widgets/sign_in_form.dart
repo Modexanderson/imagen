@@ -1,6 +1,7 @@
-
 import 'package:flutter/material.dart';
+import 'package:imagen/widgets/snack_bar.dart';
 import 'package:logger/logger.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../exceptions/firebase_sign_in_exceptions.dart';
 import '../exceptions/messaged_firebase_auth_exception.dart';
@@ -18,6 +19,7 @@ class SignInForm extends StatefulWidget {
 
 class _SignInFormState extends State<SignInForm> {
   final _formkey = GlobalKey<FormState>();
+  bool isPasswordVisible = false;
 
   final TextEditingController emailFieldController = TextEditingController();
   final TextEditingController passwordFieldController = TextEditingController();
@@ -42,7 +44,7 @@ class _SignInFormState extends State<SignInForm> {
           buildForgotPasswordWidget(context),
           SizedBox(height: getProportionateScreenHeight(30)),
           DefaultButton(
-            text: "Sign in",
+            text: AppLocalizations.of(context)!.signIn,
             press: signInButtonCallback,
           ),
         ],
@@ -62,9 +64,9 @@ class _SignInFormState extends State<SignInForm> {
                   builder: (context) => const ForgotPasswordScreen(),
                 ));
           },
-          child: const Text(
-            "Forgot Password",
-            style: TextStyle(
+          child: Text(
+            AppLocalizations.of(context)!.forgotPassword,
+            style: const TextStyle(
               decoration: TextDecoration.underline,
             ),
           ),
@@ -76,18 +78,28 @@ class _SignInFormState extends State<SignInForm> {
   Widget buildPasswordFormField() {
     return TextFormField(
       controller: passwordFieldController,
-      obscureText: true,
-      decoration: const InputDecoration(
-        hintText: "Enter your password",
-        labelText: "Password",
+      obscureText: !isPasswordVisible,
+      decoration: InputDecoration(
+        hintText: AppLocalizations.of(context)!.enterPassword,
+        labelText: AppLocalizations.of(context)!.password,
         floatingLabelBehavior: FloatingLabelBehavior.always,
-        suffixIcon: Icon(Icons.lock,),
+        suffixIcon: GestureDetector(
+          onTap: () {
+            // Toggle the visibility of the password
+            setState(() {
+              isPasswordVisible = !isPasswordVisible;
+            });
+          },
+          child: Icon(
+            isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+          ),
+        ),
       ),
       validator: (value) {
         if (passwordFieldController.text.isEmpty) {
-          return kPassNullError;
+          return AppStrings.getPassNullError(context);
         } else if (passwordFieldController.text.length < 8) {
-          return kShortPassError;
+          return AppStrings.getShortPassError(context);
         }
         return null;
       },
@@ -99,17 +111,19 @@ class _SignInFormState extends State<SignInForm> {
     return TextFormField(
       controller: emailFieldController,
       keyboardType: TextInputType.emailAddress,
-      decoration: const InputDecoration(
-        hintText: "Enter your email",
-        labelText: "Email",
+      decoration: InputDecoration(
+        hintText: AppLocalizations.of(context)!.enterEmail,
+        labelText: AppLocalizations.of(context)!.email,
         floatingLabelBehavior: FloatingLabelBehavior.always,
-        suffixIcon: Icon(Icons.mail,),
+        suffixIcon: const Icon(
+          Icons.mail,
+        ),
       ),
       validator: (value) {
         if (emailFieldController.text.isEmpty) {
-          return kEmailNullError;
+          return AppStrings.getEmailNullError(context);
         } else if (!emailValidatorRegExp.hasMatch(emailFieldController.text)) {
-          return kInvalidEmailError;
+          return AppStrings.getInvalidEmailError(context);
         }
         return null;
       },
@@ -134,7 +148,7 @@ class _SignInFormState extends State<SignInForm> {
           builder: (context) {
             return AsyncProgressDialog(
               signInFuture,
-              message: const Text("Signing in to account"),
+              message: Text(AppLocalizations.of(context)!.signInProcess),
               onError: (e) {
                 snackbarMessage = e.toString();
               },
@@ -142,7 +156,7 @@ class _SignInFormState extends State<SignInForm> {
           },
         );
         if (signInStatus == true) {
-          snackbarMessage = "Signed In Successfully";
+          snackbarMessage = AppLocalizations.of(context)!.signInSuccessful;
         } else {
           if (snackbarMessage == null) {
             throw FirebaseSignInAuthUnknownReasonFailure();
@@ -157,11 +171,7 @@ class _SignInFormState extends State<SignInForm> {
         snackbarMessage = e.toString();
       } finally {
         Logger().i(snackbarMessage);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(snackbarMessage!),
-          ),
-        );
+        ShowSnackBar().showSnackBar(context, snackbarMessage!);
       }
     }
   }

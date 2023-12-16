@@ -23,7 +23,7 @@ class ShowSnackBar {
           behavior: SnackBarBehavior.floating,
           content: Text(
             title,
-            style: const TextStyle(color: Colors.white),
+            style:  TextStyle(color: Theme.of(context).textTheme.bodySmall!.color),
           ),
           action: noAction
               ? null
