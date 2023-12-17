@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../exceptions/credential_actions_exception.dart';
 import '../exceptions/firebase_sign_in_exceptions.dart';
@@ -12,24 +14,63 @@ import '../exceptions/reauth_exceptions.dart';
 import 'database/user_database_helper.dart';
 
 class AuthentificationService {
-  static const String USER_NOT_FOUND_EXCEPTION_CODE = "user-not-found";
-  static const String WRONG_PASSWORD_EXCEPTION_CODE = "wrong-password";
-  static const String TOO_MANY_REQUESTS_EXCEPTION_CODE = 'too-many-requests';
-  static const String EMAIL_ALREADY_IN_USE_EXCEPTION_CODE =
-      "email-already-in-use";
-  static const String OPERATION_NOT_ALLOWED_EXCEPTION_CODE =
-      "operation-not-allowed";
-  static const String WEAK_PASSWORD_EXCEPTION_CODE = "weak-password";
-  static const String USER_MISMATCH_EXCEPTION_CODE = "user-mismatch";
-  static const String INVALID_CREDENTIALS_EXCEPTION_CODE = "invalid-credential";
-  static const String INVALID_EMAIL_EXCEPTION_CODE = "invalid-email";
-  static const String USER_DISABLED_EXCEPTION_CODE = "user-disabled";
-  static const String INVALID_VERIFICATION_CODE_EXCEPTION_CODE =
-      "invalid-verification-code";
-  static const String INVALID_VERIFICATION_ID_EXCEPTION_CODE =
-      "invalid-verification-id";
-  static const String REQUIRES_RECENT_LOGIN_EXCEPTION_CODE =
-      "requires-recent-login";
+  // static const String USER_NOT_FOUND_EXCEPTION_CODE = "user-not-found";
+  static String GET_USER_NOT_FOUND_EXCEPTION_CODE(BuildContext context) {
+    return AppLocalizations.of(context)!.userNotFoundException;
+  }
+  // static const String WRONG_PASSWORD_EXCEPTION_CODE = "wrong-password";
+  static String GET_WRONG_PASSWORD_EXCEPTION_CODE(BuildContext context) {
+    return AppLocalizations.of(context)!.wrongPasswordException;
+  }
+  // static const String TOO_MANY_REQUESTS_EXCEPTION_CODE = 'too-many-requests';
+  static String GET_TOO_MANY_REQUESTS_EXCEPTION_CODE(BuildContext context) {
+    return AppLocalizations.of(context)!.tooManyRequestException;
+  }
+  // static const String EMAIL_ALREADY_IN_USE_EXCEPTION_CODE =
+  //     "email-already-in-use";
+  static String GET_EMAIL_ALREADY_IN_USE_EXCEPTION_CODE(BuildContext context) {
+    return AppLocalizations.of(context)!.emailAlreadyInUseException;
+  }
+  // static const String OPERATION_NOT_ALLOWED_EXCEPTION_CODE =
+  //     "operation-not-allowed";
+  static String GET_OPERATION_NOT_ALLOWED_EXCEPTION_CODE(BuildContext context) {
+    return AppLocalizations.of(context)!.operationNotAllowException;
+  }
+  // static const String WEAK_PASSWORD_EXCEPTION_CODE = "weak-password";
+  static String GET_WEAK_PASSWORD_EXCEPTION_CODE(BuildContext context) {
+    return AppLocalizations.of(context)!.weakPasswordException;
+  }
+  // static const String USER_MISMATCH_EXCEPTION_CODE = "user-mismatch";
+  static String GET_USER_MISMATCH_EXCEPTION_CODE(BuildContext context) {
+    return AppLocalizations.of(context)!.userMismatchException;
+  }
+  // static const String INVALID_CREDENTIALS_EXCEPTION_CODE = "invalid-credential";
+  static String GET_INVALID_CREDENTIAL_EXCEPTION_CODE(BuildContext context) {
+    return AppLocalizations.of(context)!.invalidCredentialException;
+  }
+  // static const String INVALID_EMAIL_EXCEPTION_CODE = "invalid-email";
+  static String GET_INVALID_EMAIL_EXCEPTION_CODE(BuildContext context) {
+    return AppLocalizations.of(context)!.invalidEmailException;
+  }
+  // static const String USER_DISABLED_EXCEPTION_CODE = "user-disabled";
+  static String GET_USER_DISABLED_EXCEPTION_CODE(BuildContext context) {
+    return AppLocalizations.of(context)!.userDisabledException;
+  }
+  // static const String INVALID_VERIFICATION_CODE_EXCEPTION_CODE =
+  //     "invalid-verification-code";
+  static String GET_INVALID_VERIFICATION_CODE_EXCEPTION_CODE(BuildContext context) {
+    return AppLocalizations.of(context)!.invalidVerificationCodeException;
+  }
+  // static const String INVALID_VERIFICATION_ID_EXCEPTION_CODE =
+  //     "invalid-verification-id";
+  static String GET_INVALID_VERIFICATION_ID_EXCEPTION_CODE(BuildContext context) {
+    return AppLocalizations.of(context)!.invalidVerificationIdException;
+  }
+  // static const String REQUIRES_RECENT_LOGIN_EXCEPTION_CODE =
+  //     "requires-recent-login";
+  static String GET_REQUIRES_RECENT_LOGIN_EXCEPTION_CODE(BuildContext context) {
+    return AppLocalizations.of(context)!.requiredRecentLoginException;
+  }
 
   FirebaseAuth? _firebaseAuth;
 
@@ -63,7 +104,7 @@ class AuthentificationService {
       userCredential = await currentUser
           .reauthenticateWithCredential(userCredential.credential!);
     } on FirebaseAuthException catch (e) {
-      if (e.code == WRONG_PASSWORD_EXCEPTION_CODE) {
+      if (e.code == GET_WRONG_PASSWORD_EXCEPTION_CODE) {
         throw FirebaseSignInAuthWrongPasswordException();
       } else {
         throw FirebaseSignInAuthException(message: e.code);
@@ -89,19 +130,19 @@ class AuthentificationService {
       rethrow;
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
-        case INVALID_EMAIL_EXCEPTION_CODE:
+        case GET_INVALID_EMAIL_EXCEPTION_CODE:
           throw FirebaseSignInAuthInvalidEmailException();
 
-        case USER_DISABLED_EXCEPTION_CODE:
+        case GET_USER_DISABLED_EXCEPTION_CODE:
           throw FirebaseSignInAuthUserDisabledException();
 
-        case USER_NOT_FOUND_EXCEPTION_CODE:
+        case GET_USER_NOT_FOUND_EXCEPTION_CODE:
           throw FirebaseSignInAuthUserNotFoundException();
 
-        case WRONG_PASSWORD_EXCEPTION_CODE:
+        case GET_WRONG_PASSWORD_EXCEPTION_CODE:
           throw FirebaseSignInAuthWrongPasswordException();
 
-        case TOO_MANY_REQUESTS_EXCEPTION_CODE:
+        case GET_TOO_MANY_REQUESTS_EXCEPTION_CODE:
           throw FirebaseTooManyRequestsException();
 
         default:
@@ -127,13 +168,13 @@ class AuthentificationService {
       rethrow;
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
-        case EMAIL_ALREADY_IN_USE_EXCEPTION_CODE:
+        case GET_EMAIL_ALREADY_IN_USE_EXCEPTION_CODE:
           throw FirebaseSignUpAuthEmailAlreadyInUseException();
-        case INVALID_EMAIL_EXCEPTION_CODE:
+        case GET_INVALID_EMAIL_EXCEPTION_CODE:
           throw FirebaseSignUpAuthInvalidEmailException();
-        case OPERATION_NOT_ALLOWED_EXCEPTION_CODE:
+        case GET_OPERATION_NOT_ALLOWED_EXCEPTION_CODE:
           throw FirebaseSignUpAuthOperationNotAllowedException();
-        case WEAK_PASSWORD_EXCEPTION_CODE:
+        case GET_WEAK_PASSWORD_EXCEPTION_CODE:
           throw FirebaseSignUpAuthWeakPasswordException();
         default:
           throw FirebaseSignInAuthException(message: e.code);
@@ -253,7 +294,7 @@ class AuthentificationService {
     } on MessagedFirebaseAuthException {
       rethrow;
     } on FirebaseAuthException catch (e) {
-      if (e.code == USER_NOT_FOUND_EXCEPTION_CODE) {
+      if (e.code == GET_USER_NOT_FOUND_EXCEPTION_CODE) {
         throw FirebaseCredentialActionAuthUserNotFoundException();
       } else {
         throw FirebaseCredentialActionAuthException(message: e.code);
@@ -282,9 +323,9 @@ class AuthentificationService {
       rethrow;
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
-        case WEAK_PASSWORD_EXCEPTION_CODE:
+        case GET_WEAK_PASSWORD_EXCEPTION_CODE:
           throw FirebaseCredentialActionAuthWeakPasswordException();
-        case REQUIRES_RECENT_LOGIN_EXCEPTION_CODE:
+        case GET_REQUIRES_RECENT_LOGIN_EXCEPTION_CODE:
           throw FirebaseCredentialActionAuthRequiresRecentLoginException();
         default:
           throw FirebaseCredentialActionAuthException(message: e.code);
@@ -331,19 +372,19 @@ class AuthentificationService {
       rethrow;
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
-        case USER_MISMATCH_EXCEPTION_CODE:
+        case GET_USER_MISMATCH_EXCEPTION_CODE:
           throw FirebaseReauthUserMismatchException();
-        case USER_NOT_FOUND_EXCEPTION_CODE:
+        case GET_USER_NOT_FOUND_EXCEPTION_CODE:
           throw FirebaseReauthUserNotFoundException();
-        case INVALID_CREDENTIALS_EXCEPTION_CODE:
+        case GET_INVALID_CREDENTIAL_EXCEPTION_CODE:
           throw FirebaseReauthInvalidCredentialException();
-        case INVALID_EMAIL_EXCEPTION_CODE:
+        case GET_INVALID_EMAIL_EXCEPTION_CODE:
           throw FirebaseReauthInvalidEmailException();
-        case WRONG_PASSWORD_EXCEPTION_CODE:
+        case GET_WRONG_PASSWORD_EXCEPTION_CODE:
           throw FirebaseReauthWrongPasswordException();
-        case INVALID_VERIFICATION_CODE_EXCEPTION_CODE:
+        case GET_INVALID_VERIFICATION_CODE_EXCEPTION_CODE:
           throw FirebaseReauthInvalidVerificationCodeException();
-        case INVALID_VERIFICATION_ID_EXCEPTION_CODE:
+        case GET_INVALID_VERIFICATION_ID_EXCEPTION_CODE:
           throw FirebaseReauthInvalidVerificationIdException();
         default:
           throw FirebaseReauthException(message: e.code);

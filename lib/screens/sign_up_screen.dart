@@ -53,6 +53,43 @@ class SignUpScreen extends StatelessWidget {
     }
   }
 
+  Future<void> signUpWithAppleCallback(BuildContext context) async {
+    final AuthentificationService authService = AuthentificationService();
+    bool signUpStatus = false;
+    String? snackbarMessage;
+    try {
+      final signUpFuture = authService.signUpWithApple();
+      signUpFuture.then((value) {
+        print('Value from signUpFuture: $value');
+        signUpStatus = value;
+      });
+      signUpStatus = await showDialog(
+        context: context,
+        builder: (context) {
+          return AsyncProgressDialog(
+            signUpFuture,
+            message: Text(AppLocalizations.of(context)!.signInProcess),
+          );
+        },
+      );
+
+      if (signUpStatus == true) {
+      } else {
+        throw FirebaseSignUpAuthUnknownReasonFailureException();
+      }
+    } on MessagedFirebaseAuthException catch (e) {
+      ShowSnackBar().showSnackBar(context, e.message);
+    } catch (e) {
+      ShowSnackBar().showSnackBar(context, e.toString());
+    } finally {
+      Logger().i(snackbarMessage);
+      ShowSnackBar().showSnackBar(context, snackbarMessage!);
+
+      if (signUpStatus == true) {
+        Navigator.pop(context);
+      }
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,11 +159,7 @@ class SignUpScreen extends StatelessWidget {
                   Buttons.apple,
                   text: AppLocalizations.of(context)!.continueWithApple,
                   onPressed: () {
-                    try {
-                      authService.signUpWithApple();
-                    } catch (e) {
-                      print("error sign in with apple");
-                    }
+                    signUpWithAppleCallback(context);
                   },
                 ),
                 SizedBox(height: getProportionateScreenHeight(20)),

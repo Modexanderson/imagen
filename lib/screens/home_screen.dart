@@ -265,11 +265,13 @@ class _HomeScreenState extends State<HomeScreen> {
         : MediaQuery.of(context).size.height / 2;
     return UpgradeAlert(
       upgrader: Upgrader(
+          showIgnore: false,
+          showLater: false,
           durationUntilAlertAgain: const Duration(days: 1),
           dialogStyle: Platform.isIOS
               ? UpgradeDialogStyle.cupertino
               : UpgradeDialogStyle.material,
-          canDismissDialog: true,
+          // canDismissDialog: true,
           shouldPopScope: () {
             return true;
           }),
@@ -498,7 +500,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox();
                     } else {
                       return Padding(
-                        padding: const EdgeInsets.all(10.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
                         child: DefaultButton(
                           press: () async {
                             bool allowed =
@@ -761,17 +763,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: SizedBox(
                               height: 60,
                               width: MediaQuery.of(context).size.width * 0.9,
-                              child: Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: DefaultButton(
-                                  press: () {
-                                    _downloadImage(
-                                      image!,
-                                      _textEditingController.text,
-                                    );
-                                  },
-                                  text: AppLocalizations.of(context)!.download,
-                                ),
+                              child: DefaultButton(
+                                press: () {
+                                  _downloadImage(
+                                    image!,
+                                    _textEditingController.text,
+                                  );
+                                },
+                                text: AppLocalizations.of(context)!.download,
                               ),
                             ),
                           );

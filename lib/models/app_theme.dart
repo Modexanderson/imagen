@@ -41,6 +41,7 @@ class AppTheme {
       ),
       disabledColor: Colors.grey[600],
       brightness: Brightness.light,
+      snackBarTheme: SnackBarThemeData(backgroundColor: Theme.of(context).cardColor),
       indicatorColor: currentTheme.currentColor(),
       progressIndicatorTheme: const ProgressIndicatorThemeData()
           .copyWith(color: currentTheme.currentColor()),
@@ -86,6 +87,8 @@ class AppTheme {
       ),
       visualDensity: VisualDensity.adaptivePlatformDensity,
       brightness: Brightness.dark,
+      snackBarTheme: SnackBarThemeData(backgroundColor: Theme.of(context).hintColor),
+
       appBarTheme: AppBarTheme(
         color: currentTheme.currentColor(),
         foregroundColor: Colors.white,
