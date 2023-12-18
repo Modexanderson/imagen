@@ -393,11 +393,17 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(
                               width:
                                   4), // Adjust the spacing between icon and credits
-                          Text(
-                            '$credits',
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                          SizedBox(
+                            width: 40,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Text(
+                                '$credits',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                           ),
                         ],
