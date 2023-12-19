@@ -26,6 +26,18 @@ class UserDatabaseHelper {
     return _firebaseFirestore!;
   }
 
+   Future<bool> userExists(String uid) async {
+    try {
+      DocumentSnapshot<Map<String, dynamic>> snapshot =
+          await firestore.collection(USERS_COLLECTION_NAME).doc(uid).get();
+
+      return snapshot.exists;
+    } catch (e) {
+      print("Error checking user existence: $e");
+      return false;
+    }
+  }
+
   final String? phone;
   Future<void> createNewUser(String uid) async {
     await firestore.collection(USERS_COLLECTION_NAME).doc(uid).set({

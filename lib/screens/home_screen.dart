@@ -507,6 +507,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     } else {
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        child: 
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.9,
                         child: DefaultButton(
                           press: () async {
                             bool allowed =
@@ -605,6 +608,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             }
                           },
                           text: AppLocalizations.of(context)!.create,
+                        ),
                         ),
                       );
                     }

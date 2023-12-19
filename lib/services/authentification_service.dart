@@ -153,75 +153,193 @@ class AuthentificationService {
     }
   }
 
-  Future<bool> signUp({String? email, String? password}) async {
-    try {
-      final UserCredential userCredential =
-          await firebaseAuth.createUserWithEmailAndPassword(
-              email: email.toString(), password: password.toString());
-      final String uid = userCredential.user!.uid;
-      if (userCredential.user!.emailVerified == false) {
-        await userCredential.user!.sendEmailVerification();
-      }
-      await UserDatabaseHelper().createNewUser(uid);
-      return true;
-    } on MessagedFirebaseAuthException {
-      rethrow;
-    } on FirebaseAuthException catch (e) {
-      switch (e.code) {
-        case GET_EMAIL_ALREADY_IN_USE_EXCEPTION_CODE:
-          throw FirebaseSignUpAuthEmailAlreadyInUseException();
-        case GET_INVALID_EMAIL_EXCEPTION_CODE:
-          throw FirebaseSignUpAuthInvalidEmailException();
-        case GET_OPERATION_NOT_ALLOWED_EXCEPTION_CODE:
-          throw FirebaseSignUpAuthOperationNotAllowedException();
-        case GET_WEAK_PASSWORD_EXCEPTION_CODE:
-          throw FirebaseSignUpAuthWeakPasswordException();
-        default:
-          throw FirebaseSignInAuthException(message: e.code);
-      }
-    } catch (e) {
-      rethrow;
+  // Future<bool> signUp({String? email, String? password}) async {
+  //   try {
+  //     final UserCredential userCredential =
+  //         await firebaseAuth.createUserWithEmailAndPassword(
+  //             email: email.toString(), password: password.toString());
+  //     final String uid = userCredential.user!.uid;
+  //     if (userCredential.user!.emailVerified == false) {
+  //       await userCredential.user!.sendEmailVerification();
+  //     }
+  //     await UserDatabaseHelper().createNewUser(uid);
+  //     return true;
+  //   } on MessagedFirebaseAuthException {
+  //     rethrow;
+  //   } on FirebaseAuthException catch (e) {
+  //     switch (e.code) {
+  //       case GET_EMAIL_ALREADY_IN_USE_EXCEPTION_CODE:
+  //         throw FirebaseSignUpAuthEmailAlreadyInUseException();
+  //       case GET_INVALID_EMAIL_EXCEPTION_CODE:
+  //         throw FirebaseSignUpAuthInvalidEmailException();
+  //       case GET_OPERATION_NOT_ALLOWED_EXCEPTION_CODE:
+  //         throw FirebaseSignUpAuthOperationNotAllowedException();
+  //       case GET_WEAK_PASSWORD_EXCEPTION_CODE:
+  //         throw FirebaseSignUpAuthWeakPasswordException();
+  //       default:
+  //         throw FirebaseSignInAuthException(message: e.code);
+  //     }
+  //   } catch (e) {
+  //     rethrow;
+  //   }
+  // }
+
+
+Future<bool> signUp({String? email, String? password}) async {
+  try {
+    final UserCredential userCredential =
+        await firebaseAuth.createUserWithEmailAndPassword(
+            email: email.toString(), password: password.toString());
+    final String uid = userCredential.user!.uid;
+    if (userCredential.user!.emailVerified == false) {
+      await userCredential.user!.sendEmailVerification();
     }
+    await UserDatabaseHelper().createNewUser(uid);
+    return true;
+  } on MessagedFirebaseAuthException {
+    rethrow;
+  } on FirebaseAuthException catch (e) {
+    switch (e.code) {
+      case GET_EMAIL_ALREADY_IN_USE_EXCEPTION_CODE:
+        throw FirebaseSignUpAuthEmailAlreadyInUseException();
+      case GET_INVALID_EMAIL_EXCEPTION_CODE:
+        throw FirebaseSignUpAuthInvalidEmailException();
+      case GET_OPERATION_NOT_ALLOWED_EXCEPTION_CODE:
+        throw FirebaseSignUpAuthOperationNotAllowedException();
+      case GET_WEAK_PASSWORD_EXCEPTION_CODE:
+        throw FirebaseSignUpAuthWeakPasswordException();
+    }
+    // Return false if the switch block doesn't match any case
+    return false;
+  } catch (e) {
+    rethrow;
   }
+}
+
+
+
+
+
+  // Future<bool> signUpWithGoogle() async {
+  //   try {
+  //     final GoogleSignInAccount? googleSignInAccount =
+  //         await GoogleSignIn().signIn();
+  //     if (googleSignInAccount == null) {
+  //       // The user canceled the sign-in process
+  //       return false;
+  //     }
+
+  //     final GoogleSignInAuthentication googleSignInAuthentication =
+  //         await googleSignInAccount.authentication;
+  //     final AuthCredential credential = GoogleAuthProvider.credential(
+  //       accessToken: googleSignInAuthentication.accessToken,
+  //       idToken: googleSignInAuthentication.idToken,
+  //     );
+
+  //     final UserCredential userCredential =
+  //         await _firebaseAuth!.signInWithCredential(credential);
+
+  //     final String uid = userCredential.user!.uid;
+
+  //     if (!userCredential.user!.emailVerified) {
+  //       await userCredential.user!.sendEmailVerification();
+  //     }
+
+  //     await UserDatabaseHelper().createNewUser(uid);
+
+  //     return true;
+  //   } on FirebaseAuthException catch (e) {
+  //     // Handle FirebaseAuthException
+  //     print(e.message);
+  //     return false;
+  //   } catch (e) {
+  //     // Handle other exceptions
+  //     print(e.toString());
+  //     return false;
+  //   }
+  // }
 
   Future<bool> signUpWithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleSignInAccount =
-          await GoogleSignIn().signIn();
-      if (googleSignInAccount == null) {
-        // The user canceled the sign-in process
-        return false;
-      }
+  try {
+    final GoogleSignInAccount? googleSignInAccount =
+        await GoogleSignIn().signIn();
+    
+    if (googleSignInAccount == null) {
+      // The user canceled the sign-in process
+      return false;
+    }
 
-      final GoogleSignInAuthentication googleSignInAuthentication =
-          await googleSignInAccount.authentication;
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleSignInAuthentication.accessToken,
-        idToken: googleSignInAuthentication.idToken,
-      );
+    final GoogleSignInAuthentication googleSignInAuthentication =
+        await googleSignInAccount.authentication;
+    final AuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleSignInAuthentication.accessToken,
+      idToken: googleSignInAuthentication.idToken,
+    );
 
-      final UserCredential userCredential =
-          await _firebaseAuth!.signInWithCredential(credential);
+    final UserCredential userCredential =
+        await _firebaseAuth!.signInWithCredential(credential);
 
-      final String uid = userCredential.user!.uid;
+    final String uid = userCredential.user!.uid;
 
+    // Check if the user already exists in the database
+    if (!(await UserDatabaseHelper().userExists(uid))) {
+      // User doesn't exist, create a new user
       if (!userCredential.user!.emailVerified) {
         await userCredential.user!.sendEmailVerification();
       }
 
       await UserDatabaseHelper().createNewUser(uid);
-
-      return true;
-    } on FirebaseAuthException catch (e) {
-      // Handle FirebaseAuthException
-      print(e.message);
-      return false;
-    } catch (e) {
-      // Handle other exceptions
-      print(e.toString());
-      return false;
     }
+
+    return true;
+  } on FirebaseAuthException catch (e) {
+    // Handle FirebaseAuthException
+    print(e.message);
+    return false;
+  } catch (e) {
+    // Handle other exceptions
+    print(e.toString());
+    return false;
   }
+}
+
+
+  // Future<bool> signUpWithApple() async {
+  //   try {
+  //     final AuthorizationCredentialAppleID appleCredential =
+  //         await SignInWithApple.getAppleIDCredential(scopes: [
+  //       AppleIDAuthorizationScopes.email,
+  //       AppleIDAuthorizationScopes.fullName,
+  //     ]);
+
+  //     final String nonce = generateNonce(); // Generate a nonce
+  //     final AuthCredential credential = OAuthProvider('apple.com').credential(
+  //       idToken: appleCredential.identityToken,
+  //       rawNonce: nonce,
+  //     );
+
+  //     final UserCredential userCredential =
+  //         await _firebaseAuth!.signInWithCredential(credential);
+
+  //     final String uid = userCredential.user!.uid;
+
+  //     if (!userCredential.user!.emailVerified) {
+  //       await userCredential.user!.sendEmailVerification();
+  //     }
+
+  //     await UserDatabaseHelper().createNewUser(uid);
+
+  //     return true;
+  //   } on FirebaseAuthException catch (e) {
+  //     // Handle FirebaseAuthException
+  //     print(e.message);
+  //     return false;
+  //   } catch (e) {
+  //     // Handle other exceptions
+  //     print(e.toString());
+  //     return false;
+  //   }
+  // }
 
   Future<bool> signUpWithApple() async {
     try {
@@ -246,7 +364,11 @@ class AuthentificationService {
         await userCredential.user!.sendEmailVerification();
       }
 
-      await UserDatabaseHelper().createNewUser(uid);
+      // Check if the user already exists in the database
+      if (!(await UserDatabaseHelper().userExists(uid))) {
+        // User doesn't exist, create a new user
+        await UserDatabaseHelper().createNewUser(uid);
+      }
 
       return true;
     } on FirebaseAuthException catch (e) {

@@ -148,31 +148,71 @@ class _SignUpFormState extends State<SignUpForm> {
     );
   }
 
+  // Future<void> signUpButtonCallback() async {
+  //   if (_formKey.currentState!.validate()) {
+  //     // goto complete profile page
+  //     final AuthentificationService authService = AuthentificationService();
+  //     bool signUpStatus = false;
+  //     String? snackbarMessage;
+  //     try {
+  //       final signUpFuture = authService.signUp(
+  //         email: emailFieldController.text,
+  //         password: passwordFieldController.text,
+  //       );
+
+  //       signUpFuture.then((value) {
+  //         print('Value from signUpFuture: $value');
+  //         signUpStatus = value;
+  //       });
+  //       signUpStatus = await showDialog(
+  //         context: context,
+  //         builder: (context) {
+  //           return AsyncProgressDialog(
+  //             signUpFuture,
+  //             message: Text(AppLocalizations.of(context)!.creatingNewAccount),
+  //           );
+  //         },
+  //       );
+  //       if (signUpStatus == true) {
+  //         snackbarMessage =
+  //             AppLocalizations.of(context)!.successfulRegistration;
+  //       } else {
+  //         throw FirebaseSignUpAuthUnknownReasonFailureException();
+  //       }
+  //     } on MessagedFirebaseAuthException catch (e) {
+  //       snackbarMessage = e.message;
+  //     } catch (e) {
+  //       snackbarMessage = e.toString();
+  //     } finally {
+  //       Logger().i(snackbarMessage);
+  //       ShowSnackBar().showSnackBar(context, snackbarMessage!);
+
+  //       if (signUpStatus == true) {
+  //         Navigator.pop(context);
+  //       }
+  //     }
+  //   }
+  // }
   Future<void> signUpButtonCallback() async {
     if (_formKey.currentState!.validate()) {
-      // goto complete profile page
       final AuthentificationService authService = AuthentificationService();
       bool signUpStatus = false;
       String? snackbarMessage;
-      try {
-        final signUpFuture = authService.signUp(
-          email: emailFieldController.text,
-          password: passwordFieldController.text,
-        );
 
-        signUpFuture.then((value) {
-          print('Value from signUpFuture: $value');
-          signUpStatus = value;
-        });
+      try {
         signUpStatus = await showDialog(
           context: context,
           builder: (context) {
             return AsyncProgressDialog(
-              signUpFuture,
+              authService.signUp(
+                email: emailFieldController.text,
+                password: passwordFieldController.text,
+              ),
               message: Text(AppLocalizations.of(context)!.creatingNewAccount),
             );
           },
         );
+
         if (signUpStatus == true) {
           snackbarMessage =
               AppLocalizations.of(context)!.successfulRegistration;
@@ -183,6 +223,8 @@ class _SignUpFormState extends State<SignUpForm> {
         snackbarMessage = e.message;
       } catch (e) {
         snackbarMessage = e.toString();
+        throw FirebaseSignUpAuthUnknownReasonFailureException(
+            message: snackbarMessage);
       } finally {
         Logger().i(snackbarMessage);
         ShowSnackBar().showSnackBar(context, snackbarMessage!);
