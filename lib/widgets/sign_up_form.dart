@@ -12,6 +12,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../services/database/user_database_helper.dart';
 import 'async_progress_dialog.dart';
 import 'default_button.dart';
+import 'default_text_form_field.dart';
 
 class SignUpForm extends StatefulWidget {
   @override
@@ -61,13 +62,12 @@ class _SignUpFormState extends State<SignUpForm> {
   }
 
   Widget buildConfirmPasswordFormField() {
-    return TextFormField(
+    return DefaultTextFormField(
       controller: confirmPasswordFieldController,
       obscureText: !isPasswordVisible,
-      decoration: InputDecoration(
+      
         hintText: AppLocalizations.of(context)!.reenterPassword,
         labelText: AppLocalizations.of(context)!.confirmPassword,
-        floatingLabelBehavior: FloatingLabelBehavior.always,
         suffixIcon: GestureDetector(
           onTap: () {
             // Toggle the visibility of the password
@@ -79,7 +79,6 @@ class _SignUpFormState extends State<SignUpForm> {
             isPasswordVisible ? Icons.visibility : Icons.visibility_off,
           ),
         ),
-      ),
       validator: (value) {
         if (confirmPasswordFieldController.text.isEmpty) {
           return AppStrings.getPassNullError(context);
@@ -96,14 +95,12 @@ class _SignUpFormState extends State<SignUpForm> {
   }
 
   Widget buildEmailFormField() {
-    return TextFormField(
+    return DefaultTextFormField(
       controller: emailFieldController,
       keyboardType: TextInputType.emailAddress,
-      decoration: InputDecoration(
           hintText: AppLocalizations.of(context)!.enterEmail,
           labelText: AppLocalizations.of(context)!.email,
-          floatingLabelBehavior: FloatingLabelBehavior.always,
-          suffixIcon: const Icon(Icons.mail)),
+          suffixIcon: const Icon(Icons.mail),
       validator: (value) {
         if (emailFieldController.text.isEmpty) {
           return AppStrings.getEmailNullError(context);
@@ -117,13 +114,12 @@ class _SignUpFormState extends State<SignUpForm> {
   }
 
   Widget buildPasswordFormField() {
-    return TextFormField(
+    return DefaultTextFormField(
       controller: passwordFieldController,
       obscureText: !isPasswordVisible,
-      decoration: InputDecoration(
+      
         hintText: AppLocalizations.of(context)!.enterPassword,
         labelText: AppLocalizations.of(context)!.password,
-        floatingLabelBehavior: FloatingLabelBehavior.always,
         suffixIcon: GestureDetector(
           onTap: () {
             // Toggle the visibility of the password
@@ -135,7 +131,6 @@ class _SignUpFormState extends State<SignUpForm> {
             isPasswordVisible ? Icons.visibility : Icons.visibility_off,
           ),
         ),
-      ),
       validator: (value) {
         if (passwordFieldController.text.isEmpty) {
           return AppStrings.getPassNullError(context);

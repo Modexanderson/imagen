@@ -23,6 +23,7 @@ import '../services/authentification_service.dart';
 import '../services/database/user_database_helper.dart';
 import '../widgets/async_progress_dialog.dart';
 import '../widgets/binance_pay_widget.dart';
+import '../widgets/default_text_form_field.dart';
 import '../widgets/drawer.dart';
 import '../widgets/revenue_cat_widget.dart';
 import '../widgets/show_confirmation_dialog.dart';
@@ -425,14 +426,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: TextFormField(
+                    child: DefaultTextFormField(
                       controller: _textEditingController,
-                      decoration: InputDecoration(
-                        hintText:
-                            AppLocalizations.of(context)!.enterPromptExample,
-                        labelText: AppLocalizations.of(context)!.enterPrompt,
-                        floatingLabelBehavior: FloatingLabelBehavior.always,
-                      ),
+                      hintText:
+                          AppLocalizations.of(context)!.enterPromptExample,
+                      labelText: AppLocalizations.of(context)!.enterPrompt,
                       validator: (value) {
                         if (_textEditingController.text.isEmpty) {
                           return AppLocalizations.of(context)!.inputSomeText;
@@ -507,108 +505,109 @@ class _HomeScreenState extends State<HomeScreen> {
                     } else {
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: 
-                        SizedBox(
+                        child: SizedBox(
                           width: MediaQuery.of(context).size.width * 0.9,
-                        child: DefaultButton(
-                          press: () async {
-                            bool allowed =
-                                AuthentificationService().currentUserVerified;
-                            if (!allowed) {
-                              final reverify = await showConfirmationDialog(
-                                context,
-                                "You haven't verified your email address. This action is only allowed for verified users.",
-                                positiveResponse: "Resend verification email",
-                                negativeResponse: "Go back",
-                              );
-
-                              if (reverify) {
-                                try {
-                                  bool verificationResult =
-                                      await AuthentificationService()
-                                          .sendVerificationEmailToCurrentUser();
-
-                                  if (verificationResult) {
-                                    ShowSnackBar().showSnackBar(
-                                      context,
-                                      "Verification email sent successfully",
-                                    );
-                                  } else {
-                                    // Handle case where verification email sending failed
-                                    ShowSnackBar().showSnackBar(
-                                      context,
-                                      "Failed to send verification email",
-                                    );
-                                  }
-                                } catch (error) {
-                                  // Handle other exceptions
-                                  print(
-                                      'Error during email verification: $error');
-                                  ShowSnackBar().showSnackBar(
-                                    context,
-                                    "An error occurred during email verification",
-                                  );
-                                }
-                              }
-                              return;
-                            }
-
-                            if (_textEditingController.text.isEmpty) {
-                              ShowSnackBar().showSnackBar(
-                                context,
-                                AppLocalizations.of(context)!.inputSomeText,
-                              );
-                            } else {
-                              try {
-                                Uint8List image = await _imageCubit.generate(
-                                  _textEditingController.text,
-                                  _selectedStyle,
-                                  _selectedResolution,
+                          child: DefaultButton(
+                            press: () async {
+                              bool allowed =
+                                  AuthentificationService().currentUserVerified;
+                              if (!allowed) {
+                                final reverify = await showConfirmationDialog(
+                                  context,
+                                  "You haven't verified your email address. This action is only allowed for verified users.",
+                                  positiveResponse: "Resend verification email",
+                                  negativeResponse: "Go back",
                                 );
 
-                                // If image generation is successful, deduct credits
-                                bool deductionResult;
+                                if (reverify) {
+                                  try {
+                                    bool verificationResult =
+                                        await AuthentificationService()
+                                            .sendVerificationEmailToCurrentUser();
 
-                                // Check if the generated image is not empty
-                                if (image.isNotEmpty) {
-                                  double debitValue = await getDebitValue();
-                                  print('Credit value retrieved: $debitValue');
-                                  deductionResult = await UserDatabaseHelper()
-                                      .deductCreditsForUser(
-                                          userUid, debitValue);
+                                    if (verificationResult) {
+                                      ShowSnackBar().showSnackBar(
+                                        context,
+                                        "Verification email sent successfully",
+                                      );
+                                    } else {
+                                      // Handle case where verification email sending failed
+                                      ShowSnackBar().showSnackBar(
+                                        context,
+                                        "Failed to send verification email",
+                                      );
+                                    }
+                                  } catch (error) {
+                                    // Handle other exceptions
+                                    print(
+                                        'Error during email verification: $error');
+                                    ShowSnackBar().showSnackBar(
+                                      context,
+                                      "An error occurred during email verification",
+                                    );
+                                  }
+                                }
+                                return;
+                              }
 
-                                  if (deductionResult) {
-                                    // If credits deducted successfully, proceed with the image
-                                    // display or any other actions you need to perform.
+                              if (_textEditingController.text.isEmpty) {
+                                ShowSnackBar().showSnackBar(
+                                  context,
+                                  AppLocalizations.of(context)!.inputSomeText,
+                                );
+                              } else {
+                                try {
+                                  Uint8List image = await _imageCubit.generate(
+                                    _textEditingController.text,
+                                    _selectedStyle,
+                                    _selectedResolution,
+                                  );
+
+                                  // If image generation is successful, deduct credits
+                                  bool deductionResult;
+
+                                  // Check if the generated image is not empty
+                                  if (image.isNotEmpty) {
+                                    double debitValue = await getDebitValue();
+                                    print(
+                                        'Credit value retrieved: $debitValue');
+                                    deductionResult = await UserDatabaseHelper()
+                                        .deductCreditsForUser(
+                                            userUid, debitValue);
+
+                                    if (deductionResult) {
+                                      // If credits deducted successfully, proceed with the image
+                                      // display or any other actions you need to perform.
+                                    } else {
+                                      // Insufficient credits. Show a message.
+                                      ShowSnackBar().showSnackBar(
+                                        context,
+                                        AppLocalizations.of(context)!
+                                            .insufficientCredits,
+                                      );
+                                    }
                                   } else {
-                                    // Insufficient credits. Show a message.
+                                    // Handle the case where the image is not generated successfully
                                     ShowSnackBar().showSnackBar(
                                       context,
                                       AppLocalizations.of(context)!
-                                          .insufficientCredits,
+                                          .failedGeneration,
                                     );
                                   }
-                                } else {
-                                  // Handle the case where the image is not generated successfully
+                                } catch (error) {
+                                  // Handle the image generation error
+                                  print(
+                                      'Error during image generation: $error');
                                   ShowSnackBar().showSnackBar(
                                     context,
                                     AppLocalizations.of(context)!
-                                        .failedGeneration,
+                                        .errorImageGeneration,
                                   );
                                 }
-                              } catch (error) {
-                                // Handle the image generation error
-                                print('Error during image generation: $error');
-                                ShowSnackBar().showSnackBar(
-                                  context,
-                                  AppLocalizations.of(context)!
-                                      .errorImageGeneration,
-                                );
                               }
-                            }
-                          },
-                          text: AppLocalizations.of(context)!.create,
-                        ),
+                            },
+                            text: AppLocalizations.of(context)!.create,
+                          ),
                         ),
                       );
                     }

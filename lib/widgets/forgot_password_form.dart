@@ -10,6 +10,7 @@ import '../models/size_config.dart';
 import '../services/authentification_service.dart';
 import 'async_progress_dialog.dart';
 import 'default_button.dart';
+import 'default_text_form_field.dart';
 import 'no_account_text.dart';
 
 class ForgotPasswordForm extends StatefulWidget {
@@ -47,19 +48,19 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
     );
   }
 
-  TextFormField buildEmailFormField() {
-    return TextFormField(
+  DefaultTextFormField buildEmailFormField() {
+    return DefaultTextFormField(
       controller: emailFieldController,
       keyboardType: TextInputType.emailAddress,
-      decoration:  InputDecoration(
-        hintText: AppLocalizations.of(context)!.enterEmail,
-        labelText: AppLocalizations.of(context)!.email,
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-        suffixIcon: const Icon(Icons.mail,),
+      hintText: AppLocalizations.of(context)!.enterEmail,
+      labelText: AppLocalizations.of(context)!.email,
+      suffixIcon: const Icon(
+        Icons.mail,
       ),
       validator: (value) {
         if (value!.isEmpty) {
-          return AppStrings.getEmailNullError(context);;
+          return AppStrings.getEmailNullError(context);
+          ;
         } else if (!emailValidatorRegExp.hasMatch(value)) {
           return AppStrings.getInvalidEmailError(context);
         }
@@ -84,7 +85,8 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
           builder: (context) {
             return AsyncProgressDialog(
               resultFuture,
-              message: Text( AppLocalizations.of(context)!.sendingVerificationEmail),
+              message:
+                  Text(AppLocalizations.of(context)!.sendingVerificationEmail),
             );
           },
         );
