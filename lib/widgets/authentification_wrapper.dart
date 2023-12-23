@@ -17,7 +17,7 @@ class AuthentificationWrapper extends StatelessWidget {
           return RateAppInitWidget(
         builder: (rateMyApp) => const HomeScreen());
         } else {
-          return SignInScreen();
+          return const SignInScreen();
         }
       },
     );

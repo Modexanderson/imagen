@@ -36,19 +36,23 @@ class _SignInFormState extends State<SignInForm> {
   Widget build(BuildContext context) {
     return Form(
       key: _formkey,
-      child: Column(
-        children: [
-          buildEmailFormField(),
-          SizedBox(height: getProportionateScreenHeight(30)),
-          buildPasswordFormField(),
-          SizedBox(height: getProportionateScreenHeight(30)),
-          buildForgotPasswordWidget(context),
-          SizedBox(height: getProportionateScreenHeight(30)),
-          DefaultButton(
-            text: AppLocalizations.of(context)!.signIn,
-            press: signInButtonCallback,
-          ),
-        ],
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+            horizontal: getProportionateScreenWidth(screenPadding)),
+        child: Column(
+          children: [
+            buildEmailFormField(),
+            SizedBox(height: getProportionateScreenHeight(30)),
+            buildPasswordFormField(),
+            SizedBox(height: getProportionateScreenHeight(30)),
+            buildForgotPasswordWidget(context),
+            SizedBox(height: getProportionateScreenHeight(30)),
+            DefaultButton(
+              text: AppLocalizations.of(context)!.signIn,
+              press: signInButtonCallback,
+            ),
+          ],
+        ),
       ),
     );
   }

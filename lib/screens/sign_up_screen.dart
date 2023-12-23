@@ -12,9 +12,16 @@ import '../widgets/async_progress_dialog.dart';
 import '../widgets/sign_up_form.dart';
 import '../widgets/snack_bar.dart';
 
-class SignUpScreen extends StatelessWidget {
-  SignUpScreen({super.key});
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
+
+  @override
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
   final AuthentificationService authService = AuthentificationService();
+
   Future<void> signUpWithGoogleCallback(BuildContext context) async {
     final AuthentificationService authService = AuthentificationService();
     bool signUpStatus = false;
@@ -90,8 +97,10 @@ class SignUpScreen extends StatelessWidget {
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -102,73 +111,77 @@ class SignUpScreen extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: SizedBox(
-            width: double.infinity,
-            child: Column(
-              children: [
-                SizedBox(height: SizeConfig.screenHeight! * 0.02),
-                Text(
-                  AppLocalizations.of(context)!.registerAccount,
-                  style: headingStyle,
-                ),
-                Text(
-                  AppLocalizations.of(context)!.completeDetails,
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: SizeConfig.screenHeight! * 0.07),
-                SignUpForm(),
-                SizedBox(height: getProportionateScreenHeight(20)),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Container(
-                      height: 1,
-                      width: MediaQuery.of(context).size.width /
-                          2.5, // Adjust the length of each line segment
-                      color: Colors.grey, // Adjust the color as needed
-                    ),
-                    const SizedBox(
-                        width: 5), // Adjust spacing between line and text
-                    Text(
-                      AppLocalizations.of(context)!.or.toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 16, // Adjust the font size as needed
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+                horizontal: getProportionateScreenWidth(screenPadding)),
+          child: SingleChildScrollView(
+            child: SizedBox(
+              width: double.infinity,
+              child: Column(
+                children: [
+                  SizedBox(height: SizeConfig.screenHeight! * 0.02),
+                  Text(
+                    AppLocalizations.of(context)!.registerAccount,
+                    style: headingStyle,
+                  ),
+                  Text(
+                    AppLocalizations.of(context)!.completeDetails,
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: SizeConfig.screenHeight! * 0.07),
+                  SignUpForm(),
+                  SizedBox(height: getProportionateScreenHeight(20)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Container(
+                        height: 1,
+                        width: MediaQuery.of(context).size.width /
+                            2.5, // Adjust the length of each line segment
+                        color: Colors.grey, // Adjust the color as needed
                       ),
-                    ),
-                    const SizedBox(
-                        width: 5), // Adjust spacing between line and text
-                    Container(
-                      height: 1,
-                      width: MediaQuery.of(context).size.width /
-                          2.5, // Adjust the length of each line segment
-                      color: Colors.grey, // Adjust the color as needed
-                    ),
-                  ],
-                ),
-                SizedBox(height: getProportionateScreenHeight(20)),
-                SignInButton(
-                  Buttons.google,
-                  text: AppLocalizations.of(context)!.continueWithGoogle,
-                  onPressed: () {
-                    signUpWithGoogleCallback(context);
-                  },
-                ),
-                SizedBox(height: getProportionateScreenHeight(5)),
-                SignInButton(
-                  Buttons.apple,
-                  text: AppLocalizations.of(context)!.continueWithApple,
-                  onPressed: () {
-                    signUpWithAppleCallback(context);
-                  },
-                ),
-                SizedBox(height: getProportionateScreenHeight(20)),
-                Text(
-                  AppLocalizations.of(context)!.continuationAgreement,
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: getProportionateScreenHeight(20)),
-              ],
+                      const SizedBox(
+                          width: 5), // Adjust spacing between line and text
+                      Text(
+                        AppLocalizations.of(context)!.or.toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 16, // Adjust the font size as needed
+                        ),
+                      ),
+                      const SizedBox(
+                          width: 5), // Adjust spacing between line and text
+                      Container(
+                        height: 1,
+                        width: MediaQuery.of(context).size.width /
+                            2.5, // Adjust the length of each line segment
+                        color: Colors.grey, // Adjust the color as needed
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: getProportionateScreenHeight(20)),
+                  SignInButton(
+                    Buttons.google,
+                    text: AppLocalizations.of(context)!.continueWithGoogle,
+                    onPressed: () {
+                      signUpWithGoogleCallback(context);
+                    },
+                  ),
+                  SizedBox(height: getProportionateScreenHeight(5)),
+                  SignInButton(
+                    Buttons.apple,
+                    text: AppLocalizations.of(context)!.continueWithApple,
+                    onPressed: () {
+                      signUpWithAppleCallback(context);
+                    },
+                  ),
+                  SizedBox(height: getProportionateScreenHeight(20)),
+                  Text(
+                    AppLocalizations.of(context)!.continuationAgreement,
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: getProportionateScreenHeight(20)),
+                ],
+              ),
             ),
           ),
         ),

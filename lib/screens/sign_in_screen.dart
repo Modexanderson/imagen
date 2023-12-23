@@ -13,29 +13,9 @@ import '../widgets/no_account_text.dart';
 import '../widgets/sign_in_form.dart';
 import '../widgets/snack_bar.dart';
 
-class LoadingDialog extends StatefulWidget {
-  @override
-  _LoadingDialogState createState() => _LoadingDialogState();
-}
-
-class _LoadingDialogState extends State<LoadingDialog> {
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 16),
-          Text('Signing in with Google...'),
-        ],
-      ),
-    );
-  }
-}
 
 class SignInScreen extends StatefulWidget {
-  SignInScreen({super.key});
+  const SignInScreen({super.key});
 
   @override
   State<SignInScreen> createState() => _SignInScreenState();
@@ -127,12 +107,12 @@ class _SignInScreenState extends State<SignInScreen> {
     return Scaffold(
       appBar: AppBar(),
       body: SafeArea(
-        child: SizedBox(
-          width: double.infinity,
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-                horizontal: getProportionateScreenWidth(screenPadding)),
-            child: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+              horizontal: getProportionateScreenWidth(screenPadding)),
+          child: SingleChildScrollView(
+            child: SizedBox(
+              width: double.infinity,
               child: Column(
                 children: [
                   SizedBox(height: SizeConfig.screenHeight! * 0.04),

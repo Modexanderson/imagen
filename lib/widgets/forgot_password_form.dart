@@ -31,19 +31,23 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
   Widget build(BuildContext context) {
     return Form(
       key: _formKey,
-      child: Column(
-        children: [
-          buildEmailFormField(),
-          SizedBox(height: getProportionateScreenHeight(30)),
-          SizedBox(height: SizeConfig.screenHeight! * 0.1),
-          DefaultButton(
-            text: AppLocalizations.of(context)!.sendVerificationEmail,
-            press: sendVerificationEmailButtonCallback,
-          ),
-          SizedBox(height: SizeConfig.screenHeight! * 0.1),
-          const NoAccountText(),
-          SizedBox(height: getProportionateScreenHeight(30)),
-        ],
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+            horizontal: getProportionateScreenWidth(screenPadding)),
+        child: Column(
+          children: [
+            buildEmailFormField(),
+            SizedBox(height: getProportionateScreenHeight(30)),
+            SizedBox(height: SizeConfig.screenHeight! * 0.1),
+            DefaultButton(
+              text: AppLocalizations.of(context)!.sendVerificationEmail,
+              press: sendVerificationEmailButtonCallback,
+            ),
+            SizedBox(height: SizeConfig.screenHeight! * 0.1),
+            const NoAccountText(),
+            SizedBox(height: getProportionateScreenHeight(30)),
+          ],
+        ),
       ),
     );
   }
