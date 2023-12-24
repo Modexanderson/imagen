@@ -169,7 +169,7 @@ class _SignInFormState extends State<SignInForm> {
       } on MessagedFirebaseAuthException catch (e) {
         snackbarMessage = e.message;
       } catch (e) {
-        snackbarMessage = e.toString();
+        // snackbarMessage = e.toString();
       } finally {
         Logger().i(snackbarMessage);
         ShowSnackBar().showSnackBar(context, snackbarMessage!);

@@ -199,7 +199,7 @@ class _SignUpFormState extends State<SignUpForm> {
           context: context,
           builder: (context) {
             return AsyncProgressDialog(
-              authService.signUp(
+              authService.signUp(context,
                 email: emailFieldController.text,
                 password: passwordFieldController.text,
               ),
@@ -212,13 +212,13 @@ class _SignUpFormState extends State<SignUpForm> {
           snackbarMessage =
               AppLocalizations.of(context)!.successfulRegistration;
         } else {
-          throw FirebaseSignUpAuthUnknownReasonFailureException();
+          throw FirebaseSignUpAuthUnknownReasonFailureException(context);
         }
       } on MessagedFirebaseAuthException catch (e) {
         snackbarMessage = e.message;
       } catch (e) {
         snackbarMessage = e.toString();
-        throw FirebaseSignUpAuthUnknownReasonFailureException(
+        throw FirebaseSignUpAuthUnknownReasonFailureException( context,
             message: snackbarMessage);
       } finally {
         Logger().i(snackbarMessage);

@@ -185,7 +185,7 @@ class AuthentificationService {
   // }
 
 
-Future<bool> signUp({String? email, String? password}) async {
+Future<bool> signUp(BuildContext context, {String? email, String? password}) async {
   try {
     final UserCredential userCredential =
         await firebaseAuth.createUserWithEmailAndPassword(
@@ -201,13 +201,13 @@ Future<bool> signUp({String? email, String? password}) async {
   } on FirebaseAuthException catch (e) {
     switch (e.code) {
       case GET_EMAIL_ALREADY_IN_USE_EXCEPTION_CODE:
-        throw FirebaseSignUpAuthEmailAlreadyInUseException();
+        throw FirebaseSignUpAuthEmailAlreadyInUseException(context);
       case GET_INVALID_EMAIL_EXCEPTION_CODE:
-        throw FirebaseSignUpAuthInvalidEmailException();
+        throw FirebaseSignUpAuthInvalidEmailException(context);
       case GET_OPERATION_NOT_ALLOWED_EXCEPTION_CODE:
-        throw FirebaseSignUpAuthOperationNotAllowedException();
+        throw FirebaseSignUpAuthOperationNotAllowedException(context);
       case GET_WEAK_PASSWORD_EXCEPTION_CODE:
-        throw FirebaseSignUpAuthWeakPasswordException();
+        throw FirebaseSignUpAuthWeakPasswordException(context);
     }
     // Return false if the switch block doesn't match any case
     return false;

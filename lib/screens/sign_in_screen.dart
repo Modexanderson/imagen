@@ -46,7 +46,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
       if (signUpStatus == true) {
       } else {
-        throw FirebaseSignUpAuthUnknownReasonFailureException();
+        throw FirebaseSignUpAuthUnknownReasonFailureException(context);
       }
     } on MessagedFirebaseAuthException catch (e) {
       ShowSnackBar().showSnackBar(context, e.message);
@@ -85,7 +85,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
       if (signUpStatus == true) {
       } else {
-        throw FirebaseSignUpAuthUnknownReasonFailureException();
+        throw FirebaseSignUpAuthUnknownReasonFailureException(context);
       }
     } on MessagedFirebaseAuthException catch (e) {
       ShowSnackBar().showSnackBar(context, e.message);
