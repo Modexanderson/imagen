@@ -11,6 +11,7 @@ import '../services/authentification_service.dart';
 import '../widgets/async_progress_dialog.dart';
 import '../widgets/sign_up_form.dart';
 import '../widgets/snack_bar.dart';
+import 'home_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -43,6 +44,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
       );
 
       if (signUpStatus == true) {
+        // Navigate to the home screen or any other screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
       } else {
         throw FirebaseSignUpAuthUnknownReasonFailureException();
       }
@@ -81,6 +87,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
       );
 
       if (signUpStatus == true) {
+        // Navigate to the home screen or any other screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
       } else {
         throw FirebaseSignUpAuthUnknownReasonFailureException();
       }
@@ -113,7 +124,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(
-                horizontal: getProportionateScreenWidth(screenPadding)),
+              horizontal: getProportionateScreenWidth(screenPadding)),
           child: SingleChildScrollView(
             child: SizedBox(
               width: double.infinity,

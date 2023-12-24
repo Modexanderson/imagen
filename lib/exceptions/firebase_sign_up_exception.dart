@@ -37,6 +37,6 @@ class FirebaseSignUpAuthWeakPasswordException
 class FirebaseSignUpAuthUnknownReasonFailureException
     extends FirebaseSignUpAuthException {
   FirebaseSignUpAuthUnknownReasonFailureException(
-      {String message = "Can't register due to unknown reason"})
+      {String message = "Can't sign in due to unknown reason"})
       : super(message: message);
 }

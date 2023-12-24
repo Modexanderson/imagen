@@ -18,9 +18,21 @@ class AppTheme {
         selectionColor: currentTheme.currentColor(),
       ),
       inputDecorationTheme: InputDecorationTheme(
-        focusedBorder: UnderlineInputBorder(
+        focusedBorder: OutlineInputBorder(
+           borderRadius: BorderRadius.circular(10.0),
           borderSide:
-              BorderSide(width: 1.5, color: currentTheme.currentColor()),
+              const BorderSide(width: 1.5, color: Colors.black),
+        ),
+         border: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.black), // Set your border color here
+          ),
+          errorBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.red),
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.red),
+          borderRadius: BorderRadius.circular(10.0),
         ),
       ),
       listTileTheme: ListTileThemeData(
@@ -75,9 +87,21 @@ class AppTheme {
         selectionColor: currentTheme.currentColor(),
       ),
       inputDecorationTheme: InputDecorationTheme(
-        focusedBorder: UnderlineInputBorder(
+        focusedBorder: OutlineInputBorder(
+           borderRadius: BorderRadius.circular(10.0),
           borderSide:
-              BorderSide(width: 1.5, color: currentTheme.currentColor()),
+              const BorderSide(width: 1.5, color: Colors.white),
+        ),
+         border: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.white), // Set your border color here
+          ),
+          errorBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.red),
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.red),
+          borderRadius: BorderRadius.circular(10.0),
         ),
       ),
       listTileTheme: ListTileThemeData(

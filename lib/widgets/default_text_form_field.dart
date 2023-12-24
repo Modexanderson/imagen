@@ -10,7 +10,8 @@ class DefaultTextFormField extends StatelessWidget {
   final String? Function(String?)? validator;
   final AutovalidateMode autovalidateMode;
 
-  const DefaultTextFormField({super.key, 
+  const DefaultTextFormField({
+    super.key,
     required this.controller,
     required this.hintText,
     required this.labelText,
@@ -32,21 +33,8 @@ class DefaultTextFormField extends StatelessWidget {
         labelText: labelText,
         suffixIcon: suffixIcon,
         floatingLabelBehavior: FloatingLabelBehavior.always,
-        contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.red),
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.red),
-          borderRadius: BorderRadius.circular(10.0),
-        ),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
       ),
       validator: validator,
       autovalidateMode: autovalidateMode,
