@@ -3,6 +3,8 @@ import 'package:imagen/widgets/snack_bar.dart';
 import 'package:rate_my_app/rate_my_app.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import 'default_progress_indicator.dart';
+
 class RateAppInitWidget extends StatefulWidget {
   final Widget Function(RateMyApp) builder;
 
@@ -46,7 +48,7 @@ class _RateAppInitWidgetState extends State<RateAppInitWidget> {
       },
       builder: (context) => rateMyApp == null
           ? const Center(
-              child: CircularProgressIndicator(),
+              child: DefaultProgressIndicator(),
             )
           : widget.builder(rateMyApp!),
     );

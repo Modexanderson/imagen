@@ -31,12 +31,14 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MultiProvider(
-    providers: [
-      ChangeNotifierProvider(create: (context) => BinancePayState()),
-      ChangeNotifierProvider(create: (context) => RenenueCatState()),
-      // Add other providers as needed
-    ],
-    child: const MyApp(),
-  ));
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => BinancePayState()),
+        ChangeNotifierProvider(create: (context) => RenenueCatState()),
+        // Add other providers as needed
+      ],
+      child: const MyApp(),
+    ),
+  );
 }

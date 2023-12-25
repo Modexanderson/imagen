@@ -12,7 +12,7 @@ class AppDrawer extends StatelessWidget {
   final String appVersion;
   AppDrawer({required this.appVersion, super.key});
 
-  String userEmail = AuthentificationService().currentUser.email!;
+  final String userEmail = AuthentificationService().currentUser.email!;
   void _launchPrivacyPolicy() async {
     const _privacyPolicy =
         'https://www.privacypolicies.com/live/6913039d-ae2e-4e47-9937-de2ea5fc269d';

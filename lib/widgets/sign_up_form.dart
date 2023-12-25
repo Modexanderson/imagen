@@ -8,8 +8,6 @@ import '../exceptions/messaged_firebase_auth_exception.dart';
 import '../models/constants.dart';
 import '../models/size_config.dart';
 import '../services/authentification_service.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../services/database/user_database_helper.dart';
 import 'async_progress_dialog.dart';
 import 'default_button.dart';
 import 'default_text_form_field.dart';

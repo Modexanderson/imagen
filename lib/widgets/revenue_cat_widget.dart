@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:imagen/widgets/snack_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -10,6 +9,7 @@ import 'package:uuid/uuid.dart';
 import '../api/purchase_api.dart';
 import '../services/authentification_service.dart';
 import '../services/database/user_database_helper.dart';
+import 'default_progress_indicator.dart';
 
 class RenenueCatState extends ChangeNotifier {
   double selectedAmount = 5.0;
@@ -150,7 +150,7 @@ Widget revenueCatWidget(List<Package> packages) {
                             content: const Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                CircularProgressIndicator(),
+                                DefaultProgressIndicator(),
                                 
                               ],
                             ),

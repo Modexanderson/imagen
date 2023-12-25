@@ -14,7 +14,6 @@ import 'package:path_provider/path_provider.dart';
 import 'models/app_theme.dart';
 import 'models/config.dart';
 import 'widgets/authentification_wrapper.dart';
-import 'widgets/rate_app_init_widget.dart';
 
 Future<void> openHiveBox(String boxName, {bool limit = false}) async {
   final box = await Hive.openBox(boxName).onError((error, stackTrace) async {

@@ -64,7 +64,7 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
       validator: (value) {
         if (value!.isEmpty) {
           return AppStrings.getEmailNullError(context);
-          ;
+          
         } else if (!emailValidatorRegExp.hasMatch(value)) {
           return AppStrings.getInvalidEmailError(context);
         }

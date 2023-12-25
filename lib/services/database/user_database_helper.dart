@@ -1,7 +1,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:purchases_flutter/object_wrappers.dart';
-import 'package:provider/provider.dart';
 
 import '../../api/purchase_api.dart';
 import '../authentification_service.dart';

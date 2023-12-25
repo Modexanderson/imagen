@@ -11,7 +11,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:imagen/widgets/default_button.dart';
-import 'package:lottie/lottie.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:upgrader/upgrader.dart';
@@ -21,10 +20,12 @@ import '../bloc/image_cubit.dart';
 
 import '../services/authentification_service.dart';
 import '../services/database/user_database_helper.dart';
-import '../widgets/async_progress_dialog.dart';
 import '../widgets/binance_pay_widget.dart';
+import '../widgets/default_error_indicator.dart';
+import '../widgets/default_progress_indicator.dart';
 import '../widgets/default_text_form_field.dart';
 import '../widgets/drawer.dart';
+import '../widgets/planet_spinner_animation.dart';
 import '../widgets/revenue_cat_widget.dart';
 import '../widgets/show_confirmation_dialog.dart';
 import '../widgets/snack_bar.dart';
@@ -301,7 +302,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       // While waiting for data, you can show a loading indicator or a default value.
-                      return const CircularProgressIndicator();
+                      return const DefaultProgressIndicator();
                     }
 
                     if (snapshot.hasError) {
@@ -634,16 +635,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               // mainAxisAlignment: MainAxisAlignment.center,
                               // crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Lottie.asset(
-                                  'assets/animations/infinite-loader.json',
-                                  frameRate: FrameRate(20),
-                                  alignment: Alignment.center,
-                                  height: 300,
-                                  repeat: true,
-                                  animate: true,
-                                ),
+                                PlanetSpinnerAnimation(),
                                 Text(
-                                  AppLocalizations.of(context)!.creatingProcess,
+                                  '${AppLocalizations.of(context)!.generatingImage}...',
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 16,
@@ -658,7 +652,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       //
                                     },
                                     child: Text(
-                                        AppLocalizations.of(context)!.cancel))
+                                        AppLocalizations.of(context)!.cancel, style: const TextStyle(decoration: TextDecoration.underline),))
                               ],
                             );
                           } else if (state is ImageStopped) {
@@ -746,12 +740,19 @@ class _HomeScreenState extends State<HomeScreen> {
                             return Center(
                               child: Padding(
                                 padding: const EdgeInsets.all(50.0),
-                                child: Text(
-                                  AppLocalizations.of(context)!.resultsNotFound,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                  ),
+                                child: Column(
+                                  children: [
+                                    const DefaultErrorIndicator(),
+                                    // SizedBox(height: 10,),
+                                    Text(
+                                      AppLocalizations.of(context)!
+                                          .failedGenerationTryAgain,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             );

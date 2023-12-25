@@ -5,19 +5,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../models/config.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:uuid/uuid.dart';
-// import 'dart:convert';
-// import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 import '../models/.env.dart';
 import 'package:imagen/widgets/snack_bar.dart';
 import '../services/authentification_service.dart';
 import '../services/database/user_database_helper.dart';
+import 'default_progress_indicator.dart';
 
 class BinancePayState extends ChangeNotifier {
   double selectedAmount = 5.0;
@@ -266,7 +264,7 @@ Widget binancePayWidget() {
                           content: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              CircularProgressIndicator(),
+                              DefaultProgressIndicator(),
                               SizedBox(height: 16),
                               Text(AppLocalizations.of(context)!.creatingBinanceOrder),
                             ],
