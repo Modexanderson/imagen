@@ -66,14 +66,19 @@ Future<void> createBinancePayOrder(BuildContext context, double amount) async {
   try {
     if (response.status == 'SUCCESS') {
       String deepLink = response.data!.deeplink;
+      String universalLink = response.data!.universalUrl;
 
       if (await canLaunchUrl(Uri.parse(deepLink))) {
         await launchUrl(Uri.parse(deepLink));
         print(deepLink);
       } else {
-        ShowSnackBar()
-            .showSnackBar(context, AppLocalizations.of(context)!.couldNotLaunchBinance);
-        print('Could not launch $deepLink');
+        if (await canLaunchUrl(Uri.parse(universalLink))) {
+          await launchUrl(Uri.parse(universalLink));
+        } else {
+          ShowSnackBar().showSnackBar(
+              context, AppLocalizations.of(context)!.couldNotLaunchBinance);
+          print('Could not launch $deepLink');
+        }
       }
 
       // Query the order status using the prepayId
@@ -116,7 +121,8 @@ Future<void> createBinancePayOrder(BuildContext context, double amount) async {
           break;
       }
     } else {
-      ShowSnackBar().showSnackBar(context, AppLocalizations.of(context)!.errorCreatingBinanceOrder);
+      ShowSnackBar().showSnackBar(
+          context, AppLocalizations.of(context)!.errorCreatingBinanceOrder);
       print('Error creating Binance Pay order: ${response.errorMessage}');
     }
   } catch (error) {
@@ -136,54 +142,55 @@ Widget binancePayWidget() {
   return Consumer<BinancePayState>(
     builder: (context, state, _) {
       return AlertDialog(
-        title:  Text(AppLocalizations.of(context)!.selectAmount,),
+        title: Text(
+          AppLocalizations.of(context)!.selectAmount,
+        ),
         content: SizedBox(
           width: MediaQuery.of(context).size.width * 0.5,
           child: SingleChildScrollView(
             child: Column(
               // mainAxisSize: MainAxisSize.min,
-              children: [ GridView.count(
-                        shrinkWrap: true,
-                        crossAxisCount: 3,
-                        crossAxisSpacing: 10.0,
-                        mainAxisSpacing: 10.0,
-                        childAspectRatio: (70 / 70),
-                        children: [
-                          for (var amount in [5, 10, 15, 20, 50, 100])
-                            GestureDetector(
-                              onTap: () {
-                                state.updateSelectedAmount(amount.toDouble());
-                                state.customAmountController.clear();
-                              },
-                              child: SizedBox(
-                                width: 150,
-                                height: 60,
-                                child: Card(
-                                  color: state.selectedAmount ==
-                                          amount.toDouble()
-                                      ? Theme.of(context).appBarTheme.backgroundColor
-                                      : Colors.white,
-                                  child: SizedBox(
-                                    height: 50,
-                                    child: Center(
-                                      child: Text(
-                                        '\$ $amount',
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          color: state.selectedAmount ==
-                                                  amount.toDouble()
-                                              ? Colors.white
-                                              : Colors.black,
-                                        ),
-                                      ),
-                                    ),
+              children: [
+                GridView.count(
+                  shrinkWrap: true,
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 10.0,
+                  mainAxisSpacing: 10.0,
+                  childAspectRatio: (70 / 70),
+                  children: [
+                    for (var amount in [5, 10, 15, 20, 50, 100])
+                      GestureDetector(
+                        onTap: () {
+                          state.updateSelectedAmount(amount.toDouble());
+                          state.customAmountController.clear();
+                        },
+                        child: SizedBox(
+                          width: 150,
+                          height: 60,
+                          child: Card(
+                            color: state.selectedAmount == amount.toDouble()
+                                ? Theme.of(context).appBarTheme.backgroundColor
+                                : Colors.white,
+                            child: SizedBox(
+                              height: 50,
+                              child: Center(
+                                child: Text(
+                                  '\$ $amount',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color: state.selectedAmount ==
+                                            amount.toDouble()
+                                        ? Colors.white
+                                        : Colors.black,
                                   ),
                                 ),
                               ),
                             ),
-                        ],
+                          ),
+                        ),
                       ),
-                    
+                  ],
+                ),
                 const SizedBox(height: 10),
                 CupertinoTextField(
                   controller: state.customAmountController,
@@ -238,7 +245,7 @@ Widget binancePayWidget() {
               ),
               Expanded(
                 child: CupertinoDialogAction(
-                  child:  Text(AppLocalizations.of(context)!.confirm),
+                  child: Text(AppLocalizations.of(context)!.confirm),
                   onPressed: () async {
                     // Create a GlobalKey for the loading spinner dialog
                     final GlobalKey<State> key = GlobalKey<State>();
@@ -247,9 +254,9 @@ Widget binancePayWidget() {
                     if (state.customAmountController.text.isEmpty) {
                       amount = state.selectedAmount;
                     } else {
-                      amount = double.tryParse(
-                              state.customAmountController.text) ??
-                          0.0;
+                      amount =
+                          double.tryParse(state.customAmountController.text) ??
+                              0.0;
                       state.updateSelectedAmount(
                           amount); // Deselect the amount in the card
                     }
@@ -266,7 +273,8 @@ Widget binancePayWidget() {
                             children: [
                               DefaultProgressIndicator(),
                               SizedBox(height: 16),
-                              Text(AppLocalizations.of(context)!.creatingBinanceOrder),
+                              Text(AppLocalizations.of(context)!
+                                  .creatingBinanceOrder),
                             ],
                           ),
                         );

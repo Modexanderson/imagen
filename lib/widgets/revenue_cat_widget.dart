@@ -126,19 +126,9 @@ Widget revenueCatWidget(List<Package> packages) {
                   child: CupertinoDialogAction(
                     child: Text(AppLocalizations.of(context)!.confirm),
                     onPressed: () async {
-                      // Create a GlobalKey for the loading spinner dialog
                       final GlobalKey<State> key = GlobalKey<State>();
 
-                      // var amount = 0.0;
-                      // if (state.customAmountController.text.isEmpty) {
-                      //   amount = state.selectedAmount;
-                      // } else {
-                      //   amount = double.tryParse(
-                      //           state.customAmountController.text) ??
-                      //       0.0;
-                      //   state.updateSelectedAmount(
-                      //       amount); // Deselect the amount in the card
-                      // }
+                     
                       Navigator.of(context).pop();
                       // Show loading spinner while creating Binance Pay order
                       showDialog(
@@ -194,12 +184,7 @@ Widget buildPackage(BuildContext context, Package package) {
       width: 150,
       height: 60,
       child: Card(
-        // color:
-        // state.selectedAmount ==
-        //         amount.toDouble()
-        //     ?
-        //      Colors.blue
-        //     : Colors.white,
+        
         child: SizedBox(
           height: 50,
           child: Center(
@@ -207,10 +192,7 @@ Widget buildPackage(BuildContext context, Package package) {
               product.title,
               style: const TextStyle(
                 fontSize: 20,
-                // color: state.selectedAmount ==
-                //         amount.toDouble()
-                //     ? Colors.white
-                //     : Colors.black,
+               
               ),
             ),
           ),

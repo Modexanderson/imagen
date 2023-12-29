@@ -161,6 +161,8 @@
   "@finish": {},
   "failedGeneration": "Image generation failed. Credits not deducted.",
   "@failedGeneration": {},
+  "sendingVerificationEmailFailed": "Failed to send verification email.",
+  "@sendingVerificationEmailFailed": {},
   "forgotPassword": "Forgot Password",
   "@forgotPassword": {},
   "failedGenerationTryAgain": "Image generation failed, try again.",

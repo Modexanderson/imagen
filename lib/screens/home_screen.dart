@@ -514,10 +514,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   AuthentificationService().currentUserVerified;
                               if (!allowed) {
                                 final reverify = await showConfirmationDialog(
-                                  context,
-                                  "You haven't verified your email address. This action is only allowed for verified users.",
-                                  positiveResponse: "Resend verification email",
-                                  negativeResponse: "Go back",
+                                  context, AppLocalizations.of(context)!.emailVerificationMessage,
+                                  positiveResponse: AppLocalizations.of(context)!.resendVerificationEmail,
+                                  negativeResponse: AppLocalizations.of(context)!.goBack,
                                 );
 
                                 if (reverify) {
@@ -528,14 +527,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                     if (verificationResult) {
                                       ShowSnackBar().showSnackBar(
-                                        context,
-                                        "Verification email sent successfully",
+                                        context, AppLocalizations.of(context)!.verificationEmailSuccessful,
                                       );
                                     } else {
                                       // Handle case where verification email sending failed
                                       ShowSnackBar().showSnackBar(
-                                        context,
-                                        "Failed to send verification email",
+                                        context, AppLocalizations.of(context)!.sendingVerificationEmailFailed,
                                       );
                                     }
                                   } catch (error) {
@@ -543,8 +540,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     print(
                                         'Error during email verification: $error');
                                     ShowSnackBar().showSnackBar(
-                                      context,
-                                      "An error occurred during email verification",
+                                      context, AppLocalizations.of(context)!.verificationEmailError,
                                     );
                                   }
                                 }
@@ -635,7 +631,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               // mainAxisAlignment: MainAxisAlignment.center,
                               // crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                PlanetSpinnerAnimation(),
+                                const PlanetSpinnerAnimation(),
                                 Text(
                                   '${AppLocalizations.of(context)!.generatingImage}...',
                                   textAlign: TextAlign.center,
@@ -741,12 +737,15 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Padding(
                                 padding: const EdgeInsets.all(50.0),
                                 child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                              // crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     const DefaultErrorIndicator(),
                                     // SizedBox(height: 10,),
                                     Text(
                                       AppLocalizations.of(context)!
                                           .failedGenerationTryAgain,
+                                          textAlign: TextAlign.center,
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 20,
