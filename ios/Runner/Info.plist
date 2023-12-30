@@ -37,6 +37,10 @@
 		</array>
 		<key>CFBundleVersion</key>
 		<string>$(FLUTTER_BUILD_NUMBER)</string>
+		<key>GIDClientID</key>
+		<!-- TODO Replace this value: -->
+		<!-- Copied from GoogleService-Info.plist key CLIENT_ID -->
+		<string>302883549378-m2nivt2kpudb8udhnd3rqoov2ki4p4a9.apps.googleusercontent.com</string>
 		<key>LSApplicationQueriesSchemes</key>
 		<array>
 			<string>itms</string>
