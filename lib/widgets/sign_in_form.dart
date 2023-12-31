@@ -84,20 +84,19 @@ class _SignInFormState extends State<SignInForm> {
     return DefaultTextFormField(
       controller: passwordFieldController,
       obscureText: !isPasswordVisible,
-      
-        hintText: AppLocalizations.of(context)!.enterPassword,
-        labelText: AppLocalizations.of(context)!.password,
-        suffixIcon: GestureDetector(
-          onTap: () {
-            // Toggle the visibility of the password
-            setState(() {
-              isPasswordVisible = !isPasswordVisible;
-            });
-          },
-          child: Icon(
-            isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-          ),
+      hintText: AppLocalizations.of(context)!.enterPassword,
+      labelText: AppLocalizations.of(context)!.password,
+      suffixIcon: GestureDetector(
+        onTap: () {
+          // Toggle the visibility of the password
+          setState(() {
+            isPasswordVisible = !isPasswordVisible;
+          });
+        },
+        child: Icon(
+          isPasswordVisible ? Icons.visibility : Icons.visibility_off,
         ),
+      ),
       validator: (value) {
         if (passwordFieldController.text.isEmpty) {
           return AppStrings.getPassNullError(context);
@@ -114,12 +113,11 @@ class _SignInFormState extends State<SignInForm> {
     return DefaultTextFormField(
       controller: emailFieldController,
       keyboardType: TextInputType.emailAddress,
-      
-        hintText: AppLocalizations.of(context)!.enterEmail,
-        labelText: AppLocalizations.of(context)!.email,
-        suffixIcon: const Icon(
-          Icons.mail,
-        ),
+      hintText: AppLocalizations.of(context)!.enterEmail,
+      labelText: AppLocalizations.of(context)!.email,
+      suffixIcon: const Icon(
+        Icons.mail,
+      ),
       validator: (value) {
         if (emailFieldController.text.isEmpty) {
           return AppStrings.getEmailNullError(context);
@@ -140,6 +138,7 @@ class _SignInFormState extends State<SignInForm> {
       String? snackbarMessage;
       try {
         final signInFuture = authService.signIn(
+          context,
           email: emailFieldController.text.trim(),
           password: passwordFieldController.text.trim(),
         );

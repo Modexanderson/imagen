@@ -29,7 +29,7 @@ class _SignInScreenState extends State<SignInScreen> {
     bool signUpStatus = false;
     String? snackbarMessage;
     try {
-      final signUpFuture = authService.signUpWithGoogle();
+      final signUpFuture = authService.signUpWithGoogle(context);
       signUpFuture.then((value) {
         print('Value from signUpFuture: $value');
         signUpStatus = value;
@@ -68,7 +68,7 @@ class _SignInScreenState extends State<SignInScreen> {
     bool signUpStatus = false;
     String? snackbarMessage;
     try {
-      final signUpFuture = authService.signUpWithApple();
+      final signUpFuture = authService.signUpWithApple(context);
       signUpFuture.then((value) {
         print('Value from signUpFuture: $value');
         signUpStatus = value;

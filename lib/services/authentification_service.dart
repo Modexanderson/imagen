@@ -11,67 +11,46 @@ import '../exceptions/firebase_sign_in_exceptions.dart';
 import '../exceptions/firebase_sign_up_exception.dart';
 import '../exceptions/messaged_firebase_auth_exception.dart';
 import '../exceptions/reauth_exceptions.dart';
+import '../widgets/snack_bar.dart';
 import 'database/user_database_helper.dart';
 
 class AuthentificationService {
-  // static const String USER_NOT_FOUND_EXCEPTION_CODE = "user-not-found";
-  static String GET_USER_NOT_FOUND_EXCEPTION_CODE(BuildContext context) {
-    return AppLocalizations.of(context)!.userNotFoundException;
-  }
-  // static const String WRONG_PASSWORD_EXCEPTION_CODE = "wrong-password";
-  static String GET_WRONG_PASSWORD_EXCEPTION_CODE(BuildContext context) {
-    return AppLocalizations.of(context)!.wrongPasswordException;
-  }
-  // static const String TOO_MANY_REQUESTS_EXCEPTION_CODE = 'too-many-requests';
-  static String GET_TOO_MANY_REQUESTS_EXCEPTION_CODE(BuildContext context) {
-    return AppLocalizations.of(context)!.tooManyRequestException;
-  }
-  // static const String EMAIL_ALREADY_IN_USE_EXCEPTION_CODE =
-  //     "email-already-in-use";
-  static String GET_EMAIL_ALREADY_IN_USE_EXCEPTION_CODE(BuildContext context) {
-    return AppLocalizations.of(context)!.emailAlreadyInUseException;
-  }
-  // static const String OPERATION_NOT_ALLOWED_EXCEPTION_CODE =
-  //     "operation-not-allowed";
-  static String GET_OPERATION_NOT_ALLOWED_EXCEPTION_CODE(BuildContext context) {
-    return AppLocalizations.of(context)!.operationNotAllowException;
-  }
-  // static const String WEAK_PASSWORD_EXCEPTION_CODE = "weak-password";
-  static String GET_WEAK_PASSWORD_EXCEPTION_CODE(BuildContext context) {
-    return AppLocalizations.of(context)!.weakPasswordException;
-  }
-  // static const String USER_MISMATCH_EXCEPTION_CODE = "user-mismatch";
-  static String GET_USER_MISMATCH_EXCEPTION_CODE(BuildContext context) {
-    return AppLocalizations.of(context)!.userMismatchException;
-  }
-  // static const String INVALID_CREDENTIALS_EXCEPTION_CODE = "invalid-credential";
-  static String GET_INVALID_CREDENTIAL_EXCEPTION_CODE(BuildContext context) {
-    return AppLocalizations.of(context)!.invalidCredentialException;
-  }
-  // static const String INVALID_EMAIL_EXCEPTION_CODE = "invalid-email";
-  static String GET_INVALID_EMAIL_EXCEPTION_CODE(BuildContext context) {
-    return AppLocalizations.of(context)!.invalidEmailException;
-  }
-  // static const String USER_DISABLED_EXCEPTION_CODE = "user-disabled";
-  static String GET_USER_DISABLED_EXCEPTION_CODE(BuildContext context) {
-    return AppLocalizations.of(context)!.userDisabledException;
-  }
-  // static const String INVALID_VERIFICATION_CODE_EXCEPTION_CODE =
-  //     "invalid-verification-code";
-  static String GET_INVALID_VERIFICATION_CODE_EXCEPTION_CODE(BuildContext context) {
-    return AppLocalizations.of(context)!.invalidVerificationCodeException;
-  }
-  // static const String INVALID_VERIFICATION_ID_EXCEPTION_CODE =
-  //     "invalid-verification-id";
-  static String GET_INVALID_VERIFICATION_ID_EXCEPTION_CODE(BuildContext context) {
-    return AppLocalizations.of(context)!.invalidVerificationIdException;
-  }
-  // static const String REQUIRES_RECENT_LOGIN_EXCEPTION_CODE =
-  //     "requires-recent-login";
-  static String GET_REQUIRES_RECENT_LOGIN_EXCEPTION_CODE(BuildContext context) {
-    return AppLocalizations.of(context)!.requiredRecentLoginException;
-  }
 
+  String getLocalizedErrorMessage(String errorCode, BuildContext context) {
+    switch (errorCode) {
+      case 'user-not-found':
+        return AppLocalizations.of(context)!.userNotFoundException;
+      case 'wrong-password':
+        return AppLocalizations.of(context)!.wrongPasswordException;
+      case 'too-many-requests':
+        return AppLocalizations.of(context)!.tooManyRequestException;
+      case 'email-already-in-use':
+            return AppLocalizations.of(context)!.emailAlreadyInUseException;
+      case 'operation-not-allowed':
+        return AppLocalizations.of(context)!.operationNotAllowException;
+      case 'weak-password':
+        return AppLocalizations.of(context)!.weakPasswordException;
+      case 'user-mismatch':
+        return AppLocalizations.of(context)!.userMismatchException;
+      case 'invalid-credential':
+        return AppLocalizations.of(context)!.invalidCredentialException;
+      case 'invalid-email':
+        return AppLocalizations.of(context)!.invalidEmailException;
+      case 'invalid-verification-code':
+        return AppLocalizations.of(context)!.invalidVerificationCodeException;
+      case 'user-disabled':
+        return AppLocalizations.of(context)!.userDisabledException;
+      case 'invalid-verification-id':
+        return AppLocalizations.of(context)!.invalidVerificationIdException;
+      case 'requires-recent-login':
+        return AppLocalizations.of(context)!.requiredRecentLoginException;
+     
+      // Add more cases as needed for specific error messages
+      default:
+        return AppLocalizations.of(context)!.error;
+    }
+  }
+ 
   FirebaseAuth? _firebaseAuth;
 
   AuthentificationService._privateConstructor();
@@ -96,7 +75,7 @@ class AuthentificationService {
     await signOut();
   }
 
-  Future<bool> reauthCurrentUser(password) async {
+  Future<bool> reauthCurrentUser(BuildContext context, password) async {
     try {
       UserCredential userCredential =
           await firebaseAuth.signInWithEmailAndPassword(
@@ -104,18 +83,15 @@ class AuthentificationService {
       userCredential = await currentUser
           .reauthenticateWithCredential(userCredential.credential!);
     } on FirebaseAuthException catch (e) {
-      if (e.code == GET_WRONG_PASSWORD_EXCEPTION_CODE) {
-        throw FirebaseSignInAuthWrongPasswordException();
-      } else {
-        throw FirebaseSignInAuthException(message: e.code);
-      }
+      String errorMessage = getLocalizedErrorMessage(e.code, context);
+      ShowSnackBar().showSnackBar(context, errorMessage);
     } catch (e) {
       throw FirebaseReauthUnknownReasonFailureException(message: e.toString());
     }
     return true;
   }
 
-  Future<bool> signIn({String? email, String? password}) async {
+  Future<bool> signIn(BuildContext context, {String? email, String? password}) async {
     try {
       final UserCredential userCredential =
           await firebaseAuth.signInWithEmailAndPassword(
@@ -129,25 +105,9 @@ class AuthentificationService {
     } on MessagedFirebaseAuthException {
       rethrow;
     } on FirebaseAuthException catch (e) {
-      switch (e.code) {
-        case GET_INVALID_EMAIL_EXCEPTION_CODE:
-          throw FirebaseSignInAuthInvalidEmailException();
-
-        case GET_USER_DISABLED_EXCEPTION_CODE:
-          throw FirebaseSignInAuthUserDisabledException();
-
-        case GET_USER_NOT_FOUND_EXCEPTION_CODE:
-          throw FirebaseSignInAuthUserNotFoundException();
-
-        case GET_WRONG_PASSWORD_EXCEPTION_CODE:
-          throw FirebaseSignInAuthWrongPasswordException();
-
-        case GET_TOO_MANY_REQUESTS_EXCEPTION_CODE:
-          throw FirebaseTooManyRequestsException();
-
-        default:
-          throw FirebaseSignInAuthException(message: e.code);
-      }
+      String errorMessage = getLocalizedErrorMessage(e.code, context);
+      ShowSnackBar().showSnackBar(context, errorMessage);
+      return false;
     } catch (e) {
       rethrow;
     }
@@ -196,20 +156,9 @@ Future<bool> signUp(BuildContext context, {String? email, String? password}) asy
     }
     await UserDatabaseHelper().createNewUser(uid);
     return true;
-  } on MessagedFirebaseAuthException {
-    rethrow;
-  } on FirebaseAuthException catch (e) {
-    switch (e.code) {
-      case GET_EMAIL_ALREADY_IN_USE_EXCEPTION_CODE:
-        throw FirebaseSignUpAuthEmailAlreadyInUseException(context);
-      case GET_INVALID_EMAIL_EXCEPTION_CODE:
-        throw FirebaseSignUpAuthInvalidEmailException(context);
-      case GET_OPERATION_NOT_ALLOWED_EXCEPTION_CODE:
-        throw FirebaseSignUpAuthOperationNotAllowedException(context);
-      case GET_WEAK_PASSWORD_EXCEPTION_CODE:
-        throw FirebaseSignUpAuthWeakPasswordException(context);
-    }
-    // Return false if the switch block doesn't match any case
+  }on FirebaseAuthException catch (e) {
+     String errorMessage = getLocalizedErrorMessage(e.code, context);
+      ShowSnackBar().showSnackBar(context, errorMessage);
     return false;
   } catch (e) {
     rethrow;
@@ -259,7 +208,7 @@ Future<bool> signUp(BuildContext context, {String? email, String? password}) asy
   //   }
   // }
 
-  Future<bool> signUpWithGoogle() async {
+  Future<bool> signUpWithGoogle( BuildContext context) async {
   try {
     final GoogleSignInAccount? googleSignInAccount =
         await GoogleSignIn().signIn();
@@ -293,7 +242,8 @@ Future<bool> signUp(BuildContext context, {String? email, String? password}) asy
 
     return true;
   } on FirebaseAuthException catch (e) {
-    // Handle FirebaseAuthException
+    String errorMessage = getLocalizedErrorMessage(e.code, context);
+      ShowSnackBar().showSnackBar(context, errorMessage);
     print(e.message);
     return false;
   } catch (e) {
@@ -341,7 +291,7 @@ Future<bool> signUp(BuildContext context, {String? email, String? password}) asy
   //   }
   // }
 
-  Future<bool> signUpWithApple() async {
+  Future<bool> signUpWithApple(BuildContext context) async {
     try {
       final AuthorizationCredentialAppleID appleCredential =
           await SignInWithApple.getAppleIDCredential(scopes: [
@@ -372,7 +322,8 @@ Future<bool> signUp(BuildContext context, {String? email, String? password}) asy
 
       return true;
     } on FirebaseAuthException catch (e) {
-      // Handle FirebaseAuthException
+      String errorMessage = getLocalizedErrorMessage(e.code, context);
+      ShowSnackBar().showSnackBar(context, errorMessage);
       print(e.message);
       return false;
     } catch (e) {
@@ -409,30 +360,28 @@ Future<bool> signUp(BuildContext context, {String? email, String? password}) asy
     await currentUser.updateProfile(displayName: updatedDisplayName);
   }
 
-  Future<bool> resetPasswordForEmail(String email) async {
+  Future<bool> resetPasswordForEmail(BuildContext context, String email) async {
     try {
       await firebaseAuth.sendPasswordResetEmail(email: email);
       return true;
     } on MessagedFirebaseAuthException {
       rethrow;
     } on FirebaseAuthException catch (e) {
-      if (e.code == GET_USER_NOT_FOUND_EXCEPTION_CODE) {
-        throw FirebaseCredentialActionAuthUserNotFoundException();
-      } else {
-        throw FirebaseCredentialActionAuthException(message: e.code);
-      }
+      String errorMessage = getLocalizedErrorMessage(e.code, context);
+      ShowSnackBar().showSnackBar(context, errorMessage);
+      return false;
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<bool> changePasswordForCurrentUser(
+  Future<bool> changePasswordForCurrentUser( BuildContext context,
       {String? oldPassword, required String? newPassword}) async {
     try {
       bool isOldPasswordProvidedCorrect = true;
       if (oldPassword != null) {
         isOldPasswordProvidedCorrect =
-            await verifyCurrentUserPassword(oldPassword);
+            await verifyCurrentUserPassword(context, oldPassword);
       }
       if (isOldPasswordProvidedCorrect) {
         await firebaseAuth.currentUser!.updatePassword(newPassword.toString());
@@ -444,25 +393,21 @@ Future<bool> signUp(BuildContext context, {String? email, String? password}) asy
     } on MessagedFirebaseAuthException {
       rethrow;
     } on FirebaseAuthException catch (e) {
-      switch (e.code) {
-        case GET_WEAK_PASSWORD_EXCEPTION_CODE:
-          throw FirebaseCredentialActionAuthWeakPasswordException();
-        case GET_REQUIRES_RECENT_LOGIN_EXCEPTION_CODE:
-          throw FirebaseCredentialActionAuthRequiresRecentLoginException();
-        default:
-          throw FirebaseCredentialActionAuthException(message: e.code);
-      }
+      String errorMessage = getLocalizedErrorMessage(e.code, context);
+      ShowSnackBar().showSnackBar(context, errorMessage);
+      return false;
+
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<bool> changeEmailForCurrentUser(
+  Future<bool> changeEmailForCurrentUser( BuildContext context,
       {String? password, String? newEmail}) async {
     try {
       bool isPasswordProvidedCorrect = true;
       if (password != null) {
-        isPasswordProvidedCorrect = await verifyCurrentUserPassword(password);
+        isPasswordProvidedCorrect = await verifyCurrentUserPassword(context, password);
       }
       if (isPasswordProvidedCorrect) {
         await currentUser.verifyBeforeUpdateEmail(newEmail.toString());
@@ -480,7 +425,7 @@ Future<bool> signUp(BuildContext context, {String? email, String? password}) asy
     }
   }
 
-  Future<bool> verifyCurrentUserPassword(String password) async {
+  Future<bool> verifyCurrentUserPassword(BuildContext context, String password) async {
     try {
       final AuthCredential authCredential = EmailAuthProvider.credential(
         email: currentUser.email.toString(),
@@ -493,24 +438,9 @@ Future<bool> signUp(BuildContext context, {String? email, String? password}) asy
     } on MessagedFirebaseAuthException {
       rethrow;
     } on FirebaseAuthException catch (e) {
-      switch (e.code) {
-        case GET_USER_MISMATCH_EXCEPTION_CODE:
-          throw FirebaseReauthUserMismatchException();
-        case GET_USER_NOT_FOUND_EXCEPTION_CODE:
-          throw FirebaseReauthUserNotFoundException();
-        case GET_INVALID_CREDENTIAL_EXCEPTION_CODE:
-          throw FirebaseReauthInvalidCredentialException();
-        case GET_INVALID_EMAIL_EXCEPTION_CODE:
-          throw FirebaseReauthInvalidEmailException();
-        case GET_WRONG_PASSWORD_EXCEPTION_CODE:
-          throw FirebaseReauthWrongPasswordException();
-        case GET_INVALID_VERIFICATION_CODE_EXCEPTION_CODE:
-          throw FirebaseReauthInvalidVerificationCodeException();
-        case GET_INVALID_VERIFICATION_ID_EXCEPTION_CODE:
-          throw FirebaseReauthInvalidVerificationIdException();
-        default:
-          throw FirebaseReauthException(message: e.code);
-      }
+      String errorMessage = getLocalizedErrorMessage(e.code, context);
+      ShowSnackBar().showSnackBar(context, errorMessage);
+      return false;
     } catch (e) {
       rethrow;
     }

@@ -82,7 +82,7 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
       String? snackbarMessage;
       try {
         final resultFuture =
-            AuthentificationService().resetPasswordForEmail(emailInput);
+            AuthentificationService().resetPasswordForEmail(context, emailInput);
         resultFuture.then((value) => resultStatus = value);
         resultStatus = await showDialog(
           context: context,
