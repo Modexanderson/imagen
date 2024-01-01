@@ -100,7 +100,7 @@ class AuthentificationService {
         return true;
       } else {
         await userCredential.user!.sendEmailVerification();
-        throw FirebaseSignInAuthUserNotVerifiedException();
+        throw FirebaseSignInAuthUserNotVerifiedException(context);
       }
     } on MessagedFirebaseAuthException {
       rethrow;
@@ -154,7 +154,7 @@ Future<bool> signUp(BuildContext context, {String? email, String? password}) asy
     if (userCredential.user!.emailVerified == false) {
       await userCredential.user!.sendEmailVerification();
     }
-    await UserDatabaseHelper().createNewUser(uid);
+    await UserDatabaseHelper().createNewUser(uid, email!);
     return true;
   }on FirebaseAuthException catch (e) {
      String errorMessage = getLocalizedErrorMessage(e.code, context);
@@ -229,6 +229,7 @@ Future<bool> signUp(BuildContext context, {String? email, String? password}) asy
         await _firebaseAuth!.signInWithCredential(credential);
 
     final String uid = userCredential.user!.uid;
+    final String email = googleSignInAccount.email;
 
     // Check if the user already exists in the database
     if (!(await UserDatabaseHelper().userExists(uid))) {
@@ -237,7 +238,7 @@ Future<bool> signUp(BuildContext context, {String? email, String? password}) asy
         await userCredential.user!.sendEmailVerification();
       }
 
-      await UserDatabaseHelper().createNewUser(uid);
+      await UserDatabaseHelper().createNewUser(uid, email);
     }
 
     return true;
@@ -309,6 +310,7 @@ Future<bool> signUp(BuildContext context, {String? email, String? password}) asy
           await _firebaseAuth!.signInWithCredential(credential);
 
       final String uid = userCredential.user!.uid;
+      final String email = appleCredential.email ?? '';
 
       if (!userCredential.user!.emailVerified) {
         await userCredential.user!.sendEmailVerification();
@@ -317,7 +319,7 @@ Future<bool> signUp(BuildContext context, {String? email, String? password}) asy
       // Check if the user already exists in the database
       if (!(await UserDatabaseHelper().userExists(uid))) {
         // User doesn't exist, create a new user
-        await UserDatabaseHelper().createNewUser(uid);
+        await UserDatabaseHelper().createNewUser(uid, email);
       }
 
       return true;

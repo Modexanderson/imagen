@@ -8,7 +8,8 @@ import '../authentification_service.dart';
 class UserDatabaseHelper {
   static const String USERS_COLLECTION_NAME = "users";
 
-  static const String DP_KEY = "display_picture";
+  static const String USER_EMAIL = "user_email";
+
   static const String CREDITS = 'credits';
 
   UserDatabaseHelper._privateConstructor({this.phone});
@@ -37,11 +38,40 @@ class UserDatabaseHelper {
     }
   }
 
+  Future<double> getInitialCreditValue() async {
+    try {
+      // Retrieve the document from Firestore
+      final DocumentSnapshot snapshot =
+        await firestore.collection('initial_credit_collection').doc('initial_credit_doc').get();
+
+      // Check if the document exists and contains the 'credit' field
+      if (snapshot.exists && snapshot.data() != null) {
+        // Explicitly cast the data to Map<String, dynamic>
+        Map<String, dynamic> data =
+            snapshot.data() as Map<String, dynamic>;
+
+        // Retrieve the credit value
+        double initialCreditValue = (data['initialCreditValue'] ?? 0.0).toDouble();
+
+        return initialCreditValue;
+      } else {
+        print('Document does not exist or credit field is missing.');
+        return 0.0; // or handle the default value appropriately
+      }
+    } catch (e) {
+      print('Error retrieving credit value: $e');
+      return 0.0; // or handle the default value appropriately
+    }
+}
+
+
   final String? phone;
-  Future<void> createNewUser(String uid) async {
+  Future<void> createNewUser(String uid, String userEmail) async {
+   // Retrieve the value from Firebase
+  double initialCreditValue = await getInitialCreditValue();
     await firestore.collection(USERS_COLLECTION_NAME).doc(uid).set({
-      DP_KEY: null,
-      CREDITS: 5.0,
+      USER_EMAIL: userEmail,
+      CREDITS: initialCreditValue,
     });
   }
 
@@ -144,39 +174,4 @@ class UserDatabaseHelper {
     await docRef.delete();
   }
 
-
-  String getPathForCurrentUserDisplayPicture() {
-    final String currentUserUid = AuthentificationService().currentUser.uid;
-    return "user/display_picture/$currentUserUid";
-  }
-
-  Future<bool> uploadDisplayPictureForCurrentUser(String url) async {
-    String uid = AuthentificationService().currentUser.uid;
-    final userDocSnapshot =
-        firestore.collection(USERS_COLLECTION_NAME).doc(uid);
-    await userDocSnapshot.update(
-      {DP_KEY: url},
-    );
-    return true;
-  }
-
-  Future<bool> removeDisplayPictureForCurrentUser() async {
-    String uid = AuthentificationService().currentUser.uid;
-    final userDocSnapshot =
-        firestore.collection(USERS_COLLECTION_NAME).doc(uid);
-    await userDocSnapshot.update(
-      {
-        DP_KEY: FieldValue.delete(),
-      },
-    );
-    return true;
-  }
-
-  Future<String> get displayPictureForCurrentUser async {
-    String uid = AuthentificationService().currentUser.uid;
-    final userDocSnapshot =
-        await firestore.collection(USERS_COLLECTION_NAME).doc(uid).get();
-    return userDocSnapshot.data()?['DP_KEY'] ??
-        'https://cdn.vectorstock.com/i/1000x1000/62/59/default-avatar-photo-placeholder-profile-icon-vector-21666259.webp';
-  }
 }

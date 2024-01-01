@@ -213,9 +213,7 @@ class _SignUpFormState extends State<SignUpForm> {
         } else {
           if (snackbarMessage == null) {
             throw FirebaseSignUpAuthUnknownReasonFailureException(context);
-          } else {
-            throw FirebaseSignUpAuthUnknownReasonFailureException(context);
-          }
+          } 
         }
       } on MessagedFirebaseAuthException catch (e) {
         snackbarMessage = e.message;

@@ -159,9 +159,9 @@ class _SignInFormState extends State<SignInForm> {
           snackbarMessage = AppLocalizations.of(context)!.signInSuccessful;
         } else {
           if (snackbarMessage == null) {
-            throw FirebaseSignInAuthUnknownReasonFailure();
+            throw FirebaseSignInAuthUnknownReasonFailure(context);
           } else {
-            throw FirebaseSignInAuthUnknownReasonFailure(
+            throw FirebaseSignInAuthUnknownReasonFailure( context,
                 message: snackbarMessage!);
           }
         }

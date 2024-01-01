@@ -8,7 +8,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'api/purchase_api.dart';
 import 'app.dart';
 import 'firebase_options.dart';
-import 'screens/settings.dart';
 import 'widgets/binance_pay_widget.dart';
 import 'widgets/revenue_cat_widget.dart';
 

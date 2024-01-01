@@ -1,4 +1,8 @@
+import 'package:flutter/cupertino.dart';
+
 import 'messaged_firebase_auth_exception.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 class FirebaseSignInAuthException extends MessagedFirebaseAuthException {
   FirebaseSignInAuthException(
@@ -8,47 +12,47 @@ class FirebaseSignInAuthException extends MessagedFirebaseAuthException {
 
 class FirebaseSignInAuthUserDisabledException
     extends FirebaseSignInAuthException {
-  FirebaseSignInAuthUserDisabledException(
-      {String message = "This user is disabled"})
-      : super(message: message);
+  FirebaseSignInAuthUserDisabledException( BuildContext context,
+      {String message = ""})
+      : super(message: message.isNotEmpty ? message : AppLocalizations.of(context)!.userDisabledException);
 }
 
 class FirebaseSignInAuthUserNotFoundException
     extends FirebaseSignInAuthException {
-  FirebaseSignInAuthUserNotFoundException(
-      {String message = "No such user found"})
-      : super(message: message);
+  FirebaseSignInAuthUserNotFoundException( BuildContext context,
+      {String message = ""})
+      : super(message: message.isNotEmpty ? message : AppLocalizations.of(context)!.userNotFoundException);
 }
 
 class FirebaseSignInAuthInvalidEmailException
     extends FirebaseSignInAuthException {
-  FirebaseSignInAuthInvalidEmailException(
-      {String message = "Email is not valid"})
-      : super(message: message);
+  FirebaseSignInAuthInvalidEmailException( BuildContext context,
+      {String message = ""})
+      : super(message: message.isNotEmpty ? message : AppLocalizations.of(context)!.invalidEmailException);
 }
 
 class FirebaseSignInAuthWrongPasswordException
     extends FirebaseSignInAuthException {
-  FirebaseSignInAuthWrongPasswordException({String message = "Wrong password"})
-      : super(message: message);
+  FirebaseSignInAuthWrongPasswordException(BuildContext context, {String message = ""})
+      : super(message: message.isNotEmpty ? message : AppLocalizations.of(context)!.wrongPasswordException);
 }
 
 class FirebaseTooManyRequestsException extends FirebaseSignInAuthException {
-  FirebaseTooManyRequestsException(
-      {String message = "Server busy, Please try again after some time."})
-      : super(message: message);
+  FirebaseTooManyRequestsException( BuildContext context,
+      {String message = ""})
+      : super(message: message.isNotEmpty ? message : AppLocalizations.of(context)!.signInFailed);
 }
 
 class FirebaseSignInAuthUserNotVerifiedException
     extends FirebaseSignInAuthException {
-  FirebaseSignInAuthUserNotVerifiedException(
-      {String message = "This user is not verified"})
-      : super(message: message);
+  FirebaseSignInAuthUserNotVerifiedException( BuildContext context,
+      {String message = ""})
+      : super(message: message.isNotEmpty ? message : AppLocalizations.of(context)!.emailVerificationMessage);
 }
 
 class FirebaseSignInAuthUnknownReasonFailure
     extends FirebaseSignInAuthException {
-  FirebaseSignInAuthUnknownReasonFailure(
-      {String message = "Sign in failed due to unknown reason"})
-      : super(message: message);
+  FirebaseSignInAuthUnknownReasonFailure( BuildContext context,
+      {String message = ""})
+      : super(message: message.isNotEmpty ? message : AppLocalizations.of(context)!.signInFailed);
 }
