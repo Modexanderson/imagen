@@ -81,6 +81,11 @@ android {
                 debugSymbolLevel 'FULL'
             }
         }
+
+        debug {
+            signingConfig signingConfigs.release
+            debuggable true
+        }
     }
     aaptOptions {
         cruncherEnabled = false // Disable built-in PNG crunching

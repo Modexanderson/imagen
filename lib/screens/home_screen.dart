@@ -252,13 +252,13 @@ class _HomeScreenState extends State<HomeScreen> {
       // {'name': 'Payeer', 'image': 'assets/icons/payeer_method.svg', 'onTap': {}},
       // {'name': 'Enot', 'image': 'assets/icons/enot_method.svg', 'onTap': {}},
       if (!Platform.isIOS)
-      {
-        'name': 'Binance Pay',
-        'image': 'assets/icons/binancePay_method.svg',
-        'onTap': () {
-          showPaymentDialog(context, binancePayWidget());
-        }
-      },
+        {
+          'name': 'Binance Pay',
+          'image': 'assets/icons/binancePay_method.svg',
+          'onTap': () {
+            showPaymentDialog(context, binancePayWidget());
+          }
+        },
       // Add more payment options as needed
     ];
 
@@ -328,71 +328,147 @@ class _HomeScreenState extends State<HomeScreen> {
                     // Assuming 'credits' is the field in your document that holds the user's credits.
                     double credits = userData['credits'] ?? 0.0;
 
-                    return InkWell(
+                    return GestureDetector(
                       onTap: () {
-                        showPaymentOptions(
-                          context,
-                          Container(
-                            constraints: BoxConstraints(
-                              maxHeight:
-                                  MediaQuery.of(context).size.height * 0.75,
-                            ),
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              children: [
-                                Text(
-                                  AppLocalizations.of(context)!.selectPayment,
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                        showCupertinoDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                                title: Text(
+                                  AppLocalizations.of(context)!.creditBalance,
+                                  textAlign: TextAlign.center,
                                 ),
-                                const SizedBox(
-                                  height: 16,
-                                ),
-                                const Divider(),
-                                ListView.builder(
-                                  shrinkWrap: true,
-                                  primary: false,
-                                  itemCount: paymentOptions.length,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    return InkWell(
-                                      onTap: () {
-                                        paymentOptions[index]['onTap']();
-                                      },
-                                      child: Card(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .secondary,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
+                                content: SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.width * 0.5,
+                                  child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            const Icon(
+                                                Icons.monetization_on_outlined,
+                                                size: 40),
+                                            const SizedBox(
+                                                width:
+                                                    4), // Adjust the spacing between icon and credits
+                                            SizedBox(
+                                              // width: double.infinity,
+                                              child: FittedBox(
+                                                fit: BoxFit.scaleDown,
+                                                child: Text(
+                                                  '$credits',
+                                                  style: const TextStyle(
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        margin: const EdgeInsets.all(16.0),
-                                        child: Container(
-                                          height:
-                                              100, // Adjust the height as needed
-                                          padding: const EdgeInsets.all(16.0),
-                                          child: Center(
-                                            child: SvgPicture.asset(
-                                                paymentOptions[index]['image']),
-                                          ),
+                                        const SizedBox(
+                                          height: 10,
                                         ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                                const Divider(),
-                              ],
-                            ),
-                          ),
+                                        DefaultButton(
+                                          text: AppLocalizations.of(context)!
+                                              .rechargeNow,
+                                          press: () {
+                                            showPaymentOptions(
+                                              context,
+                                              Container(
+                                                constraints: BoxConstraints(
+                                                  maxHeight:
+                                                      MediaQuery.of(context)
+                                                              .size
+                                                              .height *
+                                                          0.75,
+                                                ),
+                                                padding:
+                                                    const EdgeInsets.all(16.0),
+                                                child: Column(
+                                                  children: [
+                                                    Text(
+                                                      AppLocalizations.of(
+                                                              context)!
+                                                          .selectPayment,
+                                                      style: const TextStyle(
+                                                        fontSize: 20,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 16,
+                                                    ),
+                                                    const Divider(),
+                                                    ListView.builder(
+                                                      shrinkWrap: true,
+                                                      primary: false,
+                                                      itemCount:
+                                                          paymentOptions.length,
+                                                      itemBuilder:
+                                                          (BuildContext context,
+                                                              int index) {
+                                                        return InkWell(
+                                                          onTap: () {
+                                                            paymentOptions[
+                                                                    index]
+                                                                ['onTap']();
+                                                          },
+                                                          child: Card(
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .colorScheme
+                                                                .secondary,
+                                                            shape:
+                                                                RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          12),
+                                                            ),
+                                                            margin:
+                                                                const EdgeInsets
+                                                                    .all(16.0),
+                                                            child: Container(
+                                                              height:
+                                                                  100, // Adjust the height as needed
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .all(
+                                                                      16.0),
+                                                              child: Center(
+                                                                child: SvgPicture.asset(
+                                                                    paymentOptions[
+                                                                            index]
+                                                                        [
+                                                                        'image']),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    ),
+                                                    const Divider(),
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        )
+                                      ]),
+                                ));
+                          },
                         );
                       },
                       child: Row(
                         children: [
                           // Replace the text with an icon (e.g., Icons.monetization_on)
-                          const Icon(Icons.monetization_on, size: 40),
+                          const Icon(Icons.monetization_on_outlined, size: 30),
                           const SizedBox(
                               width:
                                   4), // Adjust the spacing between icon and credits
@@ -403,7 +479,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Text(
                                 '$credits',
                                 style: const TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -515,9 +591,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                   AuthentificationService().currentUserVerified;
                               if (!allowed) {
                                 final reverify = await showConfirmationDialog(
-                                  context, AppLocalizations.of(context)!.emailVerificationMessage,
-                                  positiveResponse: AppLocalizations.of(context)!.resendVerificationEmail,
-                                  negativeResponse: AppLocalizations.of(context)!.goBack,
+                                  context,
+                                  AppLocalizations.of(context)!
+                                      .emailVerificationMessage,
+                                  positiveResponse:
+                                      AppLocalizations.of(context)!
+                                          .resendVerificationEmail,
+                                  negativeResponse:
+                                      AppLocalizations.of(context)!.goBack,
                                 );
 
                                 if (reverify) {
@@ -528,12 +609,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                     if (verificationResult) {
                                       ShowSnackBar().showSnackBar(
-                                        context, AppLocalizations.of(context)!.verificationEmailSuccessful,
+                                        context,
+                                        AppLocalizations.of(context)!
+                                            .verificationEmailSuccessful,
                                       );
                                     } else {
                                       // Handle case where verification email sending failed
                                       ShowSnackBar().showSnackBar(
-                                        context, AppLocalizations.of(context)!.sendingVerificationEmailFailed,
+                                        context,
+                                        AppLocalizations.of(context)!
+                                            .sendingVerificationEmailFailed,
                                       );
                                     }
                                   } catch (error) {
@@ -541,7 +626,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     print(
                                         'Error during email verification: $error');
                                     ShowSnackBar().showSnackBar(
-                                      context, AppLocalizations.of(context)!.verificationEmailError,
+                                      context,
+                                      AppLocalizations.of(context)!
+                                          .verificationEmailError,
                                     );
                                   }
                                 }
@@ -649,7 +736,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                       //
                                     },
                                     child: Text(
-                                        AppLocalizations.of(context)!.cancel, style: const TextStyle(decoration: TextDecoration.underline),))
+                                      AppLocalizations.of(context)!.cancel,
+                                      style: const TextStyle(
+                                          decoration: TextDecoration.underline),
+                                    ))
                               ],
                             );
                           } else if (state is ImageStopped) {
@@ -739,14 +829,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                 padding: const EdgeInsets.all(50.0),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
-                              // crossAxisAlignment: CrossAxisAlignment.center,
+                                  // crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     const DefaultErrorIndicator(),
                                     // SizedBox(height: 10,),
                                     Text(
                                       AppLocalizations.of(context)!
                                           .failedGenerationTryAgain,
-                                          textAlign: TextAlign.center,
+                                      textAlign: TextAlign.center,
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 20,

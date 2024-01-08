@@ -395,6 +395,10 @@
   "invalidVerificationIdException": "invalid verification-id",
   "@invalidVerificationIdException": {},
   "requiredRecentLoginException": "requires recent login",
-  "@requiredRecentLoginException": {}
+  "@requiredRecentLoginException": {},
+  "rechargeNow": "Recharge Now",
+  "@rechargeNow": {},
+  "creditBalance": "Your credit balance is:",
+  "@creditBalance": {}
   
 }
