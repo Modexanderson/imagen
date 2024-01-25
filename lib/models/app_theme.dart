@@ -19,14 +19,14 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         focusedBorder: OutlineInputBorder(
-           borderRadius: BorderRadius.circular(10.0),
-          borderSide:
-              const BorderSide(width: 1.5, color: Colors.black),
+          borderRadius: BorderRadius.circular(10.0),
+          borderSide: const BorderSide(width: 1.5, color: Colors.black),
         ),
-         border: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.black), // Set your border color here
-          ),
-          errorBorder: OutlineInputBorder(
+        border: const OutlineInputBorder(
+          borderSide:
+              BorderSide(color: Colors.black), // Set your border color here
+        ),
+        errorBorder: OutlineInputBorder(
           borderSide: const BorderSide(color: Colors.red),
           borderRadius: BorderRadius.circular(10.0),
         ),
@@ -53,17 +53,18 @@ class AppTheme {
       ),
       disabledColor: Colors.grey[600],
       brightness: Brightness.light,
-      snackBarTheme: SnackBarThemeData(backgroundColor: Theme.of(context).cardColor),
+      snackBarTheme:
+          SnackBarThemeData(backgroundColor: Theme.of(context).cardColor),
       indicatorColor: currentTheme.currentColor(),
       progressIndicatorTheme: const ProgressIndicatorThemeData()
           .copyWith(color: currentTheme.currentColor()),
       iconTheme: IconThemeData(
-        color: Colors.grey[800],
+        color: Colors.grey[900],
         opacity: 1.0,
         size: 24.0,
       ),
       colorScheme: Theme.of(context).colorScheme.copyWith(
-            primary: Colors.grey[800],
+            primary: Colors.grey[900],
             brightness: Brightness.light,
             secondary: currentTheme.currentColor(),
           ),
@@ -87,15 +88,16 @@ class AppTheme {
         selectionColor: currentTheme.currentColor(),
       ),
       inputDecorationTheme: InputDecorationTheme(
+        labelStyle: const TextStyle(color: Colors.white),
         focusedBorder: OutlineInputBorder(
-           borderRadius: BorderRadius.circular(10.0),
-          borderSide:
-              const BorderSide(width: 1.5, color: Colors.white),
+          borderRadius: BorderRadius.circular(10.0),
+          borderSide: const BorderSide(width: 1.5, color: Colors.white),
         ),
-         border: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.white), // Set your border color here
-          ),
-          errorBorder: OutlineInputBorder(
+        border: const OutlineInputBorder(
+          borderSide:
+              BorderSide(color: Colors.white), // Set your border color here
+        ),
+        errorBorder: OutlineInputBorder(
           borderSide: const BorderSide(color: Colors.red),
           borderRadius: BorderRadius.circular(10.0),
         ),
@@ -104,22 +106,33 @@ class AppTheme {
           borderRadius: BorderRadius.circular(10.0),
         ),
       ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: currentTheme.getCanvasColor(),
+      ),
       listTileTheme: ListTileThemeData(
+        iconColor: Colors.white,
+        textColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(7.0),
         ),
       ),
       visualDensity: VisualDensity.adaptivePlatformDensity,
       brightness: Brightness.dark,
-      snackBarTheme: SnackBarThemeData(backgroundColor: Theme.of(context).hintColor),
-
+      snackBarTheme:
+          SnackBarThemeData(backgroundColor: Theme.of(context).hintColor),
       appBarTheme: AppBarTheme(
         color: currentTheme.currentColor(),
         foregroundColor: Colors.white,
       ),
       canvasColor: currentTheme.getCanvasColor(),
+      scaffoldBackgroundColor: currentTheme.getCanvasColor(),
+      textTheme: Typography.whiteCupertino,
+      drawerTheme: DrawerThemeData(
+        backgroundColor: currentTheme.getCanvasColor(),
+      ),
       cardColor: currentTheme.getCardColor(),
       cardTheme: CardTheme(
+        color: currentTheme.getCardColor(),
         clipBehavior: Clip.antiAlias,
         elevation: 5,
         shape: RoundedRectangleBorder(

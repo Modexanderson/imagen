@@ -50,6 +50,7 @@ dependencies:
   firebase_core: ^2.24.0
   firebase_auth: ^4.15.0
   flutter_native_splash: ^2.2.9
+  flutter_stripe: ^9.4.0
   get_it: ^7.2.0
   google_sign_in: ^6.1.6
   hive_flutter: ^1.1.0
@@ -72,6 +73,9 @@ dependencies:
   uuid: ^3.0.4
   http_parser: ^4.0.2
 
+dependency_overrides:
+  stripe_android: "9.5.0+1"
+
 dev_dependencies:
   flutter_launcher_icons: "^0.10.0"
   flutter_test:
@@ -92,6 +96,7 @@ flutter_icons:
   ios: true
   image_path: "assets/icons/imagen_black.png"
 # flutter pub run flutter_launcher_icons:main
+
 
 # The following section is specific to Flutter packages.
 flutter:

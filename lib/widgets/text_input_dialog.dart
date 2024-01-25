@@ -47,7 +47,7 @@ Future<void> showTextInputDialog({
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).brightness == Brightness.dark
                   ? Colors.white
-                  : Colors.grey[700],
+                  : Colors.grey[900],
             ),
             onPressed: () {
               Navigator.pop(context);

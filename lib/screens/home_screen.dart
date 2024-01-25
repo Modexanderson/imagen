@@ -29,6 +29,7 @@ import '../widgets/planet_spinner_animation.dart';
 import '../widgets/revenue_cat_widget.dart';
 import '../widgets/show_confirmation_dialog.dart';
 import '../widgets/snack_bar.dart';
+import '../widgets/stripe_pay_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -243,9 +244,11 @@ class _HomeScreenState extends State<HomeScreen> {
         'name': 'Card Payment',
         'image': 'assets/icons/stripe_method.svg',
         'onTap': () {
-          fetchOffers(context);
-          print(packages);
-          showPaymentDialog(context, revenueCatWidget(packages));
+          //// Revenue cat 
+          // fetchOffers(context);
+          // print(packages);
+          // showPaymentDialog(context, revenueCatWidget(packages));
+          showPaymentDialog(context, StripePayWidget());
         },
       },
       // {'name': 'Crypto Payment', 'image': 'assets/icons/0xprocessing_method.svg', 'onTap': {}},
@@ -303,7 +306,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       // While waiting for data, you can show a loading indicator or a default value.
-                      return const DefaultProgressIndicator();
+                      return const SizedBox( width: 40, child: Center(child: DefaultProgressIndicator()));
                     }
 
                     if (snapshot.hasError) {

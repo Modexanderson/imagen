@@ -2,17 +2,24 @@ import 'dart:io' show Platform;
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'api/purchase_api.dart';
 import 'app.dart';
 import 'firebase_options.dart';
+import 'models/.env.dart';
 import 'widgets/binance_pay_widget.dart';
+import 'widgets/stripe_pay_widget.dart';
 import 'widgets/revenue_cat_widget.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Stripe.publishableKey = stripePublishableKey;
+  Stripe.merchantIdentifier = 'merchant.flutter.stripe.test';
+  Stripe.urlScheme = 'flutterstripe';
+  await Stripe.instance.applySettings();
   await PurchaseApi.init();
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     await Hive.initFlutter('Imagen');
@@ -35,6 +42,7 @@ Future<void> main() async {
       providers: [
         ChangeNotifierProvider(create: (context) => BinancePayState()),
         ChangeNotifierProvider(create: (context) => RenenueCatState()),
+        ChangeNotifierProvider(create: (context) => StripePayState()),
         // Add other providers as needed
       ],
       child: const MyApp(),

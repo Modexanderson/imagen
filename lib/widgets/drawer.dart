@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -25,7 +27,7 @@ class AppDrawer extends StatelessWidget {
     }
   }
 
-  final _appLink = '';
+  final _appLink = Platform.isAndroid ? 'https://cupertinostudios.online/#/imagen/android' : '' ;
   void _shareApp() {
     Share.share(_appLink);
   }
