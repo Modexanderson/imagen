@@ -79,17 +79,18 @@ class _StripePaymentScreenState extends State<StripePaymentScreen> {
                     countryCode: 'US',
                     style: CardFormStyle(
                       borderRadius: 2,
-            borderColor: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white
-                  : Colors.grey[900],
-
-            textColor: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white
-                  : Colors.grey[900],
-            placeholderColor:Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white
-                  : Colors.grey[900],
-          ),
+                      borderColor:
+                          Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.grey[900],
+                      textColor: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.grey[900],
+                      placeholderColor:
+                          Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.grey[900],
+                    ),
                   ),
                   DefaultButton(
                     press: () {
