@@ -38,7 +38,7 @@ class _CreditAlertDialogState extends State<CreditAlertDialog> {
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
-                    '$widget.credits',
+                    '${widget.credits}',
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
