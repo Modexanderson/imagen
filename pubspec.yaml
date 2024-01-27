@@ -51,6 +51,7 @@ dependencies:
   firebase_auth: ^4.15.0
   flutter_native_splash: ^2.2.9
   flutter_stripe: ^9.4.0
+  get: ^4.6.6
   get_it: ^7.2.0
   google_sign_in: ^6.1.6
   hive_flutter: ^1.1.0

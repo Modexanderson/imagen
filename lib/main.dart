@@ -17,8 +17,8 @@ import 'widgets/revenue_cat_widget.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Stripe.publishableKey = stripePublishableKey;
-  Stripe.merchantIdentifier = 'merchant.flutter.stripe.test';
-  Stripe.urlScheme = 'flutterstripe';
+  // Stripe.merchantIdentifier = 'merchant.flutter.stripe.test';
+  // Stripe.urlScheme = 'flutterstripe';
   await Stripe.instance.applySettings();
   await PurchaseApi.init();
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {

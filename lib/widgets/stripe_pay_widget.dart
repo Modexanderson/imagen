@@ -5,10 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:get/get.dart';
 import 'package:imagen/screens/card_payment_screen.dart';
 
 import 'package:uuid/uuid.dart';
 import 'package:provider/provider.dart';
+
+import '../controllers/payment_controller.dart';
 
 class StripePayState extends ChangeNotifier {
   double selectedAmount = 5.0;
@@ -31,6 +34,7 @@ String generateReferenceGoodsId() {
 }
 
 Widget StripePayWidget() {
+  final PaymentController controller = Get.put(PaymentController());
   return Consumer<StripePayState>(
     builder: (context, state, _) {
       return AlertDialog(
@@ -150,13 +154,15 @@ Widget StripePayWidget() {
                           amount); // Deselect the amount in the card
                     }
 
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StripePaymentScreen(
-                            amount: amount,
-                          ),
-                        ));
+                    controller.makePayment(amount: amount.toString(), currency: 'USD');
+
+                    // Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //       builder: (context) => StripePaymentScreen(
+                    //         amount: amount,
+                    //       ),
+                    //     ));
 
                     print(state.selectedAmount);
                   },
