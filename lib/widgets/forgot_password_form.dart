@@ -89,8 +89,8 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
           builder: (context) {
             return AsyncProgressDialog(
               resultFuture,
-              message:
-                  Text(AppLocalizations.of(context)!.sendingVerificationEmail),
+              // message:
+              //     Text(AppLocalizations.of(context)!.sendingVerificationEmail),
             );
           },
         );

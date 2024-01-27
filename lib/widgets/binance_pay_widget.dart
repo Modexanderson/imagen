@@ -272,9 +272,9 @@ Widget binancePayWidget() {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               DefaultProgressIndicator(),
-                              SizedBox(height: 16),
-                              Text(AppLocalizations.of(context)!
-                                  .creatingBinanceOrder),
+                              // SizedBox(height: 16),
+                              // Text(AppLocalizations.of(context)!
+                              //     .creatingBinanceOrder),
                             ],
                           ),
                         );

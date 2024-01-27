@@ -137,13 +137,7 @@ Widget revenueCatWidget(List<Package> packages) {
                         builder: (BuildContext context) {
                           return AlertDialog(
                             key: key,
-                            content: const Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                DefaultProgressIndicator(),
-                                
-                              ],
-                            ),
+                            content: const DefaultProgressIndicator(),
                           );
                         },
                       );

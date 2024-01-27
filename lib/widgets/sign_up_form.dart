@@ -201,7 +201,7 @@ class _SignUpFormState extends State<SignUpForm> {
                 email: emailFieldController.text,
                 password: passwordFieldController.text,
               ),
-              message: Text(AppLocalizations.of(context)!.creatingNewAccount),
+              // message: Text(AppLocalizations.of(context)!.creatingNewAccount),
             );
           },
         );

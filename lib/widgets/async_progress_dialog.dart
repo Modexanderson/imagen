@@ -15,7 +15,7 @@ class AsyncProgressDialog extends StatefulWidget {
   final BoxDecoration? decoration;
   final double opacity;
   final Widget? progress;
-  final Widget? message;
+  // final Widget? message;
   final Function? onError;
   final Function? onComplete; // Add this callback
 
@@ -24,7 +24,7 @@ class AsyncProgressDialog extends StatefulWidget {
     this.decoration,
     this.opacity = 1.0,
     this.progress,
-    this.message,
+    // this.message,
     this.onError,
     this.onComplete, // Initialize the callback
   });
@@ -67,7 +67,7 @@ class _AsyncProgressDialogState extends State<AsyncProgressDialog> {
 
   Widget _buildDialog(BuildContext context) {
     var content;
-    if (widget.message == null) {
+    
       content = Container(
         height: 200,
         width: 100,
@@ -76,22 +76,6 @@ class _AsyncProgressDialogState extends State<AsyncProgressDialog> {
         child: widget.progress ??
             const DefaultProgressIndicator(),
       );
-    } else {
-      content = Container(
-        height: 200,
-        width: 100,
-        padding: const EdgeInsets.all(20),
-        decoration: widget.decoration ?? _DefaultDecoration,
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              widget.progress ??
-                  const DefaultProgressIndicator(),
-              const SizedBox(height: 5),
-              _buildText(context)
-            ]),
-      );
-    }
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -103,13 +87,4 @@ class _AsyncProgressDialogState extends State<AsyncProgressDialog> {
     );
   }
 
-  Widget _buildText(BuildContext context) {
-    if (widget.message == null) {
-      return const SizedBox.shrink();
-    }
-    return Expanded(
-      flex: 1,
-      child: widget.message!,
-    );
-  }
 }

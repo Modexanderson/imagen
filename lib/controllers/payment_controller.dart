@@ -5,36 +5,38 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/.env.dart';
+import '../services/authentification_service.dart';
+import '../services/database/user_database_helper.dart';
 
 class PaymentController extends GetxController {
   Map<String, dynamic>? paymentIntentData;
 
   Future<void> makePayment(
-      {required String amount, required String currency}) async {
+      {required double amount, required String currency}) async {
+    String userUid = AuthentificationService().currentUser.uid;
+
     try {
-      paymentIntentData = await createPaymentIntent(amount, currency);
+      paymentIntentData =
+          await createPaymentIntent(amount.toString(), currency);
       if (paymentIntentData != null) {
         await Stripe.instance.initPaymentSheet(
             paymentSheetParameters: SetupPaymentSheetParameters(
-          // applePay: true,
-          // googlePay: true,
-          // testEnv: true,
-          // merchantCountryCode: 'US',
           merchantDisplayName: 'Prospects',
           customerId: paymentIntentData!['customer'],
           paymentIntentClientSecret: paymentIntentData!['client_secret'],
           customerEphemeralKeySecret: paymentIntentData!['ephemeralKey'],
         ));
-        displayPaymentSheet();
+        displayPaymentSheet(userUid: userUid, amount: amount);
       }
     } catch (e, s) {
       print('exception:$e$s');
     }
   }
 
-  displayPaymentSheet() async {
+  displayPaymentSheet({required String userUid, required double amount}) async {
     try {
       await Stripe.instance.presentPaymentSheet();
+      await UserDatabaseHelper().updateCreditsAfterPayment(userUid, amount);
       Get.snackbar('Payment', 'Payment Successful',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,

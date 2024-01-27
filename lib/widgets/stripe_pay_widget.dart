@@ -154,7 +154,7 @@ Widget StripePayWidget() {
                           amount); // Deselect the amount in the card
                     }
 
-                    controller.makePayment(amount: amount.toString(), currency: 'USD');
+                    controller.makePayment(amount: amount, currency: 'USD');
 
                     // Navigator.push(
                     //     context,

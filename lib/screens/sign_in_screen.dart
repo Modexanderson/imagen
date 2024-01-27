@@ -39,7 +39,7 @@ class _SignInScreenState extends State<SignInScreen> {
         builder: (context) {
           return AsyncProgressDialog(
             signUpFuture,
-            message: Text(AppLocalizations.of(context)!.signInProcess),
+            // message: Text(AppLocalizations.of(context)!.signInProcess),
           );
         },
       );
@@ -78,7 +78,7 @@ class _SignInScreenState extends State<SignInScreen> {
         builder: (context) {
           return AsyncProgressDialog(
             signUpFuture,
-            message: Text(AppLocalizations.of(context)!.signInProcess),
+            // message: Text(AppLocalizations.of(context)!.signInProcess),
           );
         },
       );

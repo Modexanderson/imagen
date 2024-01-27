@@ -148,7 +148,7 @@ class _SignInFormState extends State<SignInForm> {
           builder: (context) {
             return AsyncProgressDialog(
               signInFuture,
-              message: Text(AppLocalizations.of(context)!.signInProcess),
+              // message: Text(AppLocalizations.of(context)!.signInProcess),
               onError: (e) {
                 snackbarMessage = e.toString();
               },
