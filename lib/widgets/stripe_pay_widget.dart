@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:get/get.dart';
-import 'package:imagen/screens/card_payment_screen.dart';
 
 import 'package:uuid/uuid.dart';
 import 'package:provider/provider.dart';

@@ -8,7 +8,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../exceptions/credential_actions_exception.dart';
 import '../exceptions/firebase_sign_in_exceptions.dart';
-import '../exceptions/firebase_sign_up_exception.dart';
 import '../exceptions/messaged_firebase_auth_exception.dart';
 import '../exceptions/reauth_exceptions.dart';
 import '../widgets/snack_bar.dart';

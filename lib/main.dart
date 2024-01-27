@@ -6,7 +6,6 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import 'api/purchase_api.dart';
 import 'app.dart';
 import 'firebase_options.dart';
 import 'models/.env.dart';

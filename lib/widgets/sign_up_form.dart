@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:imagen/screens/home_screen.dart';
 import 'package:imagen/widgets/snack_bar.dart';
 import 'package:logger/logger.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';

@@ -36,8 +36,6 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   binance_pay: ^0.0.2
   cloud_firestore: ^4.13.3
-  cupertino_icons: ^1.0.2
-  device_info_plus: ^9.0.1
   file_picker: ^5.2.7
   flutter_bloc: ^8.1.2
   flutter_svg: ^2.0.9

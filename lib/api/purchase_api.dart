@@ -16,7 +16,7 @@ class PurchaseApi {
   
 
   static Future init() async {
-    await Purchases.setDebugLogsEnabled(true);
+    await Purchases.setLogLevel(LogLevel.debug);
     await Purchases.setup(_apiKey);
   }
 
