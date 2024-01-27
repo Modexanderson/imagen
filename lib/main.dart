@@ -16,9 +16,7 @@ import 'widgets/revenue_cat_widget.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  Stripe.publishableKey = stripePublishableKey;
-  await Stripe.instance.applySettings();
-  await PurchaseApi.init();
+  
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     await Hive.initFlutter('Imagen');
   } else {
@@ -35,6 +33,9 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  Stripe.publishableKey = stripeTestPublishableKey;
+  await Stripe.instance.applySettings();
+  // await PurchaseApi.init();
   runApp(
     MultiProvider(
       providers: [

@@ -12,6 +12,7 @@ import 'package:uuid/uuid.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/payment_controller.dart';
+import 'default_progress_indicator.dart';
 
 class StripePayState extends ChangeNotifier {
   double selectedAmount = 5.0;
@@ -143,6 +144,8 @@ Widget StripePayWidget() {
                 child: CupertinoDialogAction(
                   child: Text(AppLocalizations.of(context)!.confirm),
                   onPressed: () async {
+                    // Create a GlobalKey for the loading spinner dialog
+                    final GlobalKey<State> key = GlobalKey<State>();
                     var amount = 0.0;
                     if (state.customAmountController.text.isEmpty) {
                       amount = state.selectedAmount;
@@ -154,7 +157,35 @@ Widget StripePayWidget() {
                           amount); // Deselect the amount in the card
                     }
 
-                    controller.makePayment(amount: amount, currency: 'USD');
+                    Navigator.of(context).pop();
+                    // Show loading spinner while creating Binance Pay order
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          key: key,
+                          content: const Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              DefaultProgressIndicator(),
+                              // SizedBox(height: 16),
+                              // Text(AppLocalizations.of(context)!
+                              //     .creatingBinanceOrder),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+
+                    try {
+                      // Wait for the asynchronous operation to complete
+                    await controller.makePayment(context: context, amount: amount, currency: 'USD');
+                    } finally {
+                      // Close the loading spinner dialog using the key
+                      Navigator.of(key.currentContext!).pop();
+                    }
+
 
                     // Navigator.push(
                     //     context,

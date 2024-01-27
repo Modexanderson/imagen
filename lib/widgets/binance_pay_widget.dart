@@ -268,7 +268,7 @@ Widget binancePayWidget() {
                       builder: (BuildContext context) {
                         return AlertDialog(
                           key: key,
-                          content: Column(
+                          content: const Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               DefaultProgressIndicator(),

@@ -10,6 +10,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:imagen/widgets/credit_alert_dialog.dart';
 import 'package:imagen/widgets/default_button.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
@@ -244,7 +245,7 @@ class _HomeScreenState extends State<HomeScreen> {
         'name': 'Card Payment',
         'image': 'assets/icons/stripe_method.svg',
         'onTap': () {
-          //// Revenue cat 
+          //// Revenue cat
           // fetchOffers(context);
           // print(packages);
           // showPaymentDialog(context, revenueCatWidget(packages));
@@ -306,7 +307,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       // While waiting for data, you can show a loading indicator or a default value.
-                      return const SizedBox( width: 40, child: Center(child: DefaultProgressIndicator()));
+                      return const SizedBox(
+                          width: 40,
+                          child: Center(child: DefaultProgressIndicator()));
                     }
 
                     if (snapshot.hasError) {
@@ -334,137 +337,78 @@ class _HomeScreenState extends State<HomeScreen> {
                     return GestureDetector(
                       onTap: () {
                         showCupertinoDialog(
+                          barrierDismissible: true,
                           context: context,
                           builder: (context) {
-                            return AlertDialog(
-                                title: Text(
-                                  AppLocalizations.of(context)!.creditBalance,
-                                  textAlign: TextAlign.center,
-                                ),
-                                content: SizedBox(
-                                  height:
-                                      MediaQuery.of(context).size.width * 0.5,
-                                  child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
+                            return CreditAlertDialog(
+                              press: () {
+                                showPaymentOptions(
+                                  context,
+                                  Container(
+                                    constraints: BoxConstraints(
+                                      maxHeight:
+                                          MediaQuery.of(context).size.height *
+                                              0.75,
+                                    ),
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Column(
                                       children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            const Icon(
-                                                Icons.monetization_on_outlined,
-                                                size: 40),
-                                            const SizedBox(
-                                                width:
-                                                    4), // Adjust the spacing between icon and credits
-                                            SizedBox(
-                                              // width: double.infinity,
-                                              child: FittedBox(
-                                                fit: BoxFit.scaleDown,
-                                                child: Text(
-                                                  '$credits',
-                                                  style: const TextStyle(
-                                                    fontSize: 20,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
+                                        Text(
+                                          AppLocalizations.of(context)!
+                                              .selectPayment,
+                                          style: const TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                         const SizedBox(
-                                          height: 10,
+                                          height: 16,
                                         ),
-                                        DefaultButton(
-                                          text: AppLocalizations.of(context)!
-                                              .rechargeNow,
-                                          press: () {
-                                            showPaymentOptions(
-                                              context,
-                                              Container(
-                                                constraints: BoxConstraints(
-                                                  maxHeight:
-                                                      MediaQuery.of(context)
-                                                              .size
-                                                              .height *
-                                                          0.75,
+                                        const Divider(),
+                                        ListView.builder(
+                                          shrinkWrap: true,
+                                          primary: false,
+                                          itemCount: paymentOptions.length,
+                                          itemBuilder: (BuildContext context,
+                                              int index) {
+                                            return InkWell(
+                                              onTap: () {
+                                                paymentOptions[index]
+                                                    ['onTap']();
+                                              },
+                                              child: Card(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .secondary,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
                                                 ),
-                                                padding:
+                                                margin:
                                                     const EdgeInsets.all(16.0),
-                                                child: Column(
-                                                  children: [
-                                                    Text(
-                                                      AppLocalizations.of(
-                                                              context)!
-                                                          .selectPayment,
-                                                      style: const TextStyle(
-                                                        fontSize: 20,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(
-                                                      height: 16,
-                                                    ),
-                                                    const Divider(),
-                                                    ListView.builder(
-                                                      shrinkWrap: true,
-                                                      primary: false,
-                                                      itemCount:
-                                                          paymentOptions.length,
-                                                      itemBuilder:
-                                                          (BuildContext context,
-                                                              int index) {
-                                                        return InkWell(
-                                                          onTap: () {
-                                                            paymentOptions[
-                                                                    index]
-                                                                ['onTap']();
-                                                          },
-                                                          child: Card(
-                                                            color: Theme.of(
-                                                                    context)
-                                                                .colorScheme
-                                                                .secondary,
-                                                            shape:
-                                                                RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          12),
-                                                            ),
-                                                            margin:
-                                                                const EdgeInsets
-                                                                    .all(16.0),
-                                                            child: Container(
-                                                              height:
-                                                                  100, // Adjust the height as needed
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .all(
-                                                                      16.0),
-                                                              child: Center(
-                                                                child: SvgPicture.asset(
-                                                                    paymentOptions[
-                                                                            index]
-                                                                        [
-                                                                        'image']),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        );
-                                                      },
-                                                    ),
-                                                    const Divider(),
-                                                  ],
+                                                child: Container(
+                                                  height:
+                                                      100, // Adjust the height as needed
+                                                  padding: const EdgeInsets.all(
+                                                      16.0),
+                                                  child: Center(
+                                                    child: SvgPicture.asset(
+                                                        paymentOptions[index]
+                                                            ['image']),
+                                                  ),
                                                 ),
                                               ),
                                             );
                                           },
-                                        )
-                                      ]),
-                                ));
+                                        ),
+                                        const Divider(),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                              credits: credits,
+                            );
                           },
                         );
                       },
