@@ -13,6 +13,8 @@ import 'default_button.dart';
 import 'default_text_form_field.dart';
 
 class SignUpForm extends StatefulWidget {
+  const SignUpForm({super.key});
+
   @override
   _SignUpFormState createState() => _SignUpFormState();
 }
@@ -210,10 +212,8 @@ class _SignUpFormState extends State<SignUpForm> {
               AppLocalizations.of(context)!.successfulRegistration;
               Navigator.pop(context);
         } else {
-          if (snackbarMessage == null) {
-            throw FirebaseSignUpAuthUnknownReasonFailureException(context);
-          } 
-        }
+          throw FirebaseSignUpAuthUnknownReasonFailureException(context);
+                }
       } on MessagedFirebaseAuthException catch (e) {
         snackbarMessage = e.message;
       } catch (e) {

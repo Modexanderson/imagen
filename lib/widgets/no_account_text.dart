@@ -23,7 +23,7 @@ class NoAccountText extends StatelessWidget {
         GestureDetector(
           onTap: () {
             Navigator.push(context,
-                MaterialPageRoute(builder: (context) => SignUpScreen()));
+                MaterialPageRoute(builder: (context) => const SignUpScreen()));
           },
           child: Text(
             AppLocalizations.of(context)!.signUp,

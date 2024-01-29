@@ -9,7 +9,7 @@ class RevenueCatProvider extends ChangeNotifier {
     init();
   }
 
-  Entitlement _entitlement = Entitlement.free;
+  final _entitlement = Entitlement.free;
   Entitlement get entitlement => _entitlement;
 
   Future init() async {

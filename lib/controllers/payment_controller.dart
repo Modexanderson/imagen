@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
@@ -34,7 +35,9 @@ class PaymentController extends GetxController {
         displayPaymentSheet(context: context, userUid: userUid, amount: amount);
       }
     } catch (e, s) {
-      print('exception:$e$s');
+      if (kDebugMode) {
+        print('exception:$e$s');
+      }
     }
   }
 
@@ -57,13 +60,19 @@ class PaymentController extends GetxController {
       if (e is StripeException) {
         ShowSnackBar()
             .showSnackBar(context, e.error.localizedMessage.toString());
-        print("Error from Stripe: ${e.error.localizedMessage}");
+        if (kDebugMode) {
+          print("Error from Stripe: ${e.error.localizedMessage}");
+        }
       } else {
         ShowSnackBar().showSnackBar(context, e.toString());
-        print("Unforeseen error: ${e}");
+        if (kDebugMode) {
+          print("Unforeseen error: $e");
+        }
       }
     } catch (e) {
-      print("exception:$e");
+      if (kDebugMode) {
+        print("exception:$e");
+      }
     }
   }
 
@@ -86,7 +95,9 @@ class PaymentController extends GetxController {
       return jsonDecode(response.body);
     } catch (err) {
       ShowSnackBar().showSnackBar(context, err.toString());
-      print('err charging user: ${err.toString()}');
+      if (kDebugMode) {
+        print('err charging user: ${err.toString()}');
+      }
     }
   }
 

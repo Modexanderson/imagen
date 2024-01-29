@@ -14,13 +14,13 @@ part 'image_state.dart';
 class ImageCubit extends Cubit<ImageState> {
   ImageCubit() : super(ImageInitial());
   bool _isGenerating = false;
-  final FusionBrainAPI _fusion_brain_api = FusionBrainAPI('https://api-key.fusionbrain.ai', apiKey, secretKey);
+  final FusionBrainAPI fusion_brain_api = FusionBrainAPI('https://api-key.fusionbrain.ai', apiKey, secretKey);
 
   Future<Uint8List> generate(String query, AIStyle style, Resolution resolution) async {
     emit(ImageLoading());
     _isGenerating = true; // Set the flag when generation starts
     try {
-      String imageString = await _fusion_brain_api.generateImage(query, style, resolution);
+      String imageString = await fusion_brain_api.generateImage(query, style, resolution);
       Uint8List image = base64.decode(imageString); // Decode base64 string to Uint8List
       if (_isGenerating) {
         emit(ImageLoaded(image: image));

@@ -41,7 +41,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late ImageCubit _imageCubit;
-  double _userCredits = 0.0;
+  double userCredits = 0.0;
   String _appVersion = '';
   final TextEditingController _textEditingController = TextEditingController();
   var scaffoldKey = GlobalKey<ScaffoldState>();
@@ -114,8 +114,10 @@ class _HomeScreenState extends State<HomeScreen> {
         return ''; // Return an empty string if saving fails
       }
     } catch (error) {
-      print('Error saving image to gallery: $error');
-      throw error; // Rethrow the error
+      if (kDebugMode) {
+        print('Error saving image to gallery: $error');
+      }
+      rethrow; // Rethrow the error
     }
   }
 
@@ -150,10 +152,12 @@ class _HomeScreenState extends State<HomeScreen> {
               as Map<String, dynamic>?)?[UserDatabaseHelper.CREDITS] ??
           0;
       setState(() {
-        _userCredits = credits;
+        userCredits = credits;
       });
     } catch (e) {
-      print('Error fetching user credits: $e');
+      if (kDebugMode) {
+        print('Error fetching user credits: $e');
+      }
     }
   }
 
@@ -181,11 +185,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
         return debitValue;
       } else {
-        print('Document does not exist or credit field is missing.');
+        if (kDebugMode) {
+          print('Document does not exist or credit field is missing.');
+        }
         return 0.0; // or handle the default value appropriately
       }
     } catch (e) {
-      print('Error retrieving credit value: $e');
+      if (kDebugMode) {
+        print('Error retrieving credit value: $e');
+      }
       return 0.0; // or handle the default value appropriately
     }
   }
@@ -208,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
     showModalBottomSheet(
         context: context,
         builder: (BuildContext context) {
-          return widget;
+          return SingleChildScrollView( child: widget);
         });
   }
 
@@ -249,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
           // fetchOffers(context);
           // print(packages);
           // showPaymentDialog(context, revenueCatWidget(packages));
-          showPaymentDialog(context, StripePayWidget());
+          showPaymentDialog(context, stripePayWidget());
         },
       },
       // {'name': 'Crypto Payment', 'image': 'assets/icons/0xprocessing_method.svg', 'onTap': {}},
@@ -570,8 +578,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                     }
                                   } catch (error) {
                                     // Handle other exceptions
-                                    print(
+                                    if (kDebugMode) {
+                                      print(
                                         'Error during email verification: $error');
+                                    }
                                     ShowSnackBar().showSnackBar(
                                       context,
                                       AppLocalizations.of(context)!
@@ -601,8 +611,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   // Check if the generated image is not empty
                                   if (image.isNotEmpty) {
                                     double debitValue = await getDebitValue();
-                                    print(
+                                    if (kDebugMode) {
+                                      print(
                                         'Credit value retrieved: $debitValue');
+                                    }
                                     deductionResult = await UserDatabaseHelper()
                                         .deductCreditsForUser(
                                             userUid, debitValue);
@@ -628,8 +640,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   }
                                 } catch (error) {
                                   // Handle the image generation error
-                                  print(
+                                  if (kDebugMode) {
+                                    print(
                                       'Error during image generation: $error');
+                                  }
                                   ShowSnackBar().showSnackBar(
                                     context,
                                     AppLocalizations.of(context)!

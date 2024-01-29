@@ -1,6 +1,7 @@
 // import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -33,7 +34,7 @@ String generateReferenceGoodsId() {
   return referenceGoodsId;
 }
 
-Widget StripePayWidget() {
+Widget stripePayWidget() {
   final PaymentController controller = Get.put(PaymentController());
   return Consumer<StripePayState>(
     builder: (context, state, _) {
@@ -194,7 +195,9 @@ Widget StripePayWidget() {
                     //       ),
                     //     ));
 
-                    print(state.selectedAmount);
+                    if (kDebugMode) {
+                      print(state.selectedAmount);
+                    }
                   },
                 ),
               ),

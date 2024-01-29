@@ -15,9 +15,12 @@ class DefaultButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double doubleValue = MediaQuery.of(context).orientation == Orientation.landscape
+        ? 150.0 // Set your double value for landscape
+        : 56.0;
     return SizedBox(
       width: double.infinity,
-      height: getProportionateScreenHeight(56),
+      height: getProportionateScreenHeight(doubleValue),
       child: ElevatedButton(
         style: ButtonStyle(
           backgroundColor: MaterialStateProperty.all<Color>(

@@ -14,6 +14,8 @@ import 'default_text_form_field.dart';
 import 'no_account_text.dart';
 
 class ForgotPasswordForm extends StatefulWidget {
+  const ForgotPasswordForm({super.key});
+
   @override
   _ForgotPasswordFormState createState() => _ForgotPasswordFormState();
 }

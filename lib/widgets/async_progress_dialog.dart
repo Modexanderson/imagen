@@ -4,7 +4,7 @@ import 'default_progress_indicator.dart';
 
 /// This code is an extension to the package flutter_progress_dialog (https://pub.dev/packages/future_progress_dialog)
 
-const _DefaultDecoration = BoxDecoration(
+const _defaultDecoration = BoxDecoration(
   // color: Colors.white,
   shape: BoxShape.rectangle,
   borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -19,8 +19,8 @@ class AsyncProgressDialog extends StatefulWidget {
   final Function? onError;
   final Function? onComplete; // Add this callback
 
-  AsyncProgressDialog(
-    this.future, {
+  const AsyncProgressDialog(
+    this.future, {super.key, 
     this.decoration,
     this.opacity = 1.0,
     this.progress,
@@ -66,13 +66,13 @@ class _AsyncProgressDialogState extends State<AsyncProgressDialog> {
   }
 
   Widget _buildDialog(BuildContext context) {
-    var content;
+    Container content;
     
       content = Container(
         height: 200,
         width: 100,
         alignment: Alignment.center,
-        decoration: widget.decoration ?? _DefaultDecoration,
+        decoration: widget.decoration ?? _defaultDecoration,
         child: widget.progress ??
             const DefaultProgressIndicator(),
       );

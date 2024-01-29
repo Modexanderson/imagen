@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
@@ -150,7 +151,9 @@ Widget revenueCatWidget(List<Package> packages) {
                         Navigator.of(key.currentContext!).pop();
                       }
 
-                      print(state.selectedAmount);
+                      if (kDebugMode) {
+                        print(state.selectedAmount);
+                      }
                     },
                   ),
                 ),

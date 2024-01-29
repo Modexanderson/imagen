@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:logger/logger.dart';
@@ -31,7 +32,9 @@ class _SignInScreenState extends State<SignInScreen> {
     try {
       final signUpFuture = authService.signUpWithGoogle(context);
       signUpFuture.then((value) {
-        print('Value from signUpFuture: $value');
+        if (kDebugMode) {
+          print('Value from signUpFuture: $value');
+        }
         signUpStatus = value;
       });
       signUpStatus = await showDialog(

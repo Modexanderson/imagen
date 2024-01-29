@@ -45,7 +45,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: SizeConfig.screenHeight! * 0.07),
-                  SignUpForm(),
+                  const SignUpForm(),
                   SizedBox(height: getProportionateScreenHeight(20)),
                   // Text(
                   //   AppLocalizations.of(context)!.continuationAgreement,

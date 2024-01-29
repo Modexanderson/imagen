@@ -16,10 +16,10 @@ class AppDrawer extends StatelessWidget {
 
   final String userEmail = AuthentificationService().currentUser.email!;
   void _launchPrivacyPolicy() async {
-    const _privacyPolicy =
+    const privacyPolicy =
         'https://www.privacypolicies.com/live/6913039d-ae2e-4e47-9937-de2ea5fc269d';
-    if (await canLaunchUrl(Uri.parse(_privacyPolicy))) {
-      await launchUrl(Uri.parse(_privacyPolicy));
+    if (await canLaunchUrl(Uri.parse(privacyPolicy))) {
+      await launchUrl(Uri.parse(privacyPolicy));
     } else {
       if (kDebugMode) {
         print('Could not launch website call.');

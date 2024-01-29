@@ -1,5 +1,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:purchases_flutter/object_wrappers.dart';
 
 import '../../api/purchase_api.dart';
@@ -12,17 +13,15 @@ class UserDatabaseHelper {
 
   static const String CREDITS = 'credits';
 
-  UserDatabaseHelper._privateConstructor({this.phone});
+  UserDatabaseHelper._privateConstructor(this.phone);
   static final UserDatabaseHelper _instance =
-      UserDatabaseHelper._privateConstructor();
+      UserDatabaseHelper._privateConstructor('');
   factory UserDatabaseHelper() {
     return _instance;
   }
   FirebaseFirestore? _firebaseFirestore;
   FirebaseFirestore get firestore {
-    if (_firebaseFirestore == null) {
-      _firebaseFirestore = FirebaseFirestore.instance;
-    }
+    _firebaseFirestore ??= FirebaseFirestore.instance;
     return _firebaseFirestore!;
   }
 
@@ -33,7 +32,9 @@ class UserDatabaseHelper {
 
       return snapshot.exists;
     } catch (e) {
-      print("Error checking user existence: $e");
+      if (kDebugMode) {
+        print("Error checking user existence: $e");
+      }
       return false;
     }
   }
@@ -55,11 +56,15 @@ class UserDatabaseHelper {
 
         return initialCreditValue;
       } else {
-        print('Document does not exist or credit field is missing.');
+        if (kDebugMode) {
+          print('Document does not exist or credit field is missing.');
+        }
         return 0.0; // or handle the default value appropriately
       }
     } catch (e) {
-      print('Error retrieving credit value: $e');
+      if (kDebugMode) {
+        print('Error retrieving credit value: $e');
+      }
       return 0.0; // or handle the default value appropriately
     }
 }
@@ -80,7 +85,9 @@ class UserDatabaseHelper {
     return await firestore.collection(USERS_COLLECTION_NAME).doc(uid).get();
   } catch (e) {
     // Handle exceptions (e.g., Firestore errors)
-    print('Error fetching user data: $e');
+    if (kDebugMode) {
+      print('Error fetching user data: $e');
+    }
     rethrow;
   }
 }
@@ -109,7 +116,9 @@ class UserDatabaseHelper {
       }
     } catch (e) {
       // Handle exceptions (e.g., Firestore errors)
-      print('Error deducting credits: $e');
+      if (kDebugMode) {
+        print('Error deducting credits: $e');
+      }
       return false;
     }
   }
@@ -129,17 +138,19 @@ class UserDatabaseHelper {
         await userDocRef.update({
           CREDITS: currentCredits + 10});
           break;
-      case Coins.idCoins10:
+      case Coins.idCoins5:
       // Update the user's credits
         await userDocRef.update({
-          CREDITS: currentCredits + 10});
+          CREDITS: currentCredits + 5});
           break;
       default:
         break;
     }
     } catch (e) {
     // Handle exceptions (e.g., Firestore errors)
-    print('Error updating user credits after payment: $e');
+    if (kDebugMode) {
+      print('Error updating user credits after payment: $e');
+    }
   }
   }
 
@@ -158,7 +169,9 @@ class UserDatabaseHelper {
     });
   } catch (e) {
     // Handle exceptions (e.g., Firestore errors)
-    print('Error updating user credits after payment: $e');
+    if (kDebugMode) {
+      print('Error updating user credits after payment: $e');
+    }
   }
 }
 

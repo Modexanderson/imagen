@@ -14,6 +14,8 @@ import 'default_button.dart';
 import 'default_text_form_field.dart';
 
 class SignInForm extends StatefulWidget {
+  const SignInForm({super.key});
+
   @override
   _SignInFormState createState() => _SignInFormState();
 }

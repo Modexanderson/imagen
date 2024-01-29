@@ -2,6 +2,7 @@
 
 import 'package:binance_pay/binance_pay.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -70,14 +71,18 @@ Future<void> createBinancePayOrder(BuildContext context, double amount) async {
 
       if (await canLaunchUrl(Uri.parse(deepLink))) {
         await launchUrl(Uri.parse(deepLink));
-        print(deepLink);
+        if (kDebugMode) {
+          print(deepLink);
+        }
       } else {
         if (await canLaunchUrl(Uri.parse(universalLink))) {
           await launchUrl(Uri.parse(universalLink));
         } else {
           ShowSnackBar().showSnackBar(
               context, AppLocalizations.of(context)!.couldNotLaunchBinance);
-          print('Could not launch $deepLink');
+          if (kDebugMode) {
+            print('Could not launch $deepLink');
+          }
         }
       }
 
@@ -91,42 +96,64 @@ Future<void> createBinancePayOrder(BuildContext context, double amount) async {
 
       switch (queryResponse.data.status) {
         case 'INITIAL':
-          print('Order is in the initial state. Waiting for payment...');
+          if (kDebugMode) {
+            print('Order is in the initial state. Waiting for payment...');
+          }
           break;
         case 'PENDING':
-          print('Payment is pending. Waiting for completion...');
+          if (kDebugMode) {
+            print('Payment is pending. Waiting for completion...');
+          }
           break;
         case 'PAID':
-          print('Payment successful. Updating user credits...');
+          if (kDebugMode) {
+            print('Payment successful. Updating user credits...');
+          }
           // Update user's credits after successful payment
           await UserDatabaseHelper().updateCreditsAfterPayment(userUid, amount);
           break;
         case 'CANCELED':
-          print('Order has been canceled by the user or system.');
+          if (kDebugMode) {
+            print('Order has been canceled by the user or system.');
+          }
           break;
         case 'ERROR':
-          print('Error processing the order.');
+          if (kDebugMode) {
+            print('Error processing the order.');
+          }
           break;
         case 'REFUNDING':
-          print('Refund process is in progress.');
+          if (kDebugMode) {
+            print('Refund process is in progress.');
+          }
           break;
         case 'REFUNDED':
-          print('Order has been refunded.');
+          if (kDebugMode) {
+            print('Order has been refunded.');
+          }
           break;
         case 'EXPIRED':
-          print('Order has expired and cannot be paid.');
+          if (kDebugMode) {
+            print('Order has expired and cannot be paid.');
+          }
           break;
         default:
-          print('Unknown order status: ${queryResponse.data.status}');
+          if (kDebugMode) {
+            print('Unknown order status: ${queryResponse.data.status}');
+          }
           break;
       }
     } else {
       ShowSnackBar().showSnackBar(
           context, AppLocalizations.of(context)!.errorCreatingBinanceOrder);
-      print('Error creating Binance Pay order: ${response.errorMessage}');
+      if (kDebugMode) {
+        print('Error creating Binance Pay order: ${response.errorMessage}');
+      }
     }
   } catch (error) {
-    print('Error during Binance Pay order creation: $error');
+    if (kDebugMode) {
+      print('Error during Binance Pay order creation: $error');
+    }
   } finally {
     // Close the order if necessary
     // Uncomment the following lines if you want to close the order
@@ -289,7 +316,9 @@ Widget binancePayWidget() {
                       Navigator.of(key.currentContext!).pop();
                     }
 
-                    print(state.selectedAmount);
+                    if (kDebugMode) {
+                      print(state.selectedAmount);
+                    }
                   },
                 ),
               ),
