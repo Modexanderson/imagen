@@ -216,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
     showModalBottomSheet(
         context: context,
         builder: (BuildContext context) {
-          return SingleChildScrollView( child: widget);
+          return SingleChildScrollView(child: widget);
         });
   }
 
@@ -341,6 +341,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     // Assuming 'credits' is the field in your document that holds the user's credits.
                     double credits = userData['credits'] ?? 0.0;
+                    userCredits = credits;
 
                     return GestureDetector(
                       onTap: () {
@@ -580,7 +581,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     // Handle other exceptions
                                     if (kDebugMode) {
                                       print(
-                                        'Error during email verification: $error');
+                                          'Error during email verification: $error');
                                     }
                                     ShowSnackBar().showSnackBar(
                                       context,
@@ -599,6 +600,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                 );
                               } else {
                                 try {
+                                  double debitValue = await getDebitValue();
+
+                                  if (userCredits < debitValue) {
+                                    ShowSnackBar().showSnackBar(
+                                      context,
+                                      AppLocalizations.of(context)!
+                                          .insufficientCredits,
+                                    );
+                                    return; // Stop further execution
+                                  }
+
                                   Uint8List image = await _imageCubit.generate(
                                     _textEditingController.text,
                                     _selectedStyle,
@@ -610,14 +622,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                   // Check if the generated image is not empty
                                   if (image.isNotEmpty) {
-                                    double debitValue = await getDebitValue();
-                                    if (kDebugMode) {
-                                      print(
-                                        'Credit value retrieved: $debitValue');
-                                    }
                                     deductionResult = await UserDatabaseHelper()
                                         .deductCreditsForUser(
-                                            userUid, debitValue);
+                                      userUid,
+                                      debitValue,
+                                    );
 
                                     if (deductionResult) {
                                       // If credits deducted successfully, proceed with the image
@@ -642,7 +651,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   // Handle the image generation error
                                   if (kDebugMode) {
                                     print(
-                                      'Error during image generation: $error');
+                                        'Error during image generation: $error');
                                   }
                                   ShowSnackBar().showSnackBar(
                                     context,
