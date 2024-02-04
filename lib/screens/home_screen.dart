@@ -3,6 +3,7 @@
 import 'dart:io' show Platform;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uuid/uuid.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -80,46 +81,55 @@ class _HomeScreenState extends State<HomeScreen> {
   var _selectedStyle = AIStyle.noStyle;
   var _selectedResolution = Resolution.r1x1;
   Future<String> _downloadImage(
-      Uint8List imageBytes, String customPart_) async {
-    try {
-      DateTime now = DateTime.now();
+  Uint8List imageBytes,
+  String customPart_,
+) async {
+  try {
+    DateTime now = DateTime.now();
+    int year = now.year;
+    int month = now.month;
+    int day = now.day;
+    int hour = now.hour;
+    int minute = now.minute;
+    int second = now.second;
+    final time = '$year-$month-$day $hour:$minute:$second';
 
-      int year = now.year;
-      int month = now.month;
-      int day = now.day;
-      int hour = now.hour;
-      int minute = now.minute;
-      int second = now.second;
-      final time = '$year-$month-$day $hour:$minute:$second';
-      final imageName = '$customPart_$time';
+    // Generate a unique identifier instead of using the entire customPart_
+    final uniqueIdentifier = Uuid().v4(); // You need to import the uuid package
 
-      final result =
-          await ImageGallerySaver.saveImage(imageBytes, name: imageName);
+    // Truncate customPart_ to a certain length (e.g., 10 characters)
+    final truncatedCustomPart = customPart_.length > 10
+        ? customPart_.substring(0, 10)
+        : customPart_;
 
-      if (result['isSuccess']) {
-        ShowSnackBar()
-            .showSnackBar(context, AppLocalizations.of(context)!.imageSaved);
-        // Image saved successfully
-        if (kDebugMode) {
-          print('Image successfully saved to gallery');
-        }
-        return result['filePath'] ?? ''; // Return the file path
-      } else {
-        ShowSnackBar().showSnackBar(
-            context, AppLocalizations.of(context)!.imageSavedFailed);
-        // Image save failed
-        if (kDebugMode) {
-          print('Failed to save image to gallery');
-        }
-        return ''; // Return an empty string if saving fails
-      }
-    } catch (error) {
+    final imageName = '$truncatedCustomPart$uniqueIdentifier$time';
+
+    final result = await ImageGallerySaver.saveImage(imageBytes, name: imageName);
+
+    if (result['isSuccess']) {
+      ShowSnackBar().showSnackBar(context, AppLocalizations.of(context)!.imageSaved);
+      // Image saved successfully
       if (kDebugMode) {
-        print('Error saving image to gallery: $error');
+        print('Image successfully saved to gallery');
       }
-      rethrow; // Rethrow the error
+      return result['filePath'] ?? ''; // Return the file path
+    } else {
+      ShowSnackBar().showSnackBar(context, AppLocalizations.of(context)!.imageSavedFailed);
+      // Image save failed
+      if (kDebugMode) {
+        print('Failed to save image to gallery');
+      }
+      return ''; // Return an empty string if saving fails
     }
+  } catch (error) {
+    if (kDebugMode) {
+      print('Error saving image to gallery: $error');
+    }
+    rethrow; // Rethrow the error
   }
+}
+
+
 
   Future<void> _getAppVersion() async {
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
@@ -351,6 +361,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           builder: (context) {
                             return CreditAlertDialog(
                               press: () {
+                                Navigator.pop(context);
                                 showPaymentOptions(
                                   context,
                                   Container(
@@ -600,6 +611,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 );
                               } else {
                                 try {
+                                  state is ImageLoading;
                                   double debitValue = await getDebitValue();
 
                                   if (userCredits < debitValue) {

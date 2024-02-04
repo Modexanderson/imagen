@@ -148,7 +148,7 @@ class FusionBrainAPI {
 
 
   Future<List<String>> checkGenerationStatus(String requestId,
-      {int attempts = 10, int delay = 2000}) async {
+      {int attempts = 10, int delay = 20000}) async {
     while (attempts > 0) {
       final response = await http.get(
           Uri.parse('$baseUrl/key/api/v1/text2image/status/$requestId'),
