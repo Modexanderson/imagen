@@ -81,55 +81,56 @@ class _HomeScreenState extends State<HomeScreen> {
   var _selectedStyle = AIStyle.noStyle;
   var _selectedResolution = Resolution.r1x1;
   Future<String> _downloadImage(
-  Uint8List imageBytes,
-  String customPart_,
-) async {
-  try {
-    DateTime now = DateTime.now();
-    int year = now.year;
-    int month = now.month;
-    int day = now.day;
-    int hour = now.hour;
-    int minute = now.minute;
-    int second = now.second;
-    final time = '$year-$month-$day $hour:$minute:$second';
+    Uint8List imageBytes,
+    String customPart_,
+  ) async {
+    try {
+      DateTime now = DateTime.now();
+      int year = now.year;
+      int month = now.month;
+      int day = now.day;
+      int hour = now.hour;
+      int minute = now.minute;
+      int second = now.second;
+      final time = '$year-$month-$day $hour:$minute:$second';
 
-    // Generate a unique identifier instead of using the entire customPart_
-    final uniqueIdentifier = Uuid().v4(); // You need to import the uuid package
+      // Generate a unique identifier instead of using the entire customPart_
+      final uniqueIdentifier =
+          Uuid().v4(); // You need to import the uuid package
 
-    // Truncate customPart_ to a certain length (e.g., 10 characters)
-    final truncatedCustomPart = customPart_.length > 10
-        ? customPart_.substring(0, 10)
-        : customPart_;
+      // Truncate customPart_ to a certain length (e.g., 10 characters)
+      final truncatedCustomPart =
+          customPart_.length > 10 ? customPart_.substring(0, 10) : customPart_;
 
-    final imageName = '$truncatedCustomPart$uniqueIdentifier$time';
+      final imageName = '$truncatedCustomPart$uniqueIdentifier$time';
 
-    final result = await ImageGallerySaver.saveImage(imageBytes, name: imageName);
+      final result =
+          await ImageGallerySaver.saveImage(imageBytes, name: imageName);
 
-    if (result['isSuccess']) {
-      ShowSnackBar().showSnackBar(context, AppLocalizations.of(context)!.imageSaved);
-      // Image saved successfully
-      if (kDebugMode) {
-        print('Image successfully saved to gallery');
+      if (result['isSuccess']) {
+        ShowSnackBar()
+            .showSnackBar(context, AppLocalizations.of(context)!.imageSaved);
+        // Image saved successfully
+        if (kDebugMode) {
+          print('Image successfully saved to gallery');
+        }
+        return result['filePath'] ?? ''; // Return the file path
+      } else {
+        ShowSnackBar().showSnackBar(
+            context, AppLocalizations.of(context)!.imageSavedFailed);
+        // Image save failed
+        if (kDebugMode) {
+          print('Failed to save image to gallery');
+        }
+        return ''; // Return an empty string if saving fails
       }
-      return result['filePath'] ?? ''; // Return the file path
-    } else {
-      ShowSnackBar().showSnackBar(context, AppLocalizations.of(context)!.imageSavedFailed);
-      // Image save failed
+    } catch (error) {
       if (kDebugMode) {
-        print('Failed to save image to gallery');
+        print('Error saving image to gallery: $error');
       }
-      return ''; // Return an empty string if saving fails
+      rethrow; // Rethrow the error
     }
-  } catch (error) {
-    if (kDebugMode) {
-      print('Error saving image to gallery: $error');
-    }
-    rethrow; // Rethrow the error
   }
-}
-
-
 
   Future<void> _getAppVersion() async {
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
@@ -254,6 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  bool buttonIsEnabled = true;
   @override
   Widget build(BuildContext context) {
     Uint8List? image;
@@ -556,6 +558,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             press: () async {
                               bool allowed =
                                   AuthentificationService().currentUserVerified;
+                              // Immediately disable the button to prevent multiple presses:
+                              buttonIsEnabled = false;
+
+                              // Check user verification (if applicable):
                               if (!allowed) {
                                 final reverify = await showConfirmationDialog(
                                   context,
@@ -576,17 +582,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                     if (verificationResult) {
                                       ShowSnackBar().showSnackBar(
-                                        context,
-                                        AppLocalizations.of(context)!
-                                            .verificationEmailSuccessful,
-                                      );
+                                          context,
+                                          AppLocalizations.of(context)!
+                                              .verificationEmailSuccessful);
                                     } else {
-                                      // Handle case where verification email sending failed
                                       ShowSnackBar().showSnackBar(
-                                        context,
-                                        AppLocalizations.of(context)!
-                                            .sendingVerificationEmailFailed,
-                                      );
+                                          context,
+                                          AppLocalizations.of(context)!
+                                              .sendingVerificationEmailFailed);
                                     }
                                   } catch (error) {
                                     // Handle other exceptions
@@ -595,82 +598,88 @@ class _HomeScreenState extends State<HomeScreen> {
                                           'Error during email verification: $error');
                                     }
                                     ShowSnackBar().showSnackBar(
-                                      context,
-                                      AppLocalizations.of(context)!
-                                          .verificationEmailError,
-                                    );
+                                        context,
+                                        AppLocalizations.of(context)!
+                                            .verificationEmailError);
                                   }
+                                  return; // Exit if user needs to verify email
                                 }
+                              }
+
+                              // Check input:
+                              if (_textEditingController.text.isEmpty) {
+                                ShowSnackBar().showSnackBar(
+                                    context,
+                                    AppLocalizations.of(context)!
+                                        .inputSomeText);
+                                buttonIsEnabled =
+                                    true; // Re-enable button after error message
                                 return;
                               }
 
-                              if (_textEditingController.text.isEmpty) {
-                                ShowSnackBar().showSnackBar(
-                                  context,
-                                  AppLocalizations.of(context)!.inputSomeText,
-                                );
-                              } else {
-                                try {
-                                  state is ImageLoading;
-                                  double debitValue = await getDebitValue();
+                              // Display loading indicator:
+                              setState(() {
+                                state is ImageLoading;
+                              });
 
-                                  if (userCredits < debitValue) {
-                                    ShowSnackBar().showSnackBar(
+                              try {
+                                double debitValue = await getDebitValue();
+
+                                // Check user credits (if applicable):
+                                if (userCredits < debitValue) {
+                                  ShowSnackBar().showSnackBar(
                                       context,
                                       AppLocalizations.of(context)!
-                                          .insufficientCredits,
-                                    );
-                                    return; // Stop further execution
-                                  }
+                                          .insufficientCredits);
+                                  buttonIsEnabled =
+                                      true; // Re-enable button after error message
+                                  return;
+                                }
 
-                                  Uint8List image = await _imageCubit.generate(
-                                    _textEditingController.text,
-                                    _selectedStyle,
-                                    _selectedResolution,
-                                  );
+                                // Generate image:
+                                Uint8List image = await _imageCubit.generate(
+                                  _textEditingController.text,
+                                  _selectedStyle,
+                                  _selectedResolution,
+                                );
 
-                                  // If image generation is successful, deduct credits
-                                  bool deductionResult;
+                                // Handle successful image generation (if applicable):
+                                if (image.isNotEmpty) {
+                                  bool deductionResult =
+                                      await UserDatabaseHelper()
+                                          .deductCreditsForUser(
+                                              userUid, debitValue);
 
-                                  // Check if the generated image is not empty
-                                  if (image.isNotEmpty) {
-                                    deductionResult = await UserDatabaseHelper()
-                                        .deductCreditsForUser(
-                                      userUid,
-                                      debitValue,
-                                    );
-
-                                    if (deductionResult) {
-                                      // If credits deducted successfully, proceed with the image
-                                      // display or any other actions you need to perform.
-                                    } else {
-                                      // Insufficient credits. Show a message.
-                                      ShowSnackBar().showSnackBar(
+                                  if (deductionResult) {
+                                    // Handle successful image generation and credit deduction
+                                    // (display image, perform other actions)
+                                  } else {
+                                    // Handle insufficient credits after image generation
+                                    ShowSnackBar().showSnackBar(
                                         context,
                                         AppLocalizations.of(context)!
-                                            .insufficientCredits,
-                                      );
-                                    }
-                                  } else {
-                                    // Handle the case where the image is not generated successfully
-                                    ShowSnackBar().showSnackBar(
+                                            .insufficientCredits);
+                                  }
+                                } else {
+                                  // Handle failed image generation
+                                  ShowSnackBar().showSnackBar(
                                       context,
                                       AppLocalizations.of(context)!
-                                          .failedGeneration,
-                                    );
-                                  }
-                                } catch (error) {
-                                  // Handle the image generation error
-                                  if (kDebugMode) {
-                                    print(
-                                        'Error during image generation: $error');
-                                  }
-                                  ShowSnackBar().showSnackBar(
+                                          .failedGeneration);
+                                }
+                              } catch (error) {
+                                // Handle other image generation errors
+                                if (kDebugMode) {
+                                  print(
+                                      'Error during image generation: $error');
+                                }
+                                ShowSnackBar().showSnackBar(
                                     context,
                                     AppLocalizations.of(context)!
-                                        .errorImageGeneration,
-                                  );
-                                }
+                                        .errorImageGeneration);
+                              } finally {
+                                // Re-enable button after completing any actions:
+                                buttonIsEnabled = true;
                               }
                             },
                             text: AppLocalizations.of(context)!.create,
