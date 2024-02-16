@@ -97,7 +97,7 @@ class _SettingsState extends State<Settings> {
                 BoxSwitchTile(
                   title: Text(AppLocalizations.of(context)!.darkMode),
                   keyName: 'darkMode',
-                  defaultValue: true,
+                  defaultValue: false,
                   onChanged: (bool val, Box box) {
                     box.put('useSystemTheme', false);
                     currentTheme.switchTheme(

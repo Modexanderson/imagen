@@ -2,17 +2,26 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share/share.dart';
 
+import '../bloc/image_cubit.dart';
 import '../screens/settings.dart';
 import '../services/authentification_service.dart';
 import 'show_confirmation_dialog.dart';
 
 class AppDrawer extends StatelessWidget {
   final String appVersion;
-  AppDrawer({required this.appVersion, super.key});
+  final Function(String) setPromptCallback;
+
+  AppDrawer({
+    Key? key,
+    required this.appVersion,
+    required this.setPromptCallback,
+  }) : super(key: key);
 
   final String userEmail = AuthentificationService().currentUser.email!;
   void _launchPrivacyPolicy() async {
@@ -27,9 +36,45 @@ class AppDrawer extends StatelessWidget {
     }
   }
 
-  final _appLink = Platform.isAndroid ? 'https://cupertinostudios.online/#/imagen/android' : '' ;
+  final _appLink = Platform.isAndroid
+      ? 'https://cupertinostudios.online/#/imagen/android'
+      : '';
   void _shareApp() {
     Share.share(_appLink);
+  }
+
+  ExpansionTile buildHistoryTile(BuildContext context) {
+    final imageHistoryBox = Hive.box('imageHistory');
+    final reversedList = List.generate(
+      imageHistoryBox.length,
+      (index) => imageHistoryBox.getAt(index),
+    ).reversed.toList();
+
+    return ExpansionTile(
+      leading: const Icon(Icons.history_outlined),
+      title: Text(
+        AppLocalizations.of(context)!.showHistory.split(' ').last,
+        style: const TextStyle(fontSize: 15),
+      ),
+      children: reversedList.map((imageInfo) {
+        return BlocProvider(
+          create: (context) => ImageCubit(),
+          child: ListTile(
+            leading: Image.memory(imageInfo!.image, width: 40, height: 40),
+            title: Text(
+              imageInfo.prompt,
+              overflow: TextOverflow.fade,
+              maxLines: 1,
+            ),
+            onTap: () {
+              context.read<ImageCubit>().setSelectedImage(imageInfo.image);
+              setPromptCallback(imageInfo.prompt); // Call the callback function
+              Navigator.pop(context);
+            },
+          ),
+        );
+      }).toList(),
+    );
   }
 
   @override
@@ -76,6 +121,10 @@ class AppDrawer extends StatelessWidget {
               onTap: () {
                 Navigator.of(context).pop();
               }),
+          const SizedBox(
+            height: 20,
+          ),
+          buildHistoryTile(context),
           const SizedBox(
             height: 20,
           ),

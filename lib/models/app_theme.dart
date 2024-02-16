@@ -40,6 +40,11 @@ class AppTheme {
           borderRadius: BorderRadius.circular(7.0),
         ),
       ),
+      expansionTileTheme: ExpansionTileThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(7.0),
+        ),
+      ),
       visualDensity: VisualDensity.adaptivePlatformDensity,
       appBarTheme: AppBarTheme(
         backgroundColor: currentTheme.currentColor(),
@@ -112,6 +117,15 @@ class AppTheme {
       listTileTheme: ListTileThemeData(
         iconColor: Colors.white,
         textColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(7.0),
+        ),
+      ),
+      expansionTileTheme: ExpansionTileThemeData(
+        iconColor: Colors.white,
+        textColor: Colors.white,
+        collapsedTextColor: Colors.white,
+        collapsedIconColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(7.0),
         ),

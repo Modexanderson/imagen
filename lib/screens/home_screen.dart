@@ -3,6 +3,7 @@
 import 'dart:io' show Platform;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -20,6 +21,7 @@ import '../api/enums.dart';
 import '../api/purchase_api.dart';
 import '../bloc/image_cubit.dart';
 
+import '../models/image_info.dart';
 import '../services/authentification_service.dart';
 import '../services/database/user_database_helper.dart';
 import '../widgets/binance_pay_widget.dart';
@@ -80,6 +82,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   var _selectedStyle = AIStyle.noStyle;
   var _selectedResolution = Resolution.r1x1;
+  // Generate a unique identifier instead of using the entire customPart_
+  final uniqueIdentifier =
+      const Uuid().v4(); // You need to import the uuid package
   Future<String> _downloadImage(
     Uint8List imageBytes,
     String customPart_,
@@ -93,10 +98,6 @@ class _HomeScreenState extends State<HomeScreen> {
       int minute = now.minute;
       int second = now.second;
       final time = '$year-$month-$day $hour:$minute:$second';
-
-      // Generate a unique identifier instead of using the entire customPart_
-      final uniqueIdentifier =
-          Uuid().v4(); // You need to import the uuid package
 
       // Truncate customPart_ to a certain length (e.g., 10 characters)
       final truncatedCustomPart =
@@ -255,6 +256,16 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  final GlobalKey<_HomeScreenState> drawerKey = GlobalKey<_HomeScreenState>();
+
+  void updateDrawer() {
+    setState(() {}); // Trigger a rebuild of the drawer
+  }
+
+  void setPrompt(String prompt) {
+    _textEditingController.text = prompt;
+  }
+
   bool buttonIsEnabled = true;
   @override
   Widget build(BuildContext context) {
@@ -290,6 +301,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final double size = Platform.isAndroid || Platform.isIOS
         ? MediaQuery.of(context).size.width
         : MediaQuery.of(context).size.height / 2;
+
     return UpgradeAlert(
       upgrader: Upgrader(
           showIgnore: false,
@@ -306,7 +318,11 @@ class _HomeScreenState extends State<HomeScreen> {
         create: (context) => _imageCubit,
         child: Scaffold(
           key: scaffoldKey,
-          drawer: AppDrawer(appVersion: _appVersion),
+          drawer: AppDrawer(
+            appVersion: _appVersion,
+            setPromptCallback: setPrompt,
+            key: drawerKey,
+          ),
           appBar: AppBar(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -642,6 +658,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                   _selectedStyle,
                                   _selectedResolution,
                                 );
+
+                                // Add the generated image to the history list
+                                // imageHistory.add(image);
+                                drawerKey.currentState?.updateDrawer();
+
+                                // Save image to Hive
+                                // Save image information to Hive
+                                Hive.box('imageHistory').add(HiveImageInfo(
+                                    image, _textEditingController.text));
 
                                 // Handle successful image generation (if applicable):
                                 if (image.isNotEmpty) {

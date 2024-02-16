@@ -9,6 +9,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'app.dart';
 import 'firebase_options.dart';
 import 'models/.env.dart';
+import 'models/image_info.dart';
 import 'widgets/binance_pay_widget.dart';
 import 'widgets/stripe_pay_widget.dart';
 import 'widgets/revenue_cat_widget.dart';
@@ -21,9 +22,10 @@ Future<void> main() async {
   } else {
     await Hive.initFlutter();
   }
+  
+  Hive.registerAdapter(HiveImageInfoAdapter());
   await openHiveBox('settings');
-  await openHiveBox('downloads');
-  await openHiveBox('Favorite Songs');
+  await openHiveBox('imageHistory');
   await openHiveBox('cache', limit: true);
 
   if (Platform.isAndroid) {

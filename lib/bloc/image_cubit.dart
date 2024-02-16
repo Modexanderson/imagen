@@ -14,6 +14,7 @@ part 'image_state.dart';
 class ImageCubit extends Cubit<ImageState> {
   ImageCubit() : super(ImageInitial());
   bool _isGenerating = false;
+  Uint8List? selectedImage;
   final FusionBrainAPI fusion_brain_api = FusionBrainAPI('https://api-key.fusionbrain.ai', apiKey, secretKey);
 
   Future<Uint8List> generate(String query, AIStyle style, Resolution resolution) async {
@@ -35,6 +36,10 @@ class ImageCubit extends Cubit<ImageState> {
     } finally {
       _isGenerating = false; // Reset the flag when generation is complete
     }
+  }
+
+ void setSelectedImage(Uint8List image) {
+    emit(ImageLoaded(image: image));
   }
 
   void cancelGeneration() {
