@@ -7,6 +7,7 @@ import 'package:flutter_archive/flutter_archive.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../widgets/snack_bar.dart';
 import 'picker.dart';
@@ -81,7 +82,7 @@ Future<void> createBackup(
       if (showDialog) {
         ShowSnackBar().showSnackBar(
           context,
-          'Backup Successful',
+          AppLocalizations.of(context)!.backupSuccess,
         );
       }
     } catch (e) {
@@ -93,7 +94,7 @@ Future<void> createBackup(
   } else {
     ShowSnackBar().showSnackBar(
       context,
-      'No Folder Selected',
+      AppLocalizations.of(context)!.noFolderSelected,
     );
   }
 }
@@ -104,7 +105,7 @@ Future<void> restore(
   final String savePath = await Picker.selectFile(
     context: context,
     ext: ['zip'],
-    message: 'Select Backup File',
+    message: AppLocalizations.of(context)!.selectBackupFile,
   );
   final File zipFile = File(savePath);
   final Directory tempDir = await getTemporaryDirectory();
@@ -131,11 +132,12 @@ Future<void> restore(
       }
     }
     destinationDir.delete(recursive: true);
-    ShowSnackBar().showSnackBar(context, 'Import Successful');
+    ShowSnackBar()
+        .showSnackBar(context, AppLocalizations.of(context)!.importSuccessful);
   } catch (e) {
     ShowSnackBar().showSnackBar(
       context,
-      'Import Failed \nError: $e',
+      '${AppLocalizations.of(context)!.importFailed}\n${AppLocalizations.of(context)!.error} $e',
     );
   }
 }

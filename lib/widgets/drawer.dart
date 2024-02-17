@@ -63,7 +63,7 @@ class _AppDrawerState extends State<AppDrawer> {
     return ExpansionTile(
       leading: const Icon(Icons.history_outlined),
       title: Text(
-        AppLocalizations.of(context)!.showHistory.split(' ').last,
+        AppLocalizations.of(context)!.history,
         style: const TextStyle(fontSize: 15),
       ),
       children: reversedList.map((imageInfo) {

@@ -289,6 +289,10 @@ class _HomeScreenState extends State<HomeScreen> {
         AppLocalizations.of(
           context,
         )!
+            .imageHistory: ['imageHistory'],
+        AppLocalizations.of(
+          context,
+        )!
             .cache: ['cache'],
       };
       final String autoBackPath = Hive.box('settings').get(

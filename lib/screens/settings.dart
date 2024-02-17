@@ -805,18 +805,18 @@ class _SettingsState extends State<Settings> {
 
                         final List<String> checked = [
                           AppLocalizations.of(context)!.settings,
-                          'Image History',
+                          AppLocalizations.of(context)!.imageHistory,
                         ];
 
                         final List<String> items = [
                           AppLocalizations.of(context)!.settings,
-                          'Image History',
+                          AppLocalizations.of(context)!.imageHistory,
                           AppLocalizations.of(context)!.cache,
                         ];
 
                         final Map<String, List> boxNames = {
                           AppLocalizations.of(context)!.settings: ['settings'],
-                          'Image History': ['imageHistory'],
+                          AppLocalizations.of(context)!.imageHistory: ['imageHistory'],
                           AppLocalizations.of(context)!.cache: ['cache'],
                         };
                         return StatefulBuilder(
