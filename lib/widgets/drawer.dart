@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -5,15 +6,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share/share.dart';
 
 import '../bloc/image_cubit.dart';
+import '../models/image_info.dart';
 import '../screens/settings.dart';
 import '../services/authentification_service.dart';
 import 'show_confirmation_dialog.dart';
 
-class AppDrawer extends StatelessWidget {
+class AppDrawer extends StatefulWidget {
   final String appVersion;
   final Function(String) setPromptCallback;
 
@@ -23,7 +26,13 @@ class AppDrawer extends StatelessWidget {
     required this.setPromptCallback,
   }) : super(key: key);
 
+  @override
+  State<AppDrawer> createState() => _AppDrawerState();
+}
+
+class _AppDrawerState extends State<AppDrawer> {
   final String userEmail = AuthentificationService().currentUser.email!;
+
   void _launchPrivacyPolicy() async {
     const privacyPolicy =
         'https://www.privacypolicies.com/live/6913039d-ae2e-4e47-9937-de2ea5fc269d';
@@ -39,6 +48,7 @@ class AppDrawer extends StatelessWidget {
   final _appLink = Platform.isAndroid
       ? 'https://cupertinostudios.online/#/imagen/android'
       : '';
+
   void _shareApp() {
     Share.share(_appLink);
   }
@@ -60,20 +70,115 @@ class AppDrawer extends StatelessWidget {
         return BlocProvider(
           create: (context) => ImageCubit(),
           child: ListTile(
-            leading: Image.memory(imageInfo!.image, width: 40, height: 40),
-            title: Text(
-              imageInfo.prompt,
-              overflow: TextOverflow.fade,
-              maxLines: 1,
-            ),
-            onTap: () {
-              context.read<ImageCubit>().setSelectedImage(imageInfo.image);
-              setPromptCallback(imageInfo.prompt); // Call the callback function
-              Navigator.pop(context);
-            },
-          ),
+              leading: Image.memory(imageInfo!.image, width: 40, height: 40),
+              title: Text(
+                imageInfo.prompt,
+                overflow: TextOverflow.fade,
+                maxLines: 1,
+              ),
+              onTap: () {
+                context.read<ImageCubit>().setSelectedImage(imageInfo.image);
+                widget.setPromptCallback(
+                    imageInfo.prompt); // Call the callback function
+                Navigator.pop(context);
+              },
+              trailing: PopupMenuButton<int>(
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 0,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.share),
+                        const SizedBox(width: 8),
+                        Text(AppLocalizations.of(context)!.share.split(' ').first),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 1,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.delete),
+                        const SizedBox(width: 8),
+                        Text(AppLocalizations.of(context)!.delete),
+                      ],
+                    ),
+                  ),
+                ],
+                onSelected: (value) {
+                  if (value == 0) {
+                    _shareImage(imageInfo.image);
+                  } else if (value == 1) {
+                    _showDeleteConfirmationDialog(context, imageInfo);
+                  }
+                },
+                icon: const Icon(Icons.more_vert),
+              )),
         );
       }).toList(),
+    );
+  }
+
+  void _showDeleteConfirmationDialog(BuildContext context, dynamic imageInfo) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(AppLocalizations.of(context)!.delete),
+          content: Text(
+            '${AppLocalizations.of(context)!.deleteThemeSubtitle} ${imageInfo.prompt}',
+            overflow: TextOverflow.fade,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text(AppLocalizations.of(context)!.cancel),
+            ),
+            TextButton(
+              onPressed: () {
+                _deleteImage(context, imageInfo);
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text(AppLocalizations.of(context)!.delete),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deleteImage(BuildContext context, HiveImageInfo imageInfo) {
+    final imageHistoryBox = Hive.box('imageHistory');
+
+    // Find the key associated with the provided imageInfo
+    final key =
+        imageHistoryBox.values.toList().indexWhere((item) => item == imageInfo);
+
+    if (key != -1) {
+      // If the key is found, delete the item from the box
+      imageHistoryBox.deleteAt(key);
+      setState(() {});
+
+      // Update the UI or notify state management solution accordingly
+    }
+  }
+
+  void _shareImage(Uint8List imageBytes) async {
+    // Convert the imageBytes to base64 encoding
+    String base64Image = base64Encode(imageBytes);
+
+    // Create a temporary directory
+    Directory tempDir = await getTemporaryDirectory();
+
+    // Create a temporary file to save the image
+    File tempFile = File('${tempDir.path}/image.png');
+    await tempFile.writeAsBytes(Uint8List.fromList(base64.decode(base64Image)));
+
+    // Share the image using the share package
+    Share.shareFiles(
+      [tempFile.path],
     );
   }
 
@@ -102,7 +207,7 @@ class AppDrawer extends StatelessWidget {
                         fontFamily: 'Alva'),
                   ),
                   Text(
-                    'v$appVersion',
+                    'v${widget.appVersion}',
                     style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,

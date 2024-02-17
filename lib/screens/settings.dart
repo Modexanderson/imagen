@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -8,8 +10,10 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../app.dart';
 import '../models/config.dart';
+import '../services/ext_storage_provider.dart';
 import '../utils/backup_restore.dart';
 import '../utils/box_switch_tile.dart';
+import '../utils/picker.dart';
 import '../widgets/gradient_container.dart';
 import '../widgets/snack_bar.dart';
 import '../widgets/text_input_dialog.dart';
@@ -25,7 +29,10 @@ class _SettingsState extends State<Settings> {
   String? appVersion;
   final Box settingsBox = Hive.box('settings');
   final MyTheme currentTheme = GetIt.I<MyTheme>();
-
+  String autoBackPath = Hive.box('settings').get(
+    'autoBackPath',
+    defaultValue: '/storage/emulated/0/Imagen/Backups',
+  ) as String;
   String lang =
       Hive.box('settings').get('lang', defaultValue: 'English') as String;
   String canvasColor =
@@ -789,7 +796,7 @@ class _SettingsState extends State<Settings> {
                         // }
 
                         final List<String> persist = [
-                          'Settings',
+                          AppLocalizations.of(context)!.settings,
                           // AppLocalizations.of(
                           //   context,
                           // )!
@@ -797,17 +804,20 @@ class _SettingsState extends State<Settings> {
                         ];
 
                         final List<String> checked = [
-                          'Settings',
+                          AppLocalizations.of(context)!.settings,
+                          'Image History',
                         ];
 
                         final List<String> items = [
-                          'Settings',
-                          'Cache',
+                          AppLocalizations.of(context)!.settings,
+                          'Image History',
+                          AppLocalizations.of(context)!.cache,
                         ];
 
                         final Map<String, List> boxNames = {
-                          'Settings': ['settings'],
-                          'Cache': ['cache'],
+                          AppLocalizations.of(context)!.settings: ['settings'],
+                          'Image History': ['imageHistory'],
+                          AppLocalizations.of(context)!.cache: ['cache'],
                         };
                         return StatefulBuilder(
                           builder: (
@@ -924,6 +934,80 @@ class _SettingsState extends State<Settings> {
                     await restore(context);
                     currentTheme.refresh();
                   },
+                ),
+                BoxSwitchTile(
+                  title: Text(
+                    AppLocalizations.of(
+                      context,
+                    )!
+                        .autoBack,
+                  ),
+                  subtitle: Text(
+                    AppLocalizations.of(
+                      context,
+                    )!
+                        .autoBackSub,
+                  ),
+                  keyName: 'autoBackup',
+                  defaultValue: false,
+                ),
+                ListTile(
+                  title: Text(
+                    AppLocalizations.of(
+                      context,
+                    )!
+                        .autoBackLocation,
+                  ),
+                  subtitle: Text(autoBackPath),
+                  trailing: TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor:
+                          Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.grey[700],
+                    ),
+                    onPressed: () async {
+                      autoBackPath = await ExtStorageProvider.getExtStorage(
+                            dirName: 'Imagen/Backups',
+                          ) ??
+                          '/storage/emulated/0/Imagen/Backups';
+                      Hive.box('settings').put('autoBackPath', autoBackPath);
+                      setState(
+                        () {},
+                      );
+                    },
+                    child: Text(
+                      AppLocalizations.of(
+                        context,
+                      )!
+                          .reset,
+                    ),
+                  ),
+                  onTap: () async {
+                    final String temp = await Picker.selectFolder(
+                      context: context,
+                      message: AppLocalizations.of(
+                        context,
+                      )!
+                          .autoBackLocation,
+                    );
+                    if (temp.trim() != '') {
+                      autoBackPath = temp;
+                      Hive.box('settings').put('autoBackPath', temp);
+                      setState(
+                        () {},
+                      );
+                    } else {
+                      ShowSnackBar().showSnackBar(
+                        context,
+                        AppLocalizations.of(
+                          context,
+                        )!
+                            .noFolderSelected,
+                      );
+                    }
+                  },
+                  dense: true,
                 ),
                 ListTile(
                   title: Text(

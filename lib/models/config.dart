@@ -121,7 +121,7 @@ class MyTheme with ChangeNotifier {
 
   void refresh() {
     final Box settingsBox = Hive.box('settings');
-    _isDark = settingsBox.get('darkMode', defaultValue: true) as bool;
+    _isDark = settingsBox.get('darkMode', defaultValue: false) as bool;
 
     _useSystemTheme =
         settingsBox.get('useSystemTheme', defaultValue: false) as bool;

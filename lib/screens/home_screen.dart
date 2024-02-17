@@ -24,6 +24,8 @@ import '../bloc/image_cubit.dart';
 import '../models/image_info.dart';
 import '../services/authentification_service.dart';
 import '../services/database/user_database_helper.dart';
+import '../services/ext_storage_provider.dart';
+import '../utils/backup_restore.dart';
 import '../widgets/binance_pay_widget.dart';
 import '../widgets/default_error_indicator.dart';
 import '../widgets/default_progress_indicator.dart';
@@ -267,6 +269,82 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   bool buttonIsEnabled = true;
+  bool autoBackup =
+      Hive.box('settings').get('autoBackup', defaultValue: false) as bool;
+
+  Widget checkBackup() {
+    if (autoBackup) {
+      final List<String> checked = [
+        AppLocalizations.of(
+          context,
+        )!
+            .settings,
+      ];
+
+      final Map<String, List> boxNames = {
+        AppLocalizations.of(
+          context,
+        )!
+            .settings: ['settings'],
+        AppLocalizations.of(
+          context,
+        )!
+            .cache: ['cache'],
+      };
+      final String autoBackPath = Hive.box('settings').get(
+        'autoBackPath',
+        defaultValue: '',
+      ) as String;
+      if (autoBackPath == '') {
+        ExtStorageProvider.getExtStorage(
+          dirName: 'Imagen/Backups',
+        ).then((value) {
+          Hive.box('settings').put('autoBackPath', value);
+          createBackup(
+            context,
+            checked,
+            boxNames,
+            path: value,
+            fileName: 'Imagen_AutoBackup',
+            showDialog: false,
+          );
+        });
+      } else {
+        createBackup(
+          context,
+          checked,
+          boxNames,
+          path: autoBackPath,
+          fileName: 'Imagen_AutoBackup',
+          showDialog: false,
+        );
+      }
+    }
+
+    // downloadChecker();
+    return const SizedBox();
+  }
+
+  DateTime? backButtonPressTime;
+  Future<bool> handleWillPop(BuildContext context) async {
+    final now = DateTime.now();
+    final backButtonHasNotBeenPressedOrSnackBarHasBeenClosed =
+        backButtonPressTime == null ||
+            now.difference(backButtonPressTime!) > const Duration(seconds: 3);
+
+    if (backButtonHasNotBeenPressedOrSnackBarHasBeenClosed) {
+      backButtonPressTime = now;
+      ShowSnackBar().showSnackBar(
+        context,
+        AppLocalizations.of(context)!.exitConfirm,
+        duration: const Duration(seconds: 2),
+        noAction: true,
+      );
+      return false;
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     Uint8List? image;
@@ -302,603 +380,614 @@ class _HomeScreenState extends State<HomeScreen> {
         ? MediaQuery.of(context).size.width
         : MediaQuery.of(context).size.height / 2;
 
-    return UpgradeAlert(
-      upgrader: Upgrader(
-          showIgnore: false,
-          showLater: false,
-          durationUntilAlertAgain: const Duration(days: 1),
-          dialogStyle: Platform.isIOS
-              ? UpgradeDialogStyle.cupertino
-              : UpgradeDialogStyle.material,
-          // canDismissDialog: true,
-          shouldPopScope: () {
-            return true;
-          }),
-      child: BlocProvider(
-        create: (context) => _imageCubit,
-        child: Scaffold(
-          key: scaffoldKey,
-          drawer: AppDrawer(
-            appVersion: _appVersion,
-            setPromptCallback: setPrompt,
-            key: drawerKey,
-          ),
-          appBar: AppBar(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  AppLocalizations.of(
-                    context,
-                  )!
-                      .appTitle,
-                  style: const TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Alva',
-                  ),
-                ),
-                StreamBuilder<DocumentSnapshot>(
-                  stream: getUserDataStream(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      // While waiting for data, you can show a loading indicator or a default value.
-                      return const SizedBox(
-                          width: 40,
-                          child: Center(child: DefaultProgressIndicator()));
-                    }
-
-                    if (snapshot.hasError) {
-                      // If there's an error, you can display an error message.
-                      return Text(AppLocalizations.of(context)!.error +
-                          snapshot.error.toString());
-                    }
-
-                    if (!snapshot.hasData || !snapshot.data!.exists) {
-                      // If there's no data or the document doesn't exist, handle it accordingly.
-                      return Text(AppLocalizations.of(context)!.noData);
-                    }
-
-                    // Cast the data to Map<String, dynamic>
-                    final Map<String, dynamic>? userData =
-                        snapshot.data!.data() as Map<String, dynamic>?;
-
-                    if (userData == null) {
-                      return Text(AppLocalizations.of(context)!.nullUserData);
-                    }
-
-                    // Assuming 'credits' is the field in your document that holds the user's credits.
-                    double credits = userData['credits'] ?? 0.0;
-                    userCredits = credits;
-
-                    return GestureDetector(
-                      onTap: () {
-                        showCupertinoDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          builder: (context) {
-                            return CreditAlertDialog(
-                              press: () {
-                                Navigator.pop(context);
-                                showPaymentOptions(
-                                  context,
-                                  Container(
-                                    constraints: BoxConstraints(
-                                      maxHeight:
-                                          MediaQuery.of(context).size.height *
-                                              0.75,
-                                    ),
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          AppLocalizations.of(context)!
-                                              .selectPayment,
-                                          style: const TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const SizedBox(
-                                          height: 16,
-                                        ),
-                                        const Divider(),
-                                        ListView.builder(
-                                          shrinkWrap: true,
-                                          primary: false,
-                                          itemCount: paymentOptions.length,
-                                          itemBuilder: (BuildContext context,
-                                              int index) {
-                                            return InkWell(
-                                              onTap: () {
-                                                paymentOptions[index]
-                                                    ['onTap']();
-                                              },
-                                              child: Card(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .secondary,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(12),
-                                                ),
-                                                margin:
-                                                    const EdgeInsets.all(16.0),
-                                                child: Container(
-                                                  height:
-                                                      100, // Adjust the height as needed
-                                                  padding: const EdgeInsets.all(
-                                                      16.0),
-                                                  child: Center(
-                                                    child: SvgPicture.asset(
-                                                        paymentOptions[index]
-                                                            ['image']),
-                                                  ),
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                        const Divider(),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                              credits: credits,
-                            );
-                          },
-                        );
-                      },
-                      child: Row(
-                        children: [
-                          // Replace the text with an icon (e.g., Icons.monetization_on)
-                          const Icon(Icons.monetization_on_outlined, size: 30),
-                          const SizedBox(
-                              width:
-                                  4), // Adjust the spacing between icon and credits
-                          SizedBox(
-                            width: 40,
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Text(
-                                '$credits',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                )
-              ],
+    return WillPopScope(
+      onWillPop: () => handleWillPop(context),
+      child: UpgradeAlert(
+        upgrader: Upgrader(
+            showIgnore: false,
+            showLater: false,
+            durationUntilAlertAgain: const Duration(days: 1),
+            dialogStyle: Platform.isIOS
+                ? UpgradeDialogStyle.cupertino
+                : UpgradeDialogStyle.material,
+            // canDismissDialog: true,
+            shouldPopScope: () {
+              return true;
+            }),
+        child: BlocProvider(
+          create: (context) => _imageCubit,
+          child: Scaffold(
+            key: scaffoldKey,
+            drawer: AppDrawer(
+              appVersion: _appVersion,
+              setPromptCallback: setPrompt,
+              key: drawerKey,
             ),
-          ),
-          body: SingleChildScrollView(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
+            appBar: AppBar(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: DefaultTextFormField(
-                      controller: _textEditingController,
-                      hintText:
-                          AppLocalizations.of(context)!.enterPromptExample,
-                      labelText: AppLocalizations.of(context)!.enterPrompt,
-                      validator: (value) {
-                        if (_textEditingController.text.isEmpty) {
-                          return AppLocalizations.of(context)!.inputSomeText;
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                  Text(
+                    AppLocalizations.of(
+                      context,
+                    )!
+                        .appTitle,
+                    style: const TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Alva',
                     ),
                   ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.imageStyle,
-                            style: const TextStyle(
-                                fontSize: 10, fontWeight: FontWeight.bold),
-                          ),
-                          DropdownButton(
-                            value: _selectedStyle,
-                            underline: const SizedBox(),
-                            items: formattedStyleText.entries
-                                .map((entry) => DropdownMenuItem<AIStyle>(
-                                      value: entry.key,
-                                      child: Text(entry.value),
-                                    ))
-                                .toList(),
-                            onChanged: (AIStyle? newValue) {
-                              setState(() {
-                                _selectedStyle = newValue!;
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.resolution,
-                            style: const TextStyle(
-                                fontSize: 10, fontWeight: FontWeight.bold),
-                          ),
-                          DropdownButton(
-                            value: _selectedResolution,
-                            underline: const SizedBox(),
-                            items: formattedResolution.entries
-                                .map((entry) => DropdownMenuItem<Resolution>(
-                                      value: entry.key,
-                                      child: Text(entry.value),
-                                    ))
-                                .toList(),
-                            onChanged: (Resolution? newValue) {
-                              setState(() {
-                                _selectedResolution = newValue!;
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  BlocBuilder<ImageCubit, ImageState>(
-                      builder: (context, state) {
-                    if (state is ImageLoading) {
-                      const SizedBox();
-                    } else {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.9,
-                          child: DefaultButton(
-                            press: () async {
-                              bool allowed =
-                                  AuthentificationService().currentUserVerified;
-                              // Immediately disable the button to prevent multiple presses:
-                              buttonIsEnabled = false;
+                  StreamBuilder<DocumentSnapshot>(
+                    stream: getUserDataStream(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        // While waiting for data, you can show a loading indicator or a default value.
+                        return const SizedBox(
+                            width: 40,
+                            child: Center(child: DefaultProgressIndicator()));
+                      }
 
-                              // Check user verification (if applicable):
-                              if (!allowed) {
-                                final reverify = await showConfirmationDialog(
-                                  context,
-                                  AppLocalizations.of(context)!
-                                      .emailVerificationMessage,
-                                  positiveResponse:
-                                      AppLocalizations.of(context)!
-                                          .resendVerificationEmail,
-                                  negativeResponse:
-                                      AppLocalizations.of(context)!.goBack,
-                                );
+                      if (snapshot.hasError) {
+                        // If there's an error, you can display an error message.
+                        return Text(AppLocalizations.of(context)!.error +
+                            snapshot.error.toString());
+                      }
 
-                                if (reverify) {
-                                  try {
-                                    bool verificationResult =
-                                        await AuthentificationService()
-                                            .sendVerificationEmailToCurrentUser();
+                      if (!snapshot.hasData || !snapshot.data!.exists) {
+                        // If there's no data or the document doesn't exist, handle it accordingly.
+                        return Text(AppLocalizations.of(context)!.noData);
+                      }
 
-                                    if (verificationResult) {
-                                      ShowSnackBar().showSnackBar(
-                                          context,
-                                          AppLocalizations.of(context)!
-                                              .verificationEmailSuccessful);
-                                    } else {
-                                      ShowSnackBar().showSnackBar(
-                                          context,
-                                          AppLocalizations.of(context)!
-                                              .sendingVerificationEmailFailed);
-                                    }
-                                  } catch (error) {
-                                    // Handle other exceptions
-                                    if (kDebugMode) {
-                                      print(
-                                          'Error during email verification: $error');
-                                    }
-                                    ShowSnackBar().showSnackBar(
-                                        context,
-                                        AppLocalizations.of(context)!
-                                            .verificationEmailError);
-                                  }
-                                  return; // Exit if user needs to verify email
-                                }
-                              }
+                      // Cast the data to Map<String, dynamic>
+                      final Map<String, dynamic>? userData =
+                          snapshot.data!.data() as Map<String, dynamic>?;
 
-                              // Check input:
-                              if (_textEditingController.text.isEmpty) {
-                                ShowSnackBar().showSnackBar(
+                      if (userData == null) {
+                        return Text(AppLocalizations.of(context)!.nullUserData);
+                      }
+
+                      // Assuming 'credits' is the field in your document that holds the user's credits.
+                      double credits = userData['credits'] ?? 0.0;
+                      userCredits = credits;
+
+                      return GestureDetector(
+                        onTap: () {
+                          showCupertinoDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (context) {
+                              return CreditAlertDialog(
+                                press: () {
+                                  Navigator.pop(context);
+                                  showPaymentOptions(
                                     context,
-                                    AppLocalizations.of(context)!
-                                        .inputSomeText);
-                                buttonIsEnabled =
-                                    true; // Re-enable button after error message
-                                return;
-                              }
-
-                              // Display loading indicator:
-                              setState(() {
-                                state is ImageLoading;
-                              });
-
-                              try {
-                                double debitValue = await getDebitValue();
-
-                                // Check user credits (if applicable):
-                                if (userCredits < debitValue) {
-                                  ShowSnackBar().showSnackBar(
-                                      context,
-                                      AppLocalizations.of(context)!
-                                          .insufficientCredits);
-                                  buttonIsEnabled =
-                                      true; // Re-enable button after error message
-                                  return;
-                                }
-
-                                // Generate image:
-                                Uint8List image = await _imageCubit.generate(
-                                  _textEditingController.text,
-                                  _selectedStyle,
-                                  _selectedResolution,
-                                );
-
-                                // Add the generated image to the history list
-                                // imageHistory.add(image);
-                                drawerKey.currentState?.updateDrawer();
-
-                                // Save image to Hive
-                                // Save image information to Hive
-                                Hive.box('imageHistory').add(HiveImageInfo(
-                                    image, _textEditingController.text));
-
-                                // Handle successful image generation (if applicable):
-                                if (image.isNotEmpty) {
-                                  bool deductionResult =
-                                      await UserDatabaseHelper()
-                                          .deductCreditsForUser(
-                                              userUid, debitValue);
-
-                                  if (deductionResult) {
-                                    // Handle successful image generation and credit deduction
-                                    // (display image, perform other actions)
-                                  } else {
-                                    // Handle insufficient credits after image generation
-                                    ShowSnackBar().showSnackBar(
-                                        context,
-                                        AppLocalizations.of(context)!
-                                            .insufficientCredits);
-                                  }
-                                } else {
-                                  // Handle failed image generation
-                                  ShowSnackBar().showSnackBar(
-                                      context,
-                                      AppLocalizations.of(context)!
-                                          .failedGeneration);
-                                }
-                              } catch (error) {
-                                // Handle other image generation errors
-                                if (kDebugMode) {
-                                  print(
-                                      'Error during image generation: $error');
-                                }
-                                ShowSnackBar().showSnackBar(
-                                    context,
-                                    AppLocalizations.of(context)!
-                                        .errorImageGeneration);
-                              } finally {
-                                // Re-enable button after completing any actions:
-                                buttonIsEnabled = true;
-                              }
+                                    Container(
+                                      constraints: BoxConstraints(
+                                        maxHeight:
+                                            MediaQuery.of(context).size.height *
+                                                0.75,
+                                      ),
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            AppLocalizations.of(context)!
+                                                .selectPayment,
+                                            style: const TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            height: 16,
+                                          ),
+                                          const Divider(),
+                                          ListView.builder(
+                                            shrinkWrap: true,
+                                            primary: false,
+                                            itemCount: paymentOptions.length,
+                                            itemBuilder: (BuildContext context,
+                                                int index) {
+                                              return InkWell(
+                                                onTap: () {
+                                                  paymentOptions[index]
+                                                      ['onTap']();
+                                                },
+                                                child: Card(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .secondary,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12),
+                                                  ),
+                                                  margin: const EdgeInsets.all(
+                                                      16.0),
+                                                  child: Container(
+                                                    height:
+                                                        100, // Adjust the height as needed
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            16.0),
+                                                    child: Center(
+                                                      child: SvgPicture.asset(
+                                                          paymentOptions[index]
+                                                              ['image']),
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                          const Divider(),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                                credits: credits,
+                              );
                             },
-                            text: AppLocalizations.of(context)!.create,
-                          ),
-                        ),
-                      );
-                    }
-                    return const SizedBox();
-                  }),
-                  // : const SizedBox(),
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .secondary, // Set the border color
-                          width: 2.0, // Set the border width
-                        ),
-                      ),
-                      height: size,
-                      width: size,
-                      child: BlocBuilder<ImageCubit, ImageState>(
-                        builder: (context, state) {
-                          if (state is ImageLoading) {
-                            return Column(
-                              // mainAxisAlignment: MainAxisAlignment.center,
-                              // crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const PlanetSpinnerAnimation(),
-                                Text(
-                                  '${AppLocalizations.of(context)!.generatingImage}...',
-                                  textAlign: TextAlign.center,
+                          );
+                        },
+                        child: Row(
+                          children: [
+                            // Replace the text with an icon (e.g., Icons.monetization_on)
+                            const Icon(Icons.monetization_on_outlined,
+                                size: 30),
+                            const SizedBox(
+                                width:
+                                    4), // Adjust the spacing between icon and credits
+                            SizedBox(
+                              width: 40,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Text(
+                                  '$credits',
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                TextButton(
-                                    onPressed: () {
-                                      context
-                                          .read<ImageCubit>()
-                                          .cancelGeneration();
-                                      //
-                                    },
-                                    child: Text(
-                                      AppLocalizations.of(context)!.cancel,
-                                      style: const TextStyle(
-                                          decoration: TextDecoration.underline),
-                                    ))
-                              ],
-                            );
-                          } else if (state is ImageStopped) {
-                            const SizedBox();
-                          } else if (state is ImageLoaded) {
-                            image = state.image;
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  )
+                ],
+              ),
+            ),
+            body: SingleChildScrollView(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    checkBackup(),
 
-                            if (Platform.isAndroid) {
-                              if (MediaQuery.of(context).orientation ==
-                                  Orientation.portrait) {
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 10.0),
-                                  child: SizedBox(
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.9,
-                                    child: FadeInImage(
-                                      placeholder: const AssetImage(
-                                          'assets/images/imagen_black.png'),
-                                      image: MemoryImage(image!),
-                                      fit: BoxFit.contain,
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: DefaultTextFormField(
+                        controller: _textEditingController,
+                        hintText:
+                            AppLocalizations.of(context)!.enterPromptExample,
+                        labelText: AppLocalizations.of(context)!.enterPrompt,
+                        validator: (value) {
+                          if (_textEditingController.text.isEmpty) {
+                            return AppLocalizations.of(context)!.inputSomeText;
+                          }
+                          return null;
+                        },
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              AppLocalizations.of(context)!.imageStyle,
+                              style: const TextStyle(
+                                  fontSize: 10, fontWeight: FontWeight.bold),
+                            ),
+                            DropdownButton(
+                              value: _selectedStyle,
+                              underline: const SizedBox(),
+                              items: formattedStyleText.entries
+                                  .map((entry) => DropdownMenuItem<AIStyle>(
+                                        value: entry.key,
+                                        child: Text(entry.value),
+                                      ))
+                                  .toList(),
+                              onChanged: (AIStyle? newValue) {
+                                setState(() {
+                                  _selectedStyle = newValue!;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              AppLocalizations.of(context)!.resolution,
+                              style: const TextStyle(
+                                  fontSize: 10, fontWeight: FontWeight.bold),
+                            ),
+                            DropdownButton(
+                              value: _selectedResolution,
+                              underline: const SizedBox(),
+                              items: formattedResolution.entries
+                                  .map((entry) => DropdownMenuItem<Resolution>(
+                                        value: entry.key,
+                                        child: Text(entry.value),
+                                      ))
+                                  .toList(),
+                              onChanged: (Resolution? newValue) {
+                                setState(() {
+                                  _selectedResolution = newValue!;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    BlocBuilder<ImageCubit, ImageState>(
+                        builder: (context, state) {
+                      if (state is ImageLoading) {
+                        const SizedBox();
+                      } else {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.9,
+                            child: DefaultButton(
+                              press: () async {
+                                bool allowed = AuthentificationService()
+                                    .currentUserVerified;
+                                // Immediately disable the button to prevent multiple presses:
+                                buttonIsEnabled = false;
+
+                                // Check user verification (if applicable):
+                                if (!allowed) {
+                                  final reverify = await showConfirmationDialog(
+                                    context,
+                                    AppLocalizations.of(context)!
+                                        .emailVerificationMessage,
+                                    positiveResponse:
+                                        AppLocalizations.of(context)!
+                                            .resendVerificationEmail,
+                                    negativeResponse:
+                                        AppLocalizations.of(context)!.goBack,
+                                  );
+
+                                  if (reverify) {
+                                    try {
+                                      bool verificationResult =
+                                          await AuthentificationService()
+                                              .sendVerificationEmailToCurrentUser();
+
+                                      if (verificationResult) {
+                                        ShowSnackBar().showSnackBar(
+                                            context,
+                                            AppLocalizations.of(context)!
+                                                .verificationEmailSuccessful);
+                                      } else {
+                                        ShowSnackBar().showSnackBar(
+                                            context,
+                                            AppLocalizations.of(context)!
+                                                .sendingVerificationEmailFailed);
+                                      }
+                                    } catch (error) {
+                                      // Handle other exceptions
+                                      if (kDebugMode) {
+                                        print(
+                                            'Error during email verification: $error');
+                                      }
+                                      ShowSnackBar().showSnackBar(
+                                          context,
+                                          AppLocalizations.of(context)!
+                                              .verificationEmailError);
+                                    }
+                                    return; // Exit if user needs to verify email
+                                  }
+                                }
+
+                                // Check input:
+                                if (_textEditingController.text.isEmpty) {
+                                  ShowSnackBar().showSnackBar(
+                                      context,
+                                      AppLocalizations.of(context)!
+                                          .inputSomeText);
+                                  buttonIsEnabled =
+                                      true; // Re-enable button after error message
+                                  return;
+                                }
+
+                                // Display loading indicator:
+                                setState(() {
+                                  state is ImageLoading;
+                                });
+
+                                try {
+                                  double debitValue = await getDebitValue();
+
+                                  // Check user credits (if applicable):
+                                  if (userCredits < debitValue) {
+                                    ShowSnackBar().showSnackBar(
+                                        context,
+                                        AppLocalizations.of(context)!
+                                            .insufficientCredits);
+                                    buttonIsEnabled =
+                                        true; // Re-enable button after error message
+                                    return;
+                                  }
+
+                                  // Generate image:
+                                  Uint8List image = await _imageCubit.generate(
+                                    _textEditingController.text,
+                                    _selectedStyle,
+                                    _selectedResolution,
+                                  );
+
+                                  // Add the generated image to the history list
+                                  // imageHistory.add(image);
+                                  drawerKey.currentState?.updateDrawer();
+
+                                  // Handle successful image generation (if applicable):
+                                  if (image.isNotEmpty) {
+                                    bool deductionResult =
+                                        await UserDatabaseHelper()
+                                            .deductCreditsForUser(
+                                                userUid, debitValue);
+                                    // Save image to Hive
+                                    // Save image information to Hive
+                                    Hive.box('imageHistory').add(HiveImageInfo(
+                                        image, _textEditingController.text));
+
+                                    if (deductionResult) {
+                                      // Handle successful image generation and credit deduction
+                                      // (display image, perform other actions)
+                                    } else {
+                                      // Handle insufficient credits after image generation
+                                      ShowSnackBar().showSnackBar(
+                                          context,
+                                          AppLocalizations.of(context)!
+                                              .insufficientCredits);
+                                    }
+                                  } else {
+                                    // Handle failed image generation
+                                    ShowSnackBar().showSnackBar(
+                                        context,
+                                        AppLocalizations.of(context)!
+                                            .failedGeneration);
+                                  }
+                                } catch (error) {
+                                  // Handle other image generation errors
+                                  if (kDebugMode) {
+                                    print(
+                                        'Error during image generation: $error');
+                                  }
+                                  ShowSnackBar().showSnackBar(
+                                      context,
+                                      AppLocalizations.of(context)!
+                                          .errorImageGeneration);
+                                } finally {
+                                  // Re-enable button after completing any actions:
+                                  buttonIsEnabled = true;
+                                }
+                              },
+                              text: AppLocalizations.of(context)!.create,
+                            ),
+                          ),
+                        );
+                      }
+                      return const SizedBox();
+                    }),
+                    // : const SizedBox(),
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .secondary, // Set the border color
+                            width: 2.0, // Set the border width
+                          ),
+                        ),
+                        height: size,
+                        width: size,
+                        child: BlocBuilder<ImageCubit, ImageState>(
+                          builder: (context, state) {
+                            if (state is ImageLoading) {
+                              return Column(
+                                // mainAxisAlignment: MainAxisAlignment.center,
+                                // crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const PlanetSpinnerAnimation(),
+                                  Text(
+                                    '${AppLocalizations.of(context)!.generatingImage}...',
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                );
+                                  TextButton(
+                                      onPressed: () {
+                                        context
+                                            .read<ImageCubit>()
+                                            .cancelGeneration();
+                                        //
+                                      },
+                                      child: Text(
+                                        AppLocalizations.of(context)!.cancel,
+                                        style: const TextStyle(
+                                            decoration:
+                                                TextDecoration.underline),
+                                      ))
+                                ],
+                              );
+                            } else if (state is ImageStopped) {
+                              const SizedBox();
+                            } else if (state is ImageLoaded) {
+                              image = state.image;
+
+                              if (Platform.isAndroid) {
+                                if (MediaQuery.of(context).orientation ==
+                                    Orientation.portrait) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 10.0),
+                                    child: SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.9,
+                                      child: FadeInImage(
+                                        placeholder: const AssetImage(
+                                            'assets/images/imagen_black.png'),
+                                        image: MemoryImage(image!),
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+                                  );
+                                } else {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 10),
+                                    child: SizedBox(
+                                      width:
+                                          MediaQuery.of(context).size.height *
+                                              0.7,
+                                      child: FadeInImage(
+                                        placeholder: const AssetImage(
+                                            'assets/images/imagen_black.png'),
+                                        image: MemoryImage(image!),
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+                                  );
+                                }
                               } else {
-                                return Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 10),
-                                  child: SizedBox(
-                                    width: MediaQuery.of(context).size.height *
-                                        0.7,
-                                    child: FadeInImage(
-                                      placeholder: const AssetImage(
-                                          'assets/images/imagen_black.png'),
-                                      image: MemoryImage(image!),
-                                      fit: BoxFit.contain,
+                                if (MediaQuery.of(context).size.width >
+                                    MediaQuery.of(context).size.height) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 10),
+                                    child: SizedBox(
+                                      width:
+                                          MediaQuery.of(context).size.height *
+                                              0.7,
+                                      child: FadeInImage(
+                                        placeholder: const AssetImage(
+                                            'assets/images/imagen_black.png'),
+                                        image: MemoryImage(image!),
+                                        fit: BoxFit.contain,
+                                      ),
                                     ),
-                                  ),
-                                );
+                                  );
+                                } else {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 10.0),
+                                    child: Column(
+                                      children: [
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.9,
+                                          child: FadeInImage(
+                                            placeholder: const AssetImage(
+                                                'assets/images/imagen_black.png'),
+                                            image: MemoryImage(image!),
+                                            fit: BoxFit.contain,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }
                               }
-                            } else {
-                              if (MediaQuery.of(context).size.width >
-                                  MediaQuery.of(context).size.height) {
-                                return Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 10),
-                                  child: SizedBox(
-                                    width: MediaQuery.of(context).size.height *
-                                        0.7,
-                                    child: FadeInImage(
-                                      placeholder: const AssetImage(
-                                          'assets/images/imagen_black.png'),
-                                      image: MemoryImage(image!),
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                );
-                              } else {
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 10.0),
+                            } else if (state is ImageError) {
+                              final error = state.error;
+                              if (kDebugMode) {
+                                print(error);
+                              }
+                              return Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(50.0),
                                   child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    // crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
-                                      SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.9,
-                                        child: FadeInImage(
-                                          placeholder: const AssetImage(
-                                              'assets/images/imagen_black.png'),
-                                          image: MemoryImage(image!),
-                                          fit: BoxFit.contain,
+                                      const DefaultErrorIndicator(),
+                                      // SizedBox(height: 10,),
+                                      Text(
+                                        AppLocalizations.of(context)!
+                                            .failedGenerationTryAgain,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20,
                                         ),
                                       ),
                                     ],
                                   ),
-                                );
-                              }
+                                ),
+                              );
                             }
-                          } else if (state is ImageError) {
-                            final error = state.error;
-                            if (kDebugMode) {
-                              print(error);
-                            }
-                            return Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(50.0),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  // crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    const DefaultErrorIndicator(),
-                                    // SizedBox(height: 10,),
-                                    Text(
-                                      AppLocalizations.of(context)!
-                                          .failedGenerationTryAgain,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                  ],
+                            return Container();
+                          },
+                        ),
+                      ),
+                    ),
+                    BlocBuilder<ImageCubit, ImageState>(
+                      builder: (context, state) {
+                        if (state is ImageLoaded) {
+                          image = state.image;
+
+                          if (image != null) {
+                            return Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: SizedBox(
+                                height: 60,
+                                width: MediaQuery.of(context).size.width * 0.9,
+                                child: DefaultButton(
+                                  press: () {
+                                    _downloadImage(
+                                      image!,
+                                      _textEditingController.text,
+                                    );
+                                  },
+                                  text: AppLocalizations.of(context)!.download,
                                 ),
                               ),
                             );
+                          } else {
+                            // Handle the case where 'image' is null
+                            return const SizedBox();
                           }
-                          return Container();
-                        },
-                      ),
-                    ),
-                  ),
-                  BlocBuilder<ImageCubit, ImageState>(
-                    builder: (context, state) {
-                      if (state is ImageLoaded) {
-                        image = state.image;
-
-                        if (image != null) {
-                          return Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: SizedBox(
-                              height: 60,
-                              width: MediaQuery.of(context).size.width * 0.9,
-                              child: DefaultButton(
-                                press: () {
-                                  _downloadImage(
-                                    image!,
-                                    _textEditingController.text,
-                                  );
-                                },
-                                text: AppLocalizations.of(context)!.download,
-                              ),
-                            ),
-                          );
-                        } else {
-                          // Handle the case where 'image' is null
-                          return const SizedBox();
                         }
-                      }
-                      return const SizedBox();
-                    },
-                  )
-                ],
+                        return const SizedBox();
+                      },
+                    )
+                  ],
+                ),
               ),
             ),
           ),

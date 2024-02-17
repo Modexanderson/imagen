@@ -130,6 +130,13 @@ class AppTheme {
           borderRadius: BorderRadius.circular(7.0),
         ),
       ),
+      popupMenuTheme: PopupMenuThemeData(
+          color: currentTheme.getCardColor(),
+          textStyle: const TextStyle(color: Colors.white),
+          labelTextStyle: MaterialStateProperty.resolveWith((states) {
+            // Default TextStyle
+            return const TextStyle(color: Colors.white);
+          })),
       visualDensity: VisualDensity.adaptivePlatformDensity,
       brightness: Brightness.dark,
       snackBarTheme:

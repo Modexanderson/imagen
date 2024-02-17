@@ -2,8 +2,12 @@ import 'dart:typed_data';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+@HiveType(typeId: 0) // Make sure this is unique among all your registered adapters.
 class HiveImageInfo {
+  @HiveField(0)
   final Uint8List image;
+
+  @HiveField(1)
   final String prompt;
 
   HiveImageInfo(this.image, this.prompt);
