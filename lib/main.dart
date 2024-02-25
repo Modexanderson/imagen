@@ -6,6 +6,7 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 
 import 'app.dart';
 import 'firebase_options.dart';
@@ -15,16 +16,18 @@ import 'widgets/binance_pay_widget.dart';
 import 'widgets/stripe_pay_widget.dart';
 import 'widgets/revenue_cat_widget.dart';
 
+final _configuration = PurchasesConfiguration(revenueCatApiKeyiOS);
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.remove();
-  
+
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     await Hive.initFlutter('Imagen');
   } else {
     await Hive.initFlutter();
   }
-  
+
   Hive.registerAdapter(HiveImageInfoAdapter());
   await openHiveBox('settings');
   await openHiveBox('imageHistory');
@@ -36,6 +39,12 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // }
+  if (Platform.isIOS || Platform.isMacOS) {
+    await Purchases.configure(_configuration);
+  }
+
   Stripe.publishableKey = stripePublishableKey;
   await Stripe.instance.applySettings();
   // await PurchaseApi.init();
@@ -43,7 +52,7 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => BinancePayState()),
-        ChangeNotifierProvider(create: (context) => RenenueCatState()),
+        ChangeNotifierProvider(create: (context) => RevenueCatPayState()),
         ChangeNotifierProvider(create: (context) => StripePayState()),
         // Add other providers as needed
       ],

@@ -1,9 +1,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:purchases_flutter/object_wrappers.dart';
-
-import '../../api/purchase_api.dart';
 import '../authentification_service.dart';
 
 class UserDatabaseHelper {
@@ -123,36 +120,36 @@ class UserDatabaseHelper {
     }
   }
 
-  Future<void> updateRevenueCatPayment(String uid, Package package) async {
-    try {
-      final userDocRef = firestore.collection(USERS_COLLECTION_NAME).doc(uid);
+  // Future<void> updateRevenueCatPayment(String uid, Package package) async {
+  //   try {
+  //     final userDocRef = firestore.collection(USERS_COLLECTION_NAME).doc(uid);
 
-      // Get the current credits value
-    final DocumentSnapshot userSnapshot = await userDocRef.get();
-    final double currentCredits =
-        (userSnapshot.data() as Map<String, dynamic>?)?[CREDITS] ?? 0;
+  //     // Get the current credits value
+  //   final DocumentSnapshot userSnapshot = await userDocRef.get();
+  //   final double currentCredits =
+  //       (userSnapshot.data() as Map<String, dynamic>?)?[CREDITS] ?? 0;
 
-    switch (package.offeringIdentifier) {
-      case Coins.idCoins10:
-      // Update the user's credits
-        await userDocRef.update({
-          CREDITS: currentCredits + 10});
-          break;
-      case Coins.idCoins5:
-      // Update the user's credits
-        await userDocRef.update({
-          CREDITS: currentCredits + 5});
-          break;
-      default:
-        break;
-    }
-    } catch (e) {
-    // Handle exceptions (e.g., Firestore errors)
-    if (kDebugMode) {
-      print('Error updating user credits after payment: $e');
-    }
-  }
-  }
+  //   switch (package.offeringIdentifier) {
+  //     case Coins.idCoins10:
+  //     // Update the user's credits
+  //       await userDocRef.update({
+  //         CREDITS: currentCredits + 10});
+  //         break;
+  //     case Coins.idCoins5:
+  //     // Update the user's credits
+  //       await userDocRef.update({
+  //         CREDITS: currentCredits + 5});
+  //         break;
+  //     default:
+  //       break;
+  //   }
+  //   } catch (e) {
+  //   // Handle exceptions (e.g., Firestore errors)
+  //   if (kDebugMode) {
+  //     print('Error updating user credits after payment: $e');
+  //   }
+  // }
+  // }
 
   Future<void> updateCreditsAfterPayment(String uid, double amount) async {
   try {

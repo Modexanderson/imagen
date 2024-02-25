@@ -56,8 +56,8 @@ Future<void> createBinancePayOrder(BuildContext context, double amount) async {
     goodsType: '02',
     goodsCategory: '6000',
     referenceGoodsId: referenceGoodsId,
-    goodsName: 'Imagen credit',
-    goodsDetail: 'Credit purchase for Imagen mobile app',
+    goodsName: '$amount Imagen credit',
+    goodsDetail: 'Credit purchase for Imagen AI',
     terminalType: 'APP',
   );
   OrderResponse response = await pay.createOrder(body: requestBody);
@@ -145,7 +145,7 @@ Future<void> createBinancePayOrder(BuildContext context, double amount) async {
       }
     } else {
       ShowSnackBar().showSnackBar(
-          context, AppLocalizations.of(context)!.errorCreatingBinanceOrder);
+          context, AppLocalizations.of(context)!. errorCreatingBinanceOrder);
       if (kDebugMode) {
         print('Error creating Binance Pay order: ${response.errorMessage}');
       }

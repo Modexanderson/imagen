@@ -33,6 +33,7 @@ import '../widgets/default_text_form_field.dart';
 import '../widgets/drawer.dart';
 import '../widgets/planet_spinner_animation.dart';
 // import '../widgets/revenue_cat_widget.dart';
+import '../widgets/revenue_cat_widget.dart';
 import '../widgets/show_confirmation_dialog.dart';
 import '../widgets/snack_bar.dart';
 import '../widgets/stripe_pay_widget.dart';
@@ -149,6 +150,8 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _getAppVersion();
     _imageCubit = ImageCubit();
+    // Revenue cat
+    // fetchOffers(context);
 
     // Fetch and display user credits
     _fetchUserCredits();
@@ -244,19 +247,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Package> packages = [];
 
-  Future fetchOffers(BuildContext context) async {
-    final offerings = await PurchaseApi.fetchOffersByIds(Coins.allIds);
+  // Future fetchOffers(BuildContext context) async {
+  //   final offerings = await PurchaseApi.fetchOffersByIds(Coins.allIds);
 
-    if (offerings.isEmpty) {
-      ShowSnackBar()
-          .showSnackBar(context, AppLocalizations.of(context)!.noPlansFound);
-    } else {
-      packages = offerings
-          .map((offer) => offer.availablePackages)
-          .expand((pair) => pair)
-          .toList();
-    }
-  }
+  //   if (offerings.isEmpty) {
+  //     ShowSnackBar()
+  //         .showSnackBar(context, AppLocalizations.of(context)!.noPlansFound);
+  //   } else {
+  //     packages = offerings
+  //         .map((offer) => offer.availablePackages)
+  //         .expand((pair) => pair)
+  //         .toList();
+  //   }
+  // }
 
   final GlobalKey<_HomeScreenState> drawerKey = GlobalKey<_HomeScreenState>();
 
@@ -353,13 +356,50 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     Uint8List? image;
     // Mapping of payment options
+//     List<Map<String, dynamic>> paymentOptions = [
+//   if (!(Platform.isIOS || Platform.isMacOS))
+//     {
+//       'name': 'Card Payment',
+//       'image': 'assets/icons/stripe_method.svg',
+//       'onTap': () {
+//         showPaymentDialog(context, stripePayWidget());
+//       },
+//     },
+//   {
+//     'name': 'Binance Pay',
+//     'image': 'assets/icons/binancePay_method.svg',
+//     'onTap': () {
+//       showPaymentDialog(context, binancePayWidget());
+//     },
+//   },
+//   {
+//     'name': 'Crypto Payment',
+//     'image': 'assets/icons/0xprocessing_method.svg',
+//     'onTap': () {
+//       // Handle crypto payment
+//     },
+//   },
+//   {
+//     'name': 'Payeer',
+//     'image': 'assets/icons/payeer_method.svg',
+//     'onTap': () {
+//       // Handle Payeer payment
+//     },
+//   },
+//   {
+//     'name': 'Enot',
+//     'image': 'assets/icons/enot_method.svg',
+//     'onTap': () {
+//       // Handle Enot payment
+//     },
+//   },
+//   // Add more payment options as needed
+// ];
     List<Map<String, dynamic>> paymentOptions = [
       {
         'name': 'Card Payment',
         'image': 'assets/icons/stripe_method.svg',
         'onTap': () {
-          //// Revenue cat
-          // fetchOffers(context);
           // print(packages);
           // showPaymentDialog(context, revenueCatWidget(packages));
           showPaymentDialog(context, stripePayWidget());
@@ -368,14 +408,14 @@ class _HomeScreenState extends State<HomeScreen> {
       // {'name': 'Crypto Payment', 'image': 'assets/icons/0xprocessing_method.svg', 'onTap': {}},
       // {'name': 'Payeer', 'image': 'assets/icons/payeer_method.svg', 'onTap': {}},
       // {'name': 'Enot', 'image': 'assets/icons/enot_method.svg', 'onTap': {}},
-      if (!Platform.isIOS)
-        {
-          'name': 'Binance Pay',
-          'image': 'assets/icons/binancePay_method.svg',
-          'onTap': () {
-            showPaymentDialog(context, binancePayWidget());
-          }
-        },
+      // if (!Platform.isIOS)
+      {
+        'name': 'Binance Pay',
+        'image': 'assets/icons/binancePay_method.svg',
+        'onTap': () {
+          showPaymentDialog(context, binancePayWidget());
+        }
+      },
       // Add more payment options as needed
     ];
 
@@ -464,72 +504,83 @@ class _HomeScreenState extends State<HomeScreen> {
                               return CreditAlertDialog(
                                 press: () {
                                   Navigator.pop(context);
-                                  showPaymentOptions(
-                                    context,
-                                    Container(
-                                      constraints: BoxConstraints(
-                                        maxHeight:
-                                            MediaQuery.of(context).size.height *
-                                                0.75,
-                                      ),
-                                      padding: const EdgeInsets.all(16.0),
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            AppLocalizations.of(context)!
-                                                .selectPayment,
-                                            style: const TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
+                                  if (!(Platform.isIOS ||
+                                      Platform.isMacOS)) {
+                                    showPaymentOptions(
+                                      context,
+                                      Container(
+                                        constraints: BoxConstraints(
+                                          maxHeight: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.75,
+                                        ),
+                                        padding: const EdgeInsets.all(16.0),
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              AppLocalizations.of(context)!
+                                                  .selectPayment,
+                                              style: const TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
-                                          ),
-                                          const SizedBox(
-                                            height: 16,
-                                          ),
-                                          const Divider(),
-                                          ListView.builder(
-                                            shrinkWrap: true,
-                                            primary: false,
-                                            itemCount: paymentOptions.length,
-                                            itemBuilder: (BuildContext context,
-                                                int index) {
-                                              return InkWell(
-                                                onTap: () {
-                                                  paymentOptions[index]
-                                                      ['onTap']();
-                                                },
-                                                child: Card(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .secondary,
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            12),
-                                                  ),
-                                                  margin: const EdgeInsets.all(
-                                                      16.0),
-                                                  child: Container(
-                                                    height:
-                                                        100, // Adjust the height as needed
-                                                    padding:
+                                            const SizedBox(
+                                              height: 16,
+                                            ),
+                                            const Divider(),
+                                            ListView.builder(
+                                              shrinkWrap: true,
+                                              primary: false,
+                                              itemCount: paymentOptions.length,
+                                              itemBuilder:
+                                                  (BuildContext context,
+                                                      int index) {
+                                                return InkWell(
+                                                  onTap: () async {
+                                                    paymentOptions[index]
+                                                        ['onTap']();
+                                                  },
+                                                  child: Card(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .secondary,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              12),
+                                                    ),
+                                                    margin:
                                                         const EdgeInsets.all(
                                                             16.0),
-                                                    child: Center(
-                                                      child: SvgPicture.asset(
-                                                          paymentOptions[index]
-                                                              ['image']),
+                                                    child: Container(
+                                                      height:
+                                                          100, // Adjust the height as needed
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              16.0),
+                                                      child: Center(
+                                                        child: SvgPicture.asset(
+                                                            paymentOptions[
+                                                                    index]
+                                                                ['image']),
+                                                      ),
                                                     ),
                                                   ),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                          const Divider(),
-                                        ],
+                                                );
+                                              },
+                                            ),
+                                            const Divider(),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  );
+                                    );
+                                  } else {
+                                    showPaymentDialog(
+                                        context, RevenueCatPayWidget());
+                                  }
                                 },
                                 credits: credits,
                               );
