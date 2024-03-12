@@ -1,0 +1,7 @@
+version: "Apple Swift version 5.9.2 (swiftlang-5.9.2.2.56 clang-1500.1.0.2.5)"
+options: "b7a64cf99cab5e72a4c1ab556f159d101123cda497d377d14c0466dc1b531d51"
+build_start_time: [1703781239, 156572000]
+build_end_time: [1703781673, 315457000]
+inputs:
+  "/Users/mordecai/Desktop/imagen/ios/Runner/AppDelegate.swift": [1703702313, 750504557]
+  "/Users/mordecai/Desktop/imagen/ios/build/Runner.build/Release-iphoneos/Runner.build/DerivedSources/GeneratedAssetSymbols.swift": [1703741408, 729982903]

@@ -1,0 +1,20 @@
+dependencies: \
+  /Users/mordecai/Desktop/imagen/ios/Runner/GeneratedPluginRegistrant.m \
+  /Users/mordecai/Desktop/imagen/ios/Runner/GeneratedPluginRegistrant.h \
+  /Users/mordecai/Desktop/imagen/ios/build/Release-iphoneos/Flutter.framework/Modules/module.modulemap \
+  /Users/mordecai/Desktop/imagen/ios/build/Release-iphoneos/Flutter.framework/Headers/Flutter.h \
+  /Users/mordecai/Desktop/imagen/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterAppDelegate.h \
+  /Users/mordecai/Desktop/imagen/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterMacros.h \
+  /Users/mordecai/Desktop/imagen/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterPlugin.h \
+  /Users/mordecai/Desktop/imagen/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterBinaryMessenger.h \
+  /Users/mordecai/Desktop/imagen/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterChannels.h \
+  /Users/mordecai/Desktop/imagen/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterCodecs.h \
+  /Users/mordecai/Desktop/imagen/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterPlatformViews.h \
+  /Users/mordecai/Desktop/imagen/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterTexture.h \
+  /Users/mordecai/Desktop/imagen/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterCallbackCache.h \
+  /Users/mordecai/Desktop/imagen/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterDartProject.h \
+  /Users/mordecai/Desktop/imagen/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterEngine.h \
+  /Users/mordecai/Desktop/imagen/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterEngineGroup.h \
+  /Users/mordecai/Desktop/imagen/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterHeadlessDartRunner.h \
+  /Users/mordecai/Desktop/imagen/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterPluginAppLifeCycleDelegate.h \
+  /Users/mordecai/Desktop/imagen/ios/build/Release-iphoneos/Flutter.framework/Headers/FlutterViewController.h

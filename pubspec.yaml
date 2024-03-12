@@ -36,7 +36,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   binance_pay: ^0.0.2
   cloud_firestore: ^4.13.3
-  file_picker: ^5.2.7
+  file_picker: ^6.2.0
   flutter_bloc: ^8.1.2
   flutter_svg: ^2.0.9
   equatable: ^2.0.5
@@ -94,7 +94,9 @@ dev_dependencies:
 flutter_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/icons/imagen_black.png"
+  remove_alpha_ios: true
+  image_path: "assets/icons/imagen_black_bg.png"
+  background_color: "#ffffff"
 # flutter pub run flutter_launcher_icons:main
 
 
