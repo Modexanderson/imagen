@@ -90,6 +90,22 @@ class AuthentificationService {
     return true;
   }
 
+  String? currentUserProvider() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Check if the user signed in with Google
+      if (user.providerData.any((provider) => provider.providerId == 'google.com')) {
+        return 'google';
+      }
+      // Check if the user signed in with Apple
+      else if (user.providerData.any((provider) => provider.providerId == 'apple.com')) {
+        return 'apple';
+      }
+      // Add more checks for other sign-in methods if needed
+    }
+    return null;
+  }
+
   Future<bool> signIn(BuildContext context, {String? email, String? password}) async {
     try {
       final UserCredential userCredential =

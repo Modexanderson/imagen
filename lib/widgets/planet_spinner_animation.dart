@@ -12,7 +12,7 @@ class PlanetSpinnerAnimation extends StatelessWidget {
       repeat: true,
       reverse: true,
       alignment: Alignment.center,
-      height: 300,
+      height: 150,
     );
   }
 }

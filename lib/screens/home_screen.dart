@@ -871,7 +871,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           builder: (context, state) {
                             if (state is ImageLoading) {
                               return Column(
-                                // mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 // crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   const PlanetSpinnerAnimation(),

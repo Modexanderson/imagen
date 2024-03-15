@@ -398,6 +398,14 @@
   "@requiredRecentLoginException": {},
   "rechargeNow": "Recharge Now",
   "@rechargeNow": {},
+
+  "deleteAccount": "Delete Account",
+  "@deleteAccount": {},
+  "deleteAccountConfitmation": "Are you sure you want to delete your Imagen account",
+  "@deleteAccountConfitmation": {},
+  "deleteAccountNote": "Note: If you delete your account all your data would be lost including your Imagen credits!",
+  "@deleteAccountNote": {},
+
   "history": "History",
   "@history": {},
   "imageHistory": "Image History",

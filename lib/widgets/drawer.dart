@@ -54,23 +54,34 @@ class _AppDrawerState extends State<AppDrawer> {
   }
 
   ExpansionTile buildHistoryTile(BuildContext context) {
-    final imageHistoryBox = Hive.box('imageHistory');
-    final reversedList = List.generate(
-      imageHistoryBox.length,
-      (index) => imageHistoryBox.getAt(index),
-    ).reversed.toList();
+  final imageHistoryBox = Hive.box('imageHistory');
+  final reversedList = List.generate(
+    imageHistoryBox.length,
+    (index) => imageHistoryBox.getAt(index),
+  ).reversed.toList();
 
-    return ExpansionTile(
-      leading: const Icon(Icons.history_outlined),
-      title: Text(
-        AppLocalizations.of(context)!.history,
-        style: const TextStyle(fontSize: 15),
-      ),
-      children: reversedList.map((imageInfo) {
-        return BlocProvider(
-          create: (context) => ImageCubit(),
-          child: ListTile(
-              leading: Image.memory(imageInfo!.image, width: 40, height: 40),
+  return ExpansionTile(
+    leading: const Icon(Icons.history_outlined),
+    title: Text(
+      AppLocalizations.of(context)!.history,
+      style: const TextStyle(fontSize: 15),
+    ),
+    children: [
+      ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: reversedList.length,
+        itemBuilder: (context, index) {
+          final imageInfo = reversedList[index];
+          return BlocProvider(
+            create: (context) => ImageCubit(),
+            child: ListTile(
+              leading: Image.memory(
+            imageInfo.image,
+            width: 40,
+            height: 40,
+            errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
+          ),
               title: Text(
                 imageInfo.prompt,
                 overflow: TextOverflow.fade,
@@ -78,8 +89,7 @@ class _AppDrawerState extends State<AppDrawer> {
               ),
               onTap: () {
                 context.read<ImageCubit>().setSelectedImage(imageInfo.image);
-                widget.setPromptCallback(
-                    imageInfo.prompt); // Call the callback function
+                widget.setPromptCallback(imageInfo.prompt);
                 Navigator.pop(context);
               },
               trailing: PopupMenuButton<int>(
@@ -113,11 +123,15 @@ class _AppDrawerState extends State<AppDrawer> {
                   }
                 },
                 icon: const Icon(Icons.more_vert),
-              )),
-        );
-      }).toList(),
-    );
-  }
+              ),
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
 
   void _showDeleteConfirmationDialog(BuildContext context, dynamic imageInfo) {
     showDialog(
