@@ -132,11 +132,8 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       // theme: ThemeData.dark(),
       home:
-          // widget.showHome
-          //     ?
-          //  RateStarScreen(rateMyApp: rateMyApp)
+         
            const AuthentificationWrapper(),
-        // const HomePage(),
       locale: _locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,

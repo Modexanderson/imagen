@@ -47,7 +47,7 @@ class _AppDrawerState extends State<AppDrawer> {
 
   final _appLink = Platform.isAndroid
       ? 'https://cupertinostudios.online/#/imagen/android'
-      : '';
+      : 'https://apps.apple.com/app/imagen-ai/id6478289950';
 
   void _shareApp() {
     Share.share(_appLink);

@@ -812,7 +812,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     // Save image to Hive
                                     // Save image information to Hive
                                     Hive.box('imageHistory').add(HiveImageInfo(
-                                        image, _textEditingController.text));
+                                        image, _textEditingController.text, DateTime.now()));
 
                                     if (deductionResult) {
                                       // Handle successful image generation and credit deduction

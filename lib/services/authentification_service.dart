@@ -181,9 +181,6 @@ Future<bool> signUp(BuildContext context, {String? email, String? password}) asy
 }
 
 
-
-
-
   // Future<bool> signUpWithGoogle() async {
   //   try {
   //     final GoogleSignInAccount? googleSignInAccount =

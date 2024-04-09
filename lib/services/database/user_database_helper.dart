@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../authentification_service.dart';
@@ -22,7 +21,7 @@ class UserDatabaseHelper {
     return _firebaseFirestore!;
   }
 
-   Future<bool> userExists(String uid) async {
+  Future<bool> userExists(String uid) async {
     try {
       DocumentSnapshot<Map<String, dynamic>> snapshot =
           await firestore.collection(USERS_COLLECTION_NAME).doc(uid).get();
@@ -39,17 +38,19 @@ class UserDatabaseHelper {
   Future<double> getInitialCreditValue() async {
     try {
       // Retrieve the document from Firestore
-      final DocumentSnapshot snapshot =
-        await firestore.collection('initial_credit_collection').doc('initial_credit_doc').get();
+      final DocumentSnapshot snapshot = await firestore
+          .collection('initial_credit_collection')
+          .doc('initial_credit_doc')
+          .get();
 
       // Check if the document exists and contains the 'credit' field
       if (snapshot.exists && snapshot.data() != null) {
         // Explicitly cast the data to Map<String, dynamic>
-        Map<String, dynamic> data =
-            snapshot.data() as Map<String, dynamic>;
+        Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
 
         // Retrieve the credit value
-        double initialCreditValue = (data['initialCreditValue'] ?? 0.0).toDouble();
+        double initialCreditValue =
+            (data['initialCreditValue'] ?? 0.0).toDouble();
 
         return initialCreditValue;
       } else {
@@ -64,41 +65,74 @@ class UserDatabaseHelper {
       }
       return 0.0; // or handle the default value appropriately
     }
-}
+  }
 
+  Future<Map<String, dynamic>?> getUserByEmail(String email) async {
+    try {
+      var querySnapshot = await FirebaseFirestore.instance
+          .collection(USERS_COLLECTION_NAME)
+          .where(USER_EMAIL, isEqualTo: email)
+          .limit(1) // Assuming email is unique
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        return querySnapshot.docs.first.data();
+      } else {
+        return null; // User not found
+      }
+    } catch (e) {
+      print("Error retrieving user by email: $e");
+      return null;
+    }
+  }
 
   final String? phone;
   Future<void> createNewUser(String uid, String userEmail) async {
-   // Retrieve the value from Firebase
-  double initialCreditValue = await getInitialCreditValue();
+    // Retrieve the value from Firebase
+    final existingUser = await UserDatabaseHelper().getUserByEmail(userEmail);
+    double initialCreditValue = await getInitialCreditValue();
     await firestore.collection(USERS_COLLECTION_NAME).doc(uid).set({
       USER_EMAIL: userEmail,
-      CREDITS: initialCreditValue,
+      CREDITS: existingUser == null ? initialCreditValue : 0.0,
     });
   }
 
-  Future<DocumentSnapshot> getUserData(String uid) async {
-  try {
-    return await firestore.collection(USERS_COLLECTION_NAME).doc(uid).get();
-  } catch (e) {
-    // Handle exceptions (e.g., Firestore errors)
-    if (kDebugMode) {
-      print('Error fetching user data: $e');
-    }
-    rethrow;
-  }
-}
+//   Future<void> createNewUser(String uid, String userEmail) async {
+//   // Retrieve the value from Firebase
+//   final existingUser = await UserDatabaseHelper().getUserByEmail(userEmail);
+//   double initialCreditValue = await getInitialCreditValue();
+  
+//   // Check if the existing user already has a CREDITS field
+//   double credits = existingUser != null ? existingUser[CREDITS] ?? 0.0 : initialCreditValue;
 
+//   // Create or update the user document in Firestore
+//   await firestore.collection(USERS_COLLECTION_NAME).doc(uid).set({
+//     USER_EMAIL: userEmail,
+//     CREDITS: credits, // Use existing credits or initialCreditValue
+//   });
+// }
+
+
+  Future<DocumentSnapshot> getUserData(String uid) async {
+    try {
+      return await firestore.collection(USERS_COLLECTION_NAME).doc(uid).get();
+    } catch (e) {
+      // Handle exceptions (e.g., Firestore errors)
+      if (kDebugMode) {
+        print('Error fetching user data: $e');
+      }
+      rethrow;
+    }
+  }
 
   Future<bool> deductCreditsForUser(String uid, double amount) async {
     try {
-      final userDocRef =
-          firestore.collection(USERS_COLLECTION_NAME).doc(uid);
+      final userDocRef = firestore.collection(USERS_COLLECTION_NAME).doc(uid);
 
       // Get the current credits value
       final DocumentSnapshot userSnapshot = await userDocRef.get();
       final double currentCredits =
-        (userSnapshot.data() as Map<String, dynamic>?)?[CREDITS] ?? 0;
+          (userSnapshot.data() as Map<String, dynamic>?)?[CREDITS] ?? 0;
 
       // Check if the user has enough credits
       if (currentCredits >= amount) {
@@ -152,36 +186,34 @@ class UserDatabaseHelper {
   // }
 
   Future<void> updateCreditsAfterPayment(String uid, double amount) async {
-  try {
-    final userDocRef = firestore.collection(USERS_COLLECTION_NAME).doc(uid);
+    try {
+      final userDocRef = firestore.collection(USERS_COLLECTION_NAME).doc(uid);
 
-    // Get the current credits value
-    final DocumentSnapshot userSnapshot = await userDocRef.get();
-    final double currentCredits =
-        (userSnapshot.data() as Map<String, dynamic>?)?[CREDITS] ?? 0;
+      // Get the current credits value
+      final DocumentSnapshot userSnapshot = await userDocRef.get();
+      final double currentCredits =
+          (userSnapshot.data() as Map<String, dynamic>?)?[CREDITS] ?? 0;
 
-    // Update the user's credits
-    await userDocRef.update({
-      CREDITS: currentCredits + amount,
-    });
-  } catch (e) {
-    // Handle exceptions (e.g., Firestore errors)
-    if (kDebugMode) {
-      print('Error updating user credits after payment: $e');
+      // Update the user's credits
+      await userDocRef.update({
+        CREDITS: currentCredits + amount,
+      });
+    } catch (e) {
+      // Handle exceptions (e.g., Firestore errors)
+      if (kDebugMode) {
+        print('Error updating user credits after payment: $e');
+      }
     }
   }
-}
-
 
   Future<void> deleteCurrentUserData() async {
     final uid = AuthentificationService().currentUser.uid;
     final docRef = firestore.collection(USERS_COLLECTION_NAME).doc(uid);
-    
+
     // final ordersDoc = await ordersCollectionRef.get();
     // for (final orderDoc in ordersDoc.docs) {
     //   await ordersCollectionRef.doc(orderDoc.id).delete();
     // }
     await docRef.delete();
   }
-
 }

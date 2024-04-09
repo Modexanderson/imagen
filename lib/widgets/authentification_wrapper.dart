@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:imagen/screens/feed_screen.dart';
 
 import '../screens/home_screen.dart';
 import '../screens/sign_in_screen.dart';
@@ -15,7 +16,7 @@ class AuthentificationWrapper extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return RateAppInitWidget(
-        builder: (rateMyApp) => const HomeScreen());
+        builder: (rateMyApp) => HomeScreen());
         } else {
           return const SignInScreen();
         }
