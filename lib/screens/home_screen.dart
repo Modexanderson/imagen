@@ -492,7 +492,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       }
 
                       // Assuming 'credits' is the field in your document that holds the user's credits.
-                      double credits = userData['credits'] ?? 0.0;
+                      double credits = double.parse(
+                          (userData['credits'] ?? 0.0).toStringAsFixed(2));
                       userCredits = credits;
 
                       return GestureDetector(
@@ -504,8 +505,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               return CreditAlertDialog(
                                 press: () {
                                   Navigator.pop(context);
-                                  if (!(Platform.isIOS ||
-                                      Platform.isMacOS)) {
+                                  if (!(Platform.isIOS || Platform.isMacOS)) {
                                     showPaymentOptions(
                                       context,
                                       Container(
@@ -758,8 +758,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                           AppLocalizations.of(context)!
                                               .verificationEmailError);
                                     }
-                                    return; // Exit if user needs to verify email
                                   }
+                                  return; // Exit if user needs to verify email
                                 }
 
                                 // Check input:
@@ -812,7 +812,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     // Save image to Hive
                                     // Save image information to Hive
                                     Hive.box('imageHistory').add(HiveImageInfo(
-                                        image, _textEditingController.text, DateTime.now()));
+                                        image,
+                                        _textEditingController.text,
+                                        DateTime.now()));
 
                                     if (deductionResult) {
                                       // Handle successful image generation and credit deduction
