@@ -31,6 +31,7 @@ Future<void> main() async {
   Hive.registerAdapter(HiveImageInfoAdapter());
   await openHiveBox('settings');
   await openHiveBox('imageHistory');
+  await openHiveBox('user_data'); // Open the user_data box
   await openHiveBox('cache', limit: true);
 
   if (Platform.isAndroid) {

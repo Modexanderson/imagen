@@ -66,7 +66,7 @@ Widget stripePayWidget() {
                           height: 60,
                           child: Card(
                             color: state.selectedAmount == amount.toDouble()
-                                ? Theme.of(context).appBarTheme.backgroundColor
+                                ? Theme.of(context).colorScheme.secondary
                                 : Colors.white,
                             child: SizedBox(
                               height: 50,
@@ -180,12 +180,12 @@ Widget stripePayWidget() {
 
                     try {
                       // Wait for the asynchronous operation to complete
-                    await controller.makePayment(context: context, amount: amount, currency: 'USD');
+                      await controller.makePayment(
+                          context: context, amount: amount, currency: 'USD');
                     } finally {
                       // Close the loading spinner dialog using the key
                       Navigator.of(key.currentContext!).pop();
                     }
-
 
                     // Navigator.push(
                     //     context,

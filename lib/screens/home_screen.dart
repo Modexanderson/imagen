@@ -153,32 +153,55 @@ class _HomeScreenState extends State<HomeScreen> {
     // Revenue cat
     // fetchOffers(context);
 
-    // Fetch and display user credits
-    _fetchUserCredits();
+    // Initialize user credits from cache
+    _initializeCachedCredits();
   }
 
   String userUid = AuthentificationService().currentUser.uid;
 
-  Future<void> _fetchUserCredits() async {
-    try {
-      DocumentSnapshot userSnapshot = await UserDatabaseHelper().getUserData(
-          userUid); // Implement this method in your UserDatabaseHelper
-
-      // Extract and update credits
-      double credits = (userSnapshot.data()
-              as Map<String, dynamic>?)?[UserDatabaseHelper.CREDITS] ??
-          0;
-      setState(() {
-        userCredits = credits;
-      });
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error fetching user credits: $e');
-      }
-    }
+  void _initializeCachedCredits() async {
+    final cachedCredits = await _fetchCachedCredits();
+    setState(() {
+      userCredits = cachedCredits;
+    });
   }
 
+  Future<double> _fetchCachedCredits() async {
+    final cachedCredits = Hive.box('user_data').get('credits');
+    return cachedCredits ?? 0.0;
+  }
+
+//   Future<double> _fetchUserCredits() async {
+//   final cachedCredits = Hive.box('user_data').get('credits');
+//   if (cachedCredits != null) {
+//     return cachedCredits; // Use cached value if available
+//   }
+
+//   try {
+//     // Fetch credits from Firestore if not cached
+//     final documentSnapshot = await UserDatabaseHelper().getUserData(userUid);
+//     if (documentSnapshot.exists && documentSnapshot.data() != null) {
+//       final data = documentSnapshot.data() as Map<String, dynamic>;
+//       final credits = data[UserDatabaseHelper.CREDITS] ?? 0.0;
+//       Hive.box('user_data').put('credits', credits);
+//       return credits;
+//     } else {
+//       return 0.0; // handle default value
+//     }
+//   } catch (e) {
+//     print('Error fetching user credits: $e');
+//     return 0.0; // handle default value
+//   }
+// }
+
   Future<double> getDebitValue() async {
+    final box = Hive.box('user_data');
+    final cachedDebitValue = box.get('debitValue');
+
+    if (cachedDebitValue != null) {
+      return cachedDebitValue;
+    }
+
     try {
       // Retrieve the document from Firestore
       DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
@@ -186,30 +209,28 @@ class _HomeScreenState extends State<HomeScreen> {
           .doc('debit_doc')
           .get();
 
-      // Check if the document exists and contains the 'credit' field
+      // Check if the document exists and contains the 'debitValue' field
       if (documentSnapshot.exists && documentSnapshot.data() != null) {
         // Explicitly cast the data to Map<String, dynamic>
         Map<String, dynamic> data =
             documentSnapshot.data() as Map<String, dynamic>;
 
-        // Retrieve the credit value
+        // Retrieve the debit value
         double debitValue = (data['debitValue'] ?? 0.0).toDouble();
 
-        // Retrieve the credit value
-        // double debitValue = (data['debitValue'] ?? 0.0).toDouble();
-        // // Retrieve the credit value
-        // double debitValue = documentSnapshot.data()!['debitValue'];
+        // Cache the debit value in Hive
+        box.put('debitValue', debitValue);
 
         return debitValue;
       } else {
         if (kDebugMode) {
-          print('Document does not exist or credit field is missing.');
+          print('Document does not exist or debit field is missing.');
         }
         return 0.0; // or handle the default value appropriately
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error retrieving credit value: $e');
+        print('Error retrieving debit value: $e');
       }
       return 0.0; // or handle the default value appropriately
     }
@@ -355,46 +376,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     Uint8List? image;
-    // Mapping of payment options
-//     List<Map<String, dynamic>> paymentOptions = [
-//   if (!(Platform.isIOS || Platform.isMacOS))
-//     {
-//       'name': 'Card Payment',
-//       'image': 'assets/icons/stripe_method.svg',
-//       'onTap': () {
-//         showPaymentDialog(context, stripePayWidget());
-//       },
-//     },
-//   {
-//     'name': 'Binance Pay',
-//     'image': 'assets/icons/binancePay_method.svg',
-//     'onTap': () {
-//       showPaymentDialog(context, binancePayWidget());
-//     },
-//   },
-//   {
-//     'name': 'Crypto Payment',
-//     'image': 'assets/icons/0xprocessing_method.svg',
-//     'onTap': () {
-//       // Handle crypto payment
-//     },
-//   },
-//   {
-//     'name': 'Payeer',
-//     'image': 'assets/icons/payeer_method.svg',
-//     'onTap': () {
-//       // Handle Payeer payment
-//     },
-//   },
-//   {
-//     'name': 'Enot',
-//     'image': 'assets/icons/enot_method.svg',
-//     'onTap': () {
-//       // Handle Enot payment
-//     },
-//   },
-//   // Add more payment options as needed
-// ];
+
     List<Map<String, dynamic>> paymentOptions = [
       {
         'name': 'Card Payment',
@@ -405,10 +387,7 @@ class _HomeScreenState extends State<HomeScreen> {
           showPaymentDialog(context, stripePayWidget());
         },
       },
-      // {'name': 'Crypto Payment', 'image': 'assets/icons/0xprocessing_method.svg', 'onTap': {}},
-      // {'name': 'Payeer', 'image': 'assets/icons/payeer_method.svg', 'onTap': {}},
-      // {'name': 'Enot', 'image': 'assets/icons/enot_method.svg', 'onTap': {}},
-      // if (!Platform.isIOS)
+
       {
         'name': 'Binance Pay',
         'image': 'assets/icons/binancePay_method.svg',
@@ -491,10 +470,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         return Text(AppLocalizations.of(context)!.nullUserData);
                       }
 
-                      // Assuming 'credits' is the field in your document that holds the user's credits.
+                      // Update the credits from Firestore
                       double credits = double.parse(
                           (userData['credits'] ?? 0.0).toStringAsFixed(2));
                       userCredits = credits;
+                      Hive.box('user_data')
+                          .put('credits', credits); // Update the cache
 
                       return GestureDetector(
                         onTap: () {
@@ -709,6 +690,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10.0),
                           child: SizedBox(
+                            height: 60,
                             width: MediaQuery.of(context).size.width * 0.9,
                             child: DefaultButton(
                               press: () async {

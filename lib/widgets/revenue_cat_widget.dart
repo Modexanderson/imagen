@@ -64,7 +64,7 @@ class RevenueCatPayWidget extends StatelessWidget {
                         child: Card(
                           color: state.selectedAmount ==
                                   _getProductPrice(product).toDouble()
-                              ? Theme.of(context).appBarTheme.backgroundColor
+                              ? Theme.of(context).colorScheme.secondary
                               : Colors.white,
                           child: SizedBox(
                             height: 50,

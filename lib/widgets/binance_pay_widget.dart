@@ -145,7 +145,7 @@ Future<void> createBinancePayOrder(BuildContext context, double amount) async {
       }
     } else {
       ShowSnackBar().showSnackBar(
-          context, AppLocalizations.of(context)!. errorCreatingBinanceOrder);
+          context, AppLocalizations.of(context)!.errorCreatingBinanceOrder);
       if (kDebugMode) {
         print('Error creating Binance Pay order: ${response.errorMessage}');
       }
@@ -196,7 +196,7 @@ Widget binancePayWidget() {
                           height: 60,
                           child: Card(
                             color: state.selectedAmount == amount.toDouble()
-                                ? Theme.of(context).appBarTheme.backgroundColor
+                                ? Theme.of(context).colorScheme.secondary
                                 : Colors.white,
                             child: SizedBox(
                               height: 50,

@@ -46,9 +46,7 @@ class AppTheme {
         ),
       ),
       visualDensity: VisualDensity.adaptivePlatformDensity,
-      appBarTheme: AppBarTheme(
-        backgroundColor: currentTheme.currentColor(),
-      ),
+      appBarTheme: AppBarTheme(),
       cardTheme: CardTheme(
         clipBehavior: Clip.antiAlias,
         elevation: 5,
@@ -142,7 +140,7 @@ class AppTheme {
       snackBarTheme:
           SnackBarThemeData(backgroundColor: Theme.of(context).hintColor),
       appBarTheme: AppBarTheme(
-        color: currentTheme.currentColor(),
+        backgroundColor: currentTheme.getCanvasColor(),
         foregroundColor: Colors.white,
       ),
       canvasColor: currentTheme.getCanvasColor(),
