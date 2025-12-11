@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:imagen/widgets/snack_bar.dart';
 import 'package:logger/logger.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:imagen/l10n/app_localizations.dart';
 
 import '../exceptions/credential_actions_exception.dart';
 import '../exceptions/messaged_firebase_auth_exception.dart';
@@ -66,7 +66,6 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
       validator: (value) {
         if (value!.isEmpty) {
           return AppStrings.getEmailNullError(context);
-          
         } else if (!emailValidatorRegExp.hasMatch(value)) {
           return AppStrings.getInvalidEmailError(context);
         }
@@ -83,8 +82,8 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
       bool resultStatus;
       String? snackbarMessage;
       try {
-        final resultFuture =
-            AuthentificationService().resetPasswordForEmail(context, emailInput);
+        final resultFuture = AuthentificationService()
+            .resetPasswordForEmail(context, emailInput);
         resultFuture.then((value) => resultStatus = value);
         resultStatus = await showDialog(
           context: context,

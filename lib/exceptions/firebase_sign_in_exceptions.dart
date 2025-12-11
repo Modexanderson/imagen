@@ -1,8 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
 import 'messaged_firebase_auth_exception.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
+import 'package:imagen/l10n/app_localizations.dart';
 
 class FirebaseSignInAuthException extends MessagedFirebaseAuthException {
   FirebaseSignInAuthException(
@@ -12,47 +11,68 @@ class FirebaseSignInAuthException extends MessagedFirebaseAuthException {
 
 class FirebaseSignInAuthUserDisabledException
     extends FirebaseSignInAuthException {
-  FirebaseSignInAuthUserDisabledException( BuildContext context,
+  FirebaseSignInAuthUserDisabledException(BuildContext context,
       {String message = ""})
-      : super(message: message.isNotEmpty ? message : AppLocalizations.of(context)!.userDisabledException);
+      : super(
+            message: message.isNotEmpty
+                ? message
+                : AppLocalizations.of(context)!.userDisabledException);
 }
 
 class FirebaseSignInAuthUserNotFoundException
     extends FirebaseSignInAuthException {
-  FirebaseSignInAuthUserNotFoundException( BuildContext context,
+  FirebaseSignInAuthUserNotFoundException(BuildContext context,
       {String message = ""})
-      : super(message: message.isNotEmpty ? message : AppLocalizations.of(context)!.userNotFoundException);
+      : super(
+            message: message.isNotEmpty
+                ? message
+                : AppLocalizations.of(context)!.userNotFoundException);
 }
 
 class FirebaseSignInAuthInvalidEmailException
     extends FirebaseSignInAuthException {
-  FirebaseSignInAuthInvalidEmailException( BuildContext context,
+  FirebaseSignInAuthInvalidEmailException(BuildContext context,
       {String message = ""})
-      : super(message: message.isNotEmpty ? message : AppLocalizations.of(context)!.invalidEmailException);
+      : super(
+            message: message.isNotEmpty
+                ? message
+                : AppLocalizations.of(context)!.invalidEmailException);
 }
 
 class FirebaseSignInAuthWrongPasswordException
     extends FirebaseSignInAuthException {
-  FirebaseSignInAuthWrongPasswordException(BuildContext context, {String message = ""})
-      : super(message: message.isNotEmpty ? message : AppLocalizations.of(context)!.wrongPasswordException);
+  FirebaseSignInAuthWrongPasswordException(BuildContext context,
+      {String message = ""})
+      : super(
+            message: message.isNotEmpty
+                ? message
+                : AppLocalizations.of(context)!.wrongPasswordException);
 }
 
 class FirebaseTooManyRequestsException extends FirebaseSignInAuthException {
-  FirebaseTooManyRequestsException( BuildContext context,
-      {String message = ""})
-      : super(message: message.isNotEmpty ? message : AppLocalizations.of(context)!.signInFailed);
+  FirebaseTooManyRequestsException(BuildContext context, {String message = ""})
+      : super(
+            message: message.isNotEmpty
+                ? message
+                : AppLocalizations.of(context)!.signInFailed);
 }
 
 class FirebaseSignInAuthUserNotVerifiedException
     extends FirebaseSignInAuthException {
-  FirebaseSignInAuthUserNotVerifiedException( BuildContext context,
+  FirebaseSignInAuthUserNotVerifiedException(BuildContext context,
       {String message = ""})
-      : super(message: message.isNotEmpty ? message : AppLocalizations.of(context)!.emailVerificationMessage);
+      : super(
+            message: message.isNotEmpty
+                ? message
+                : AppLocalizations.of(context)!.emailVerificationMessage);
 }
 
 class FirebaseSignInAuthUnknownReasonFailure
     extends FirebaseSignInAuthException {
-  FirebaseSignInAuthUnknownReasonFailure( BuildContext context,
+  FirebaseSignInAuthUnknownReasonFailure(BuildContext context,
       {String message = ""})
-      : super(message: message.isNotEmpty ? message : AppLocalizations.of(context)!.signInFailed);
+      : super(
+            message: message.isNotEmpty
+                ? message
+                : AppLocalizations.of(context)!.signInFailed);
 }

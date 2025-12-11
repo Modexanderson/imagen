@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
+import 'package:imagen/l10n/app_localizations.dart';
 
 import '../models/constants.dart';
 import '../models/size_config.dart';
@@ -11,7 +10,7 @@ class ForgotPasswordScreen extends StatelessWidget {
   static const String routeName = "/forgot_password";
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(
@@ -21,31 +20,31 @@ class ForgotPasswordScreen extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-      child: SingleChildScrollView(
-        
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-              horizontal: getProportionateScreenWidth(screenPadding)),
-          child: SizedBox(
-            width: double.infinity,
-            child: Column(
-              children: [
-                SizedBox(height: SizeConfig.screenHeight! * 0.04),
-                Text(AppLocalizations.of(context)!.forgotPassword,
-                  style: headingStyle,
-                ),
-                Text(
-                  AppLocalizations.of(context)!.pleaseEnterMailForReturnLink,
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: SizeConfig.screenHeight! * 0.1),
-                ForgotPasswordForm(),
-              ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+                horizontal: getProportionateScreenWidth(screenPadding)),
+            child: SizedBox(
+              width: double.infinity,
+              child: Column(
+                children: [
+                  SizedBox(height: SizeConfig.screenHeight! * 0.04),
+                  Text(
+                    AppLocalizations.of(context)!.forgotPassword,
+                    style: headingStyle,
+                  ),
+                  Text(
+                    AppLocalizations.of(context)!.pleaseEnterMailForReturnLink,
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: SizeConfig.screenHeight! * 0.1),
+                  const ForgotPasswordForm(),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ),
     );
   }
 }

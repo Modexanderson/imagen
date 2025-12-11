@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'messaged_firebase_auth_exception.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
+import 'package:imagen/l10n/app_localizations.dart';
 
 class FirebaseSignUpAuthException extends MessagedFirebaseAuthException {
   FirebaseSignUpAuthException(
@@ -12,36 +11,50 @@ class FirebaseSignUpAuthException extends MessagedFirebaseAuthException {
 
 class FirebaseSignUpAuthEmailAlreadyInUseException
     extends FirebaseSignUpAuthException {
-  FirebaseSignUpAuthEmailAlreadyInUseException( BuildContext context,
+  FirebaseSignUpAuthEmailAlreadyInUseException(BuildContext context,
       {String message = ""})
-      : super(message: message.isNotEmpty ? message : AppLocalizations.of(context)!.emailAlreadyInUseException);
+      : super(
+            message: message.isNotEmpty
+                ? message
+                : AppLocalizations.of(context)!.emailAlreadyInUseException);
 }
-
 
 class FirebaseSignUpAuthInvalidEmailException
     extends FirebaseSignUpAuthException {
-  FirebaseSignUpAuthInvalidEmailException( BuildContext context,
+  FirebaseSignUpAuthInvalidEmailException(BuildContext context,
       {String message = ""})
-      : super(message: message.isNotEmpty ? message : AppLocalizations.of(context)!.invalidEmailException);
+      : super(
+            message: message.isNotEmpty
+                ? message
+                : AppLocalizations.of(context)!.invalidEmailException);
 }
 
 class FirebaseSignUpAuthOperationNotAllowedException
     extends FirebaseSignUpAuthException {
-  FirebaseSignUpAuthOperationNotAllowedException( BuildContext context,
+  FirebaseSignUpAuthOperationNotAllowedException(BuildContext context,
       {String message = ""})
-      : super(message: message.isNotEmpty ? message : AppLocalizations.of(context)!.signInFailed);
+      : super(
+            message: message.isNotEmpty
+                ? message
+                : AppLocalizations.of(context)!.signInFailed);
 }
 
 class FirebaseSignUpAuthWeakPasswordException
     extends FirebaseSignUpAuthException {
-  FirebaseSignUpAuthWeakPasswordException( BuildContext context,
+  FirebaseSignUpAuthWeakPasswordException(BuildContext context,
       {String message = ""})
-      : super(message: message.isNotEmpty ? message : AppLocalizations.of(context)!.weakPasswordException);
+      : super(
+            message: message.isNotEmpty
+                ? message
+                : AppLocalizations.of(context)!.weakPasswordException);
 }
 
 class FirebaseSignUpAuthUnknownReasonFailureException
     extends FirebaseSignUpAuthException {
-  FirebaseSignUpAuthUnknownReasonFailureException( BuildContext context,
+  FirebaseSignUpAuthUnknownReasonFailureException(BuildContext context,
       {String message = ""})
-      : super(message: message.isNotEmpty ? message : AppLocalizations.of(context)!.signInFailed);
+      : super(
+            message: message.isNotEmpty
+                ? message
+                : AppLocalizations.of(context)!.signInFailed);
 }

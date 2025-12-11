@@ -8,7 +8,7 @@ class DefaultProgressIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Lottie.asset(
       'assets/animations/default-loader.json',
-      frameRate: FrameRate(20),
+      frameRate: const FrameRate(20),
       alignment: Alignment.center,
       height: 100,
       repeat: true,

@@ -3,28 +3,20 @@
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:logger/logger.dart';
+import 'package:imagen/l10n/app_localizations.dart';
 
 import '../app.dart';
-import '../exceptions/firebase_sign_up_exception.dart';
-import '../exceptions/messaged_firebase_auth_exception.dart';
 import '../models/config.dart';
 import '../models/constants.dart';
 import '../services/authentification_service.dart';
-import '../services/database/user_database_helper.dart';
 import '../services/ext_storage_provider.dart';
 import '../utils/backup_restore.dart';
 import '../utils/box_switch_tile.dart';
 import '../utils/picker.dart';
-import '../widgets/async_progress_dialog.dart';
 import '../widgets/default_progress_indicator.dart';
-import '../widgets/default_text_form_field.dart';
 import '../widgets/gradient_container.dart';
 import '../widgets/snack_bar.dart';
 import '../widgets/text_input_dialog.dart';
@@ -114,161 +106,164 @@ class _SettingsState extends State<Settings> {
   }
 
   Future<void> _deleteAccount(BuildContext context) async {
-  final provider = authService.currentUserProvider();
-  final GlobalKey<State> key = GlobalKey<State>();
+    final provider = authService.currentUserProvider();
+    final GlobalKey<State> key = GlobalKey<State>();
 
-  try {
-     // Show loading dialog
+    try {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            key: key,
+            content: const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DefaultProgressIndicator(),
+              ],
+            ),
+          );
+        },
+      );
+
+      // Check provider type and handle accordingly
+      if (provider == "google") {
+        await authService.deleteUserAccount();
+        await authService.signOut();
+      } else if (provider == "apple") {
+        await authService.deleteUserAccount();
+        await authService.signOut();
+      } else {
+        // Show reauthentication dialog for other providers
+        _showReauthenticateDialog(context);
+        // Hide loading dialog
+        Navigator.of(key.currentContext!).pop();
+        return;
+      }
+
+      // Hide loading dialog
+      Navigator.of(key.currentContext!).pop();
+
+      // Show success Snackbar
+      ShowSnackBar()
+          .showSnackBar(context, AppLocalizations.of(context)!.deleted);
+      Navigator.pop(context);
+
+      // Navigate back to login screen
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        // Handle requires-recent-login error by showing reauthentication dialog
+        _showReauthenticateDialog(context);
+      } else {
+        // Handle other FirebaseAuthExceptions
+        print("Error deleting account: $e");
+      }
+      // Hide loading dialog
+      // Navigator.of(key.currentContext!).pop();
+    } catch (e) {
+      // Handle other errors
+      print("Error deleting account: $e");
+      // Hide loading dialog
+      // Navigator.of(key.currentContext!).pop();
+    }
+  }
+
+  void _showReauthenticateDialog(BuildContext context) {
+    final authService = AuthentificationService();
+    final provider = authService.currentUserProvider();
+    final TextEditingController passwordFieldController =
+        TextEditingController();
+    bool isPasswordVisible = false; // Track password visibility
+    String? passwordError; // Track password validation error
+
     showDialog(
       context: context,
-      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          key: key,
-          content: const Column(
+          title: Text(AppLocalizations.of(context)!.deleteAccount),
+          content: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              DefaultProgressIndicator(),
+              if (provider == "google" || provider == "apple")
+                const Text(
+                  "",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                )
+              else
+                Text(
+                  AppLocalizations.of(context)!.enterPassword,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              const SizedBox(height: 20),
+              if (provider != "google" && provider != "apple")
+                TextFormField(
+                  controller: passwordFieldController,
+                  obscureText: !isPasswordVisible,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.password,
+                    hintText: AppLocalizations.of(context)!.enterPassword,
+                    errorText: passwordError,
+                    suffixIcon: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isPasswordVisible = !isPasswordVisible;
+                        });
+                      },
+                      child: Icon(
+                        isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return AppStrings.getPassNullError(context);
+                    }
+                    return null;
+                  },
+                ),
             ],
           ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text(AppLocalizations.of(context)!.cancel),
+            ),
+            TextButton(
+              onPressed: () async {
+                // Perform reauthentication and delete account
+                if (provider != "google" && provider != "apple") {
+                  String password = passwordFieldController.text.trim();
+                  if (password.isEmpty) {
+                    setState(() {
+                      passwordError = AppStrings.getPassNullError(context);
+                    });
+                    return;
+                  }
+                  await _reauthenticateAndDeleteAccount(context, password);
+                } else {
+                  if (provider == "google") {
+                    await authService.signUpWithGoogle(context);
+                  } else if (provider == "apple") {
+                    await authService.signUpWithApple(context);
+                  }
+                  await _reauthenticateAndDeleteAccount(
+                      context, ""); // No need for password in these cases
+                }
+              },
+              child: Text(AppLocalizations.of(context)!.confirmPassword),
+            ),
+          ],
         );
       },
     );
-
-    // Check provider type and handle accordingly
-    if (provider == "google") {
-      await authService.deleteUserAccount();
-      await authService.signOut();
-    } else if (provider == "apple") {
-      await authService.deleteUserAccount();
-      await authService.signOut();
-    } else {
-       // Show reauthentication dialog for other providers
-      _showReauthenticateDialog(context);
-      // Hide loading dialog
-      Navigator.of(key.currentContext!).pop();
-      return;
-    }
-
-    // Hide loading dialog
-    Navigator.of(key.currentContext!).pop();
-
-    // Show success Snackbar
-    ShowSnackBar().showSnackBar(context, AppLocalizations.of(context)!.deleted);
-    Navigator.pop(context);
-
-    // Navigate back to login screen
-    Navigator.of(context).popUntil((route) => route.isFirst);
-  } on FirebaseAuthException catch (e) {
-    if (e.code == 'requires-recent-login') {
-      // Handle requires-recent-login error by showing reauthentication dialog
-      _showReauthenticateDialog(context);
-    } else {
-      // Handle other FirebaseAuthExceptions
-      print("Error deleting account: $e");
-    }
-    // Hide loading dialog
-    // Navigator.of(key.currentContext!).pop();
-  } catch (e) {
-    // Handle other errors
-    print("Error deleting account: $e");
-    // Hide loading dialog
-    // Navigator.of(key.currentContext!).pop();
   }
-}
-
-void _showReauthenticateDialog(BuildContext context) {
-  final authService = AuthentificationService();
-  final provider = authService.currentUserProvider();
-  final TextEditingController passwordFieldController = TextEditingController();
-  bool isPasswordVisible = false; // Track password visibility
-  String? passwordError; // Track password validation error
-
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text(AppLocalizations.of(context)!.deleteAccount),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (provider == "google" || provider == "apple")
-              const Text(
-                "",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              )
-            else
-              Text(
-                AppLocalizations.of(context)!.enterPassword,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            const SizedBox(height: 20),
-            if (provider != "google" && provider != "apple")
-              TextFormField(
-                controller: passwordFieldController,
-                obscureText: !isPasswordVisible,
-                decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.password,
-                  hintText: AppLocalizations.of(context)!.enterPassword,
-                  errorText: passwordError,
-                  suffixIcon: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        isPasswordVisible = !isPasswordVisible;
-                      });
-                    },
-                    child: Icon(
-                      isPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return AppStrings.getPassNullError(context);
-                  }
-                  return null;
-                },
-              ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Close the dialog
-            },
-            child: Text(AppLocalizations.of(context)!.cancel),
-          ),
-          TextButton(
-            onPressed: () async {
-              // Perform reauthentication and delete account
-              if (provider != "google" && provider != "apple") {
-                String password = passwordFieldController.text.trim();
-                if (password.isEmpty) {
-                  setState(() {
-                    passwordError = AppStrings.getPassNullError(context);
-                  });
-                  return;
-                }
-                await _reauthenticateAndDeleteAccount(context, password);
-              } else {
-                if (provider == "google") {
-                  await authService.signUpWithGoogle(context);
-                } else if (provider == "apple") {
-                  await authService.signUpWithApple(context);
-                }
-                await _reauthenticateAndDeleteAccount(context, ""); // No need for password in these cases
-              }
-            },
-            child: Text(AppLocalizations.of(context)!.confirmPassword),
-          ),
-        ],
-      );
-    },
-  );
-}
 
   Future<void> _reauthenticateAndDeleteAccount(
     BuildContext context,
@@ -279,47 +274,41 @@ void _showReauthenticateDialog(BuildContext context) {
     try {
       // Reauthenticate the user
       User? user = authService.currentUser;
-      if (user != null) {
-        var credential = EmailAuthProvider.credential(
-            email: user.email!, password: password);
-        await user.reauthenticateWithCredential(credential);
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              key: key,
-              content: const Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  DefaultProgressIndicator(),
-                  // SizedBox(height: 16),
-                  // Text(AppLocalizations.of(context)!
-                  //     .creatingBinanceOrder),
-                ],
-              ),
-            );
-          },
-        );
-        // Delete the user account
-        await authService.deleteUserAccount();
-        // await UserDatabaseHelper().deleteCurrentUserData();
+      var credential =
+          EmailAuthProvider.credential(email: user.email!, password: password);
+      await user.reauthenticateWithCredential(credential);
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            key: key,
+            content: const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DefaultProgressIndicator(),
+                // SizedBox(height: 16),
+                // Text(AppLocalizations.of(context)!
+                //     .creatingBinanceOrder),
+              ],
+            ),
+          );
+        },
+      );
+      // Delete the user account
+      await authService.deleteUserAccount();
+      // await UserDatabaseHelper().deleteCurrentUserData();
 
-        // Sign out after deletion
-        await authService.signOut();
-        Navigator.of(key.currentContext!).pop();
+      // Sign out after deletion
+      await authService.signOut();
+      Navigator.of(key.currentContext!).pop();
 
-        // Show success Snackbar
-        ShowSnackBar()
-            .showSnackBar(context, AppLocalizations.of(context)!.deleted);
+      // Show success Snackbar
+      ShowSnackBar()
+          .showSnackBar(context, AppLocalizations.of(context)!.deleted);
 
-        // Navigate back to login screen
-        Navigator.of(context).popUntil((route) => route.isFirst);
-      } else {
-        throw FirebaseAuthException(
-            message: AppLocalizations.of(context)!.userNotFoundException,
-            code: "user-not-found");
-      }
+      // Navigate back to login screen
+      Navigator.of(context).popUntil((route) => route.isFirst);
     } on FirebaseAuthException catch (e) {
       ShowSnackBar().showSnackBar(context, e.message!);
     }
@@ -1323,7 +1312,6 @@ void _showReauthenticateDialog(BuildContext context) {
     );
   }
 }
-
 
 // void _navigateToReAuthScreen(BuildContext context) {
 //   Navigator.push(

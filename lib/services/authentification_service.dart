@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:imagen/l10n/app_localizations.dart';
 
 import '../exceptions/credential_actions_exception.dart';
 import '../exceptions/firebase_sign_in_exceptions.dart';
@@ -14,7 +14,6 @@ import '../widgets/snack_bar.dart';
 import 'database/user_database_helper.dart';
 
 class AuthentificationService {
-
   String getLocalizedErrorMessage(String errorCode, BuildContext context) {
     switch (errorCode) {
       case 'user-not-found':
@@ -24,7 +23,7 @@ class AuthentificationService {
       case 'too-many-requests':
         return AppLocalizations.of(context)!.tooManyRequestException;
       case 'email-already-in-use':
-            return AppLocalizations.of(context)!.emailAlreadyInUseException;
+        return AppLocalizations.of(context)!.emailAlreadyInUseException;
       case 'operation-not-allowed':
         return AppLocalizations.of(context)!.operationNotAllowException;
       case 'weak-password':
@@ -43,13 +42,13 @@ class AuthentificationService {
         return AppLocalizations.of(context)!.invalidVerificationIdException;
       case 'requires-recent-login':
         return AppLocalizations.of(context)!.requiredRecentLoginException;
-     
+
       // Add more cases as needed for specific error messages
       default:
         return AppLocalizations.of(context)!.error;
     }
   }
- 
+
   FirebaseAuth? _firebaseAuth;
 
   AuthentificationService._privateConstructor();
@@ -94,11 +93,13 @@ class AuthentificationService {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       // Check if the user signed in with Google
-      if (user.providerData.any((provider) => provider.providerId == 'google.com')) {
+      if (user.providerData
+          .any((provider) => provider.providerId == 'google.com')) {
         return 'google';
       }
       // Check if the user signed in with Apple
-      else if (user.providerData.any((provider) => provider.providerId == 'apple.com')) {
+      else if (user.providerData
+          .any((provider) => provider.providerId == 'apple.com')) {
         return 'apple';
       }
       // Add more checks for other sign-in methods if needed
@@ -106,7 +107,8 @@ class AuthentificationService {
     return null;
   }
 
-  Future<bool> signIn(BuildContext context, {String? email, String? password}) async {
+  Future<bool> signIn(BuildContext context,
+      {String? email, String? password}) async {
     try {
       final UserCredential userCredential =
           await firebaseAuth.signInWithEmailAndPassword(
@@ -128,181 +130,72 @@ class AuthentificationService {
     }
   }
 
-  // Future<bool> signUp({String? email, String? password}) async {
-  //   try {
-  //     final UserCredential userCredential =
-  //         await firebaseAuth.createUserWithEmailAndPassword(
-  //             email: email.toString(), password: password.toString());
-  //     final String uid = userCredential.user!.uid;
-  //     if (userCredential.user!.emailVerified == false) {
-  //       await userCredential.user!.sendEmailVerification();
-  //     }
-  //     await UserDatabaseHelper().createNewUser(uid);
-  //     return true;
-  //   } on MessagedFirebaseAuthException {
-  //     rethrow;
-  //   } on FirebaseAuthException catch (e) {
-  //     switch (e.code) {
-  //       case GET_EMAIL_ALREADY_IN_USE_EXCEPTION_CODE:
-  //         throw FirebaseSignUpAuthEmailAlreadyInUseException();
-  //       case GET_INVALID_EMAIL_EXCEPTION_CODE:
-  //         throw FirebaseSignUpAuthInvalidEmailException();
-  //       case GET_OPERATION_NOT_ALLOWED_EXCEPTION_CODE:
-  //         throw FirebaseSignUpAuthOperationNotAllowedException();
-  //       case GET_WEAK_PASSWORD_EXCEPTION_CODE:
-  //         throw FirebaseSignUpAuthWeakPasswordException();
-  //       default:
-  //         throw FirebaseSignInAuthException(message: e.code);
-  //     }
-  //   } catch (e) {
-  //     rethrow;
-  //   }
-  // }
-
-
-Future<bool> signUp(BuildContext context, {String? email, String? password}) async {
-  try {
-    final UserCredential userCredential =
-        await firebaseAuth.createUserWithEmailAndPassword(
-            email: email.toString(), password: password.toString());
-    final String uid = userCredential.user!.uid;
-    if (userCredential.user!.emailVerified == false) {
-      await userCredential.user!.sendEmailVerification();
-    }
-    await UserDatabaseHelper().createNewUser(uid, email!);
-    return true;
-  }on FirebaseAuthException catch (e) {
-     String errorMessage = getLocalizedErrorMessage(e.code, context);
-      ShowSnackBar().showSnackBar(context, errorMessage);
-    return false;
-  } catch (e) {
-    rethrow;
-  }
-}
-
-
-  // Future<bool> signUpWithGoogle() async {
-  //   try {
-  //     final GoogleSignInAccount? googleSignInAccount =
-  //         await GoogleSignIn().signIn();
-  //     if (googleSignInAccount == null) {
-  //       // The user canceled the sign-in process
-  //       return false;
-  //     }
-
-  //     final GoogleSignInAuthentication googleSignInAuthentication =
-  //         await googleSignInAccount.authentication;
-  //     final AuthCredential credential = GoogleAuthProvider.credential(
-  //       accessToken: googleSignInAuthentication.accessToken,
-  //       idToken: googleSignInAuthentication.idToken,
-  //     );
-
-  //     final UserCredential userCredential =
-  //         await _firebaseAuth!.signInWithCredential(credential);
-
-  //     final String uid = userCredential.user!.uid;
-
-  //     if (!userCredential.user!.emailVerified) {
-  //       await userCredential.user!.sendEmailVerification();
-  //     }
-
-  //     await UserDatabaseHelper().createNewUser(uid);
-
-  //     return true;
-  //   } on FirebaseAuthException catch (e) {
-  //     // Handle FirebaseAuthException
-  //     print(e.message);
-  //     return false;
-  //   } catch (e) {
-  //     // Handle other exceptions
-  //     print(e.toString());
-  //     return false;
-  //   }
-  // }
-
-  Future<bool> signUpWithGoogle( BuildContext context) async {
-  try {
-    final GoogleSignInAccount? googleSignInAccount =
-        await GoogleSignIn().signIn();
-    
-    if (googleSignInAccount == null) {
-      // The user canceled the sign-in process
-      return false;
-    }
-
-    final GoogleSignInAuthentication googleSignInAuthentication =
-        await googleSignInAccount.authentication;
-    final AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleSignInAuthentication.accessToken,
-      idToken: googleSignInAuthentication.idToken,
-    );
-
-    final UserCredential userCredential =
-        await _firebaseAuth!.signInWithCredential(credential);
-
-    final String uid = userCredential.user!.uid;
-    final String email = googleSignInAccount.email;
-
-    // Check if the user already exists in the database
-    if (!(await UserDatabaseHelper().userExists(uid))) {
-      // User doesn't exist, create a new user
-      if (!userCredential.user!.emailVerified) {
+  Future<bool> signUp(BuildContext context,
+      {String? email, String? password}) async {
+    try {
+      final UserCredential userCredential =
+          await firebaseAuth.createUserWithEmailAndPassword(
+              email: email.toString(), password: password.toString());
+      final String uid = userCredential.user!.uid;
+      if (userCredential.user!.emailVerified == false) {
         await userCredential.user!.sendEmailVerification();
       }
-
-      await UserDatabaseHelper().createNewUser(uid, email);
-    }
-
-    return true;
-  } on FirebaseAuthException catch (e) {
-    String errorMessage = getLocalizedErrorMessage(e.code, context);
+      await UserDatabaseHelper().createNewUser(uid, email!);
+      return true;
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = getLocalizedErrorMessage(e.code, context);
       ShowSnackBar().showSnackBar(context, errorMessage);
-    print(e.message);
-    return false;
-  } catch (e) {
-    // Handle other exceptions
-    print(e.toString());
-    return false;
+      return false;
+    } catch (e) {
+      rethrow;
+    }
   }
-}
 
+  Future<bool> signUpWithGoogle(BuildContext context) async {
+    try {
+      final GoogleSignInAccount? googleSignInAccount =
+          await GoogleSignIn().signIn();
 
-  // Future<bool> signUpWithApple() async {
-  //   try {
-  //     final AuthorizationCredentialAppleID appleCredential =
-  //         await SignInWithApple.getAppleIDCredential(scopes: [
-  //       AppleIDAuthorizationScopes.email,
-  //       AppleIDAuthorizationScopes.fullName,
-  //     ]);
+      if (googleSignInAccount == null) {
+        // The user canceled the sign-in process
+        return false;
+      }
 
-  //     final String nonce = generateNonce(); // Generate a nonce
-  //     final AuthCredential credential = OAuthProvider('apple.com').credential(
-  //       idToken: appleCredential.identityToken,
-  //       rawNonce: nonce,
-  //     );
+      final GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
 
-  //     final UserCredential userCredential =
-  //         await _firebaseAuth!.signInWithCredential(credential);
+      final UserCredential userCredential =
+          await _firebaseAuth!.signInWithCredential(credential);
 
-  //     final String uid = userCredential.user!.uid;
+      final String uid = userCredential.user!.uid;
+      final String email = googleSignInAccount.email;
 
-  //     if (!userCredential.user!.emailVerified) {
-  //       await userCredential.user!.sendEmailVerification();
-  //     }
+      // Check if the user already exists in the database
+      if (!(await UserDatabaseHelper().userExists(uid))) {
+        // User doesn't exist, create a new user
+        if (!userCredential.user!.emailVerified) {
+          await userCredential.user!.sendEmailVerification();
+        }
 
-  //     await UserDatabaseHelper().createNewUser(uid);
+        await UserDatabaseHelper().createNewUser(uid, email);
+      }
 
-  //     return true;
-  //   } on FirebaseAuthException catch (e) {
-  //     // Handle FirebaseAuthException
-  //     print(e.message);
-  //     return false;
-  //   } catch (e) {
-  //     // Handle other exceptions
-  //     print(e.toString());
-  //     return false;
-  //   }
-  // }
+      return true;
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = getLocalizedErrorMessage(e.code, context);
+      ShowSnackBar().showSnackBar(context, errorMessage);
+      print(e.message);
+      return false;
+    } catch (e) {
+      // Handle other exceptions
+      print(e.toString());
+      return false;
+    }
+  }
 
   Future<bool> signUpWithApple(BuildContext context) async {
     try {
@@ -352,8 +245,18 @@ Future<bool> signUp(BuildContext context, {String? email, String? password}) asy
   }
 
   bool get currentUserVerified {
-    currentUser.reload();
-    return currentUser.emailVerified;
+    try {
+      // Remove the problematic reload call that was causing the Firebase error
+      final user = firebaseAuth.currentUser;
+      if (user != null) {
+        return user.emailVerified;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Error checking user verification: $e');
+
+      return false;
+    }
   }
 
   Future<bool> sendVerificationEmailToCurrentUser() async {
@@ -389,7 +292,7 @@ Future<bool> signUp(BuildContext context, {String? email, String? password}) asy
     }
   }
 
-  Future<bool> changePasswordForCurrentUser( BuildContext context,
+  Future<bool> changePasswordForCurrentUser(BuildContext context,
       {String? oldPassword, required String? newPassword}) async {
     try {
       bool isOldPasswordProvidedCorrect = true;
@@ -410,18 +313,18 @@ Future<bool> signUp(BuildContext context, {String? email, String? password}) asy
       String errorMessage = getLocalizedErrorMessage(e.code, context);
       ShowSnackBar().showSnackBar(context, errorMessage);
       return false;
-
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<bool> changeEmailForCurrentUser( BuildContext context,
+  Future<bool> changeEmailForCurrentUser(BuildContext context,
       {String? password, String? newEmail}) async {
     try {
       bool isPasswordProvidedCorrect = true;
       if (password != null) {
-        isPasswordProvidedCorrect = await verifyCurrentUserPassword(context, password);
+        isPasswordProvidedCorrect =
+            await verifyCurrentUserPassword(context, password);
       }
       if (isPasswordProvidedCorrect) {
         await currentUser.verifyBeforeUpdateEmail(newEmail.toString());
@@ -439,7 +342,8 @@ Future<bool> signUp(BuildContext context, {String? email, String? password}) asy
     }
   }
 
-  Future<bool> verifyCurrentUserPassword(BuildContext context, String password) async {
+  Future<bool> verifyCurrentUserPassword(
+      BuildContext context, String password) async {
     try {
       final AuthCredential authCredential = EmailAuthProvider.credential(
         email: currentUser.email.toString(),

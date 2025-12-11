@@ -4,7 +4,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:imagen/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -131,9 +131,7 @@ class _MyAppState extends State<MyApp> {
       restorationScopeId: 'imagen',
       debugShowCheckedModeBanner: false,
       // theme: ThemeData.dark(),
-      home:
-         
-           const AuthentificationWrapper(),
+      home: const AuthentificationWrapper(),
       locale: _locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -161,7 +159,6 @@ class _MyAppState extends State<MyApp> {
         Locale('ur', ''), // Urdu
       ],
       navigatorKey: navigatorKey,
-      
     );
   }
 }

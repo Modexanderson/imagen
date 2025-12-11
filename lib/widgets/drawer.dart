@@ -4,11 +4,11 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:imagen/l10n/app_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:share/share.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../bloc/image_cubit.dart';
 import '../models/image_info.dart';
@@ -20,7 +20,7 @@ class AppDrawer extends StatefulWidget {
   final String appVersion;
   final Function(String) setPromptCallback;
 
-  AppDrawer({
+  const AppDrawer({
     Key? key,
     required this.appVersion,
     required this.setPromptCallback,
@@ -54,84 +54,87 @@ class _AppDrawerState extends State<AppDrawer> {
   }
 
   ExpansionTile buildHistoryTile(BuildContext context) {
-  final imageHistoryBox = Hive.box('imageHistory');
-  final reversedList = List.generate(
-    imageHistoryBox.length,
-    (index) => imageHistoryBox.getAt(index),
-  ).reversed.toList();
+    final imageHistoryBox = Hive.box('imageHistory');
+    final reversedList = List.generate(
+      imageHistoryBox.length,
+      (index) => imageHistoryBox.getAt(index),
+    ).reversed.toList();
 
-  return ExpansionTile(
-    leading: const Icon(Icons.history_outlined),
-    title: Text(
-      AppLocalizations.of(context)!.history,
-      style: const TextStyle(fontSize: 15),
-    ),
-    children: [
-      ListView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: reversedList.length,
-        itemBuilder: (context, index) {
-          final imageInfo = reversedList[index];
-          return BlocProvider(
-            create: (context) => ImageCubit(),
-            child: ListTile(
-              leading: Image.memory(
-            imageInfo.image,
-            width: 40,
-            height: 40,
-            errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
-          ),
-              title: Text(
-                imageInfo.prompt,
-                overflow: TextOverflow.fade,
-                maxLines: 1,
-              ),
-              onTap: () {
-                context.read<ImageCubit>().setSelectedImage(imageInfo.image);
-                widget.setPromptCallback(imageInfo.prompt);
-                Navigator.pop(context);
-              },
-              trailing: PopupMenuButton<int>(
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 0,
-                    child: Row(
-                      children: [
-                        const Icon(Icons.share),
-                        const SizedBox(width: 8),
-                        Text(AppLocalizations.of(context)!.share.split(' ').first),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 1,
-                    child: Row(
-                      children: [
-                        const Icon(Icons.delete),
-                        const SizedBox(width: 8),
-                        Text(AppLocalizations.of(context)!.delete),
-                      ],
-                    ),
-                  ),
-                ],
-                onSelected: (value) {
-                  if (value == 0) {
-                    _shareImage(imageInfo.image);
-                  } else if (value == 1) {
-                    _showDeleteConfirmationDialog(context, imageInfo);
-                  }
-                },
-                icon: const Icon(Icons.more_vert),
-              ),
-            ),
-          );
-        },
+    return ExpansionTile(
+      leading: const Icon(Icons.history_outlined),
+      title: Text(
+        AppLocalizations.of(context)!.history,
+        style: const TextStyle(fontSize: 15),
       ),
-    ],
-  );
-}
-
+      children: [
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: reversedList.length,
+          itemBuilder: (context, index) {
+            final imageInfo = reversedList[index];
+            return BlocProvider(
+              create: (context) => ImageCubit(),
+              child: ListTile(
+                leading: Image.memory(
+                  imageInfo.image,
+                  width: 40,
+                  height: 40,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.error),
+                ),
+                title: Text(
+                  imageInfo.prompt,
+                  overflow: TextOverflow.fade,
+                  maxLines: 1,
+                ),
+                onTap: () {
+                  context.read<ImageCubit>().setSelectedImage(imageInfo.image);
+                  widget.setPromptCallback(imageInfo.prompt);
+                  Navigator.pop(context);
+                },
+                trailing: PopupMenuButton<int>(
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 0,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.share),
+                          const SizedBox(width: 8),
+                          Text(AppLocalizations.of(context)!
+                              .share
+                              .split(' ')
+                              .first),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 1,
+                      child: Row(
+                        children: [
+                          const Icon(Icons.delete),
+                          const SizedBox(width: 8),
+                          Text(AppLocalizations.of(context)!.delete),
+                        ],
+                      ),
+                    ),
+                  ],
+                  onSelected: (value) {
+                    if (value == 0) {
+                      _shareImage(imageInfo.image);
+                    } else if (value == 1) {
+                      _showDeleteConfirmationDialog(context, imageInfo);
+                    }
+                  },
+                  icon: const Icon(Icons.more_vert),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
 
   void _showDeleteConfirmationDialog(BuildContext context, dynamic imageInfo) {
     showDialog(
@@ -180,20 +183,29 @@ class _AppDrawerState extends State<AppDrawer> {
   }
 
   void _shareImage(Uint8List imageBytes) async {
-    // Convert the imageBytes to base64 encoding
-    String base64Image = base64Encode(imageBytes);
+    try {
+      // Convert the imageBytes to base64 encoding
+      String base64Image = base64Encode(imageBytes);
 
-    // Create a temporary directory
-    Directory tempDir = await getTemporaryDirectory();
+      // Create a temporary directory
+      Directory tempDir = await getTemporaryDirectory();
 
-    // Create a temporary file to save the image
-    File tempFile = File('${tempDir.path}/image.png');
-    await tempFile.writeAsBytes(Uint8List.fromList(base64.decode(base64Image)));
+      // Create a temporary file to save the image
+      File tempFile = File(
+          '${tempDir.path}/shared_image_${DateTime.now().millisecondsSinceEpoch}.png');
+      await tempFile
+          .writeAsBytes(Uint8List.fromList(base64.decode(base64Image)));
 
-    // Share the image using the share package
-    Share.shareFiles(
-      [tempFile.path],
-    );
+      // Share the image using share_plus
+      await Share.shareXFiles(
+        [XFile(tempFile.path)],
+        text: 'Generated with Imagen AI',
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error sharing image: $e');
+      }
+    }
   }
 
   @override

@@ -46,8 +46,8 @@ class AppTheme {
         ),
       ),
       visualDensity: VisualDensity.adaptivePlatformDensity,
-      appBarTheme: AppBarTheme(),
-      cardTheme: CardTheme(
+      appBarTheme: const AppBarTheme(),
+      cardTheme: CardThemeData(
         clipBehavior: Clip.antiAlias,
         elevation: 5,
         shape: RoundedRectangleBorder(
@@ -58,7 +58,6 @@ class AppTheme {
       brightness: Brightness.light,
       snackBarTheme:
           SnackBarThemeData(backgroundColor: Theme.of(context).cardColor),
-      indicatorColor: currentTheme.currentColor(),
       progressIndicatorTheme: const ProgressIndicatorThemeData()
           .copyWith(color: currentTheme.currentColor()),
       iconTheme: IconThemeData(
@@ -71,6 +70,7 @@ class AppTheme {
             brightness: Brightness.light,
             secondary: currentTheme.currentColor(),
           ),
+      tabBarTheme: TabBarThemeData(indicatorColor: currentTheme.currentColor()),
     );
   }
 
@@ -131,7 +131,7 @@ class AppTheme {
       popupMenuTheme: PopupMenuThemeData(
           color: currentTheme.getCardColor(),
           textStyle: const TextStyle(color: Colors.white),
-          labelTextStyle: MaterialStateProperty.resolveWith((states) {
+          labelTextStyle: WidgetStateProperty.resolveWith((states) {
             // Default TextStyle
             return const TextStyle(color: Colors.white);
           })),
@@ -150,7 +150,7 @@ class AppTheme {
         backgroundColor: currentTheme.getCanvasColor(),
       ),
       cardColor: currentTheme.getCardColor(),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: currentTheme.getCardColor(),
         clipBehavior: Clip.antiAlias,
         elevation: 5,
@@ -158,7 +158,6 @@ class AppTheme {
           borderRadius: BorderRadius.circular(7.0),
         ),
       ),
-      dialogBackgroundColor: currentTheme.getCardColor(),
       progressIndicatorTheme: const ProgressIndicatorThemeData()
           .copyWith(color: currentTheme.currentColor()),
       iconTheme: const IconThemeData(
@@ -166,12 +165,14 @@ class AppTheme {
         opacity: 1.0,
         size: 24.0,
       ),
-      indicatorColor: currentTheme.currentColor(),
       colorScheme: Theme.of(context).colorScheme.copyWith(
             primary: Colors.white,
             secondary: currentTheme.currentColor(),
             brightness: Brightness.dark,
           ),
+      dialogTheme:
+          DialogThemeData(backgroundColor: currentTheme.getCardColor()),
+      tabBarTheme: TabBarThemeData(indicatorColor: currentTheme.currentColor()),
     );
   }
 }

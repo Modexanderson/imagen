@@ -1,27 +1,28 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:io' show Platform;
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gal/gal.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:imagen/l10n/app_localizations.dart';
 import 'package:imagen/widgets/credit_alert_dialog.dart';
 import 'package:imagen/widgets/default_button.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:upgrader/upgrader.dart';
-import '../api/enums.dart';
-import '../api/purchase_api.dart';
-import '../bloc/image_cubit.dart';
+import 'package:provider/provider.dart';
 
+import '../api/enums.dart';
 import '../models/image_info.dart';
+import '../providers/image_provider.dart'
+    as img_provider; // Renamed to avoid conflict
 import '../services/authentification_service.dart';
 import '../services/database/user_database_helper.dart';
 import '../services/ext_storage_provider.dart';
@@ -32,7 +33,6 @@ import '../widgets/default_progress_indicator.dart';
 import '../widgets/default_text_form_field.dart';
 import '../widgets/drawer.dart';
 import '../widgets/planet_spinner_animation.dart';
-// import '../widgets/revenue_cat_widget.dart';
 import '../widgets/revenue_cat_widget.dart';
 import '../widgets/show_confirmation_dialog.dart';
 import '../widgets/snack_bar.dart';
@@ -46,7 +46,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late ImageCubit _imageCubit;
   double userCredits = 0.0;
   String _appVersion = '';
   final TextEditingController _textEditingController = TextEditingController();
@@ -75,6 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
     AIStyle.malevichPainter: 'Malevich Painter',
     AIStyle.khokhlomaPainter: 'Khokhloma Painter',
   };
+
   final Map<Resolution, String> formattedResolution = {
     Resolution.r16x9: '1024 x 576',
     Resolution.r1x1: '1024 x 1024',
@@ -85,9 +85,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   var _selectedStyle = AIStyle.noStyle;
   var _selectedResolution = Resolution.r1x1;
+
   // Generate a unique identifier instead of using the entire customPart_
-  final uniqueIdentifier =
-      const Uuid().v4(); // You need to import the uuid package
+  final uniqueIdentifier = const Uuid().v4();
+
   Future<String> _downloadImage(
     Uint8List imageBytes,
     String customPart_,
@@ -106,33 +107,28 @@ class _HomeScreenState extends State<HomeScreen> {
       final truncatedCustomPart =
           customPart_.length > 10 ? customPart_.substring(0, 10) : customPart_;
 
-      final imageName = '$truncatedCustomPart$uniqueIdentifier$time';
+      final imageName = '$truncatedCustomPart$uniqueIdentifier$time.png';
 
-      final result =
-          await ImageGallerySaver.saveImage(imageBytes, name: imageName);
+      // Save image using GAL
+      await Gal.putImageBytes(imageBytes, name: imageName);
 
-      if (result['isSuccess']) {
-        ShowSnackBar()
-            .showSnackBar(context, AppLocalizations.of(context)!.imageSaved);
-        // Image saved successfully
-        if (kDebugMode) {
-          print('Image successfully saved to gallery');
-        }
-        return result['filePath'] ?? ''; // Return the file path
-      } else {
-        ShowSnackBar().showSnackBar(
-            context, AppLocalizations.of(context)!.imageSavedFailed);
-        // Image save failed
-        if (kDebugMode) {
-          print('Failed to save image to gallery');
-        }
-        return ''; // Return an empty string if saving fails
-      }
-    } catch (error) {
+      ShowSnackBar()
+          .showSnackBar(context, AppLocalizations.of(context)!.imageSaved);
+
       if (kDebugMode) {
-        print('Error saving image to gallery: $error');
+        print('Image successfully saved to gallery with GAL');
       }
-      rethrow; // Rethrow the error
+
+      return imageName; // Return the image name as identifier
+    } catch (error) {
+      ShowSnackBar().showSnackBar(
+          context, AppLocalizations.of(context)!.imageSavedFailed);
+
+      if (kDebugMode) {
+        print('Error saving image to gallery with GAL: $error');
+      }
+
+      return ''; // Return empty string if saving fails
     }
   }
 
@@ -149,12 +145,18 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _getAppVersion();
-    _imageCubit = ImageCubit();
-    // Revenue cat
-    // fetchOffers(context);
+
+    // Clear cached debit value to get fresh data from Firestore
+    clearDebitValueCache();
 
     // Initialize user credits from cache
     _initializeCachedCredits();
+  }
+
+  void clearDebitValueCache() {
+    final box = Hive.box('user_data');
+    box.delete('debitValue');
+    print('Debit value cache cleared');
   }
 
   String userUid = AuthentificationService().currentUser.uid;
@@ -171,68 +173,61 @@ class _HomeScreenState extends State<HomeScreen> {
     return cachedCredits ?? 0.0;
   }
 
-//   Future<double> _fetchUserCredits() async {
-//   final cachedCredits = Hive.box('user_data').get('credits');
-//   if (cachedCredits != null) {
-//     return cachedCredits; // Use cached value if available
-//   }
-
-//   try {
-//     // Fetch credits from Firestore if not cached
-//     final documentSnapshot = await UserDatabaseHelper().getUserData(userUid);
-//     if (documentSnapshot.exists && documentSnapshot.data() != null) {
-//       final data = documentSnapshot.data() as Map<String, dynamic>;
-//       final credits = data[UserDatabaseHelper.CREDITS] ?? 0.0;
-//       Hive.box('user_data').put('credits', credits);
-//       return credits;
-//     } else {
-//       return 0.0; // handle default value
-//     }
-//   } catch (e) {
-//     print('Error fetching user credits: $e');
-//     return 0.0; // handle default value
-//   }
-// }
-
   Future<double> getDebitValue() async {
     final box = Hive.box('user_data');
     final cachedDebitValue = box.get('debitValue');
+    final cachedTime = box.get('debitValueTimestamp');
 
-    if (cachedDebitValue != null) {
+    // Check if cache is still valid (e.g., cache for 1 hour)
+    const cacheExpiry = Duration(hours: 1);
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    if (cachedDebitValue != null &&
+        cachedTime != null &&
+        (now - cachedTime) < cacheExpiry.inMilliseconds) {
+      if (kDebugMode) {
+        print('Using cached debit value: $cachedDebitValue');
+      }
       return cachedDebitValue;
     }
 
     try {
-      // Retrieve the document from Firestore
+      if (kDebugMode) {
+        print('Fetching fresh debit value from Firestore');
+      }
+
       DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
           .collection('debit_collection')
           .doc('debit_doc')
           .get();
 
-      // Check if the document exists and contains the 'debitValue' field
       if (documentSnapshot.exists && documentSnapshot.data() != null) {
-        // Explicitly cast the data to Map<String, dynamic>
         Map<String, dynamic> data =
             documentSnapshot.data() as Map<String, dynamic>;
 
-        // Retrieve the debit value
         double debitValue = (data['debitValue'] ?? 0.0).toDouble();
 
-        // Cache the debit value in Hive
+        // Cache the new value with timestamp
         box.put('debitValue', debitValue);
+        box.put('debitValueTimestamp', now);
+
+        if (kDebugMode) {
+          print('Fresh debit value cached: $debitValue');
+        }
 
         return debitValue;
       } else {
         if (kDebugMode) {
           print('Document does not exist or debit field is missing.');
         }
-        return 0.0; // or handle the default value appropriately
+        return 0.0;
       }
     } catch (e) {
       if (kDebugMode) {
         print('Error retrieving debit value: $e');
       }
-      return 0.0; // or handle the default value appropriately
+      // Return cached value if available, even if expired, as fallback
+      return cachedDebitValue ?? 0.0;
     }
   }
 
@@ -245,7 +240,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _imageCubit.close();
     _textEditingController.dispose();
     super.dispose();
   }
@@ -268,24 +262,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Package> packages = [];
 
-  // Future fetchOffers(BuildContext context) async {
-  //   final offerings = await PurchaseApi.fetchOffersByIds(Coins.allIds);
-
-  //   if (offerings.isEmpty) {
-  //     ShowSnackBar()
-  //         .showSnackBar(context, AppLocalizations.of(context)!.noPlansFound);
-  //   } else {
-  //     packages = offerings
-  //         .map((offer) => offer.availablePackages)
-  //         .expand((pair) => pair)
-  //         .toList();
-  //   }
-  // }
-
   final GlobalKey<_HomeScreenState> drawerKey = GlobalKey<_HomeScreenState>();
 
   void updateDrawer() {
-    setState(() {}); // Trigger a rebuild of the drawer
+    setState(() {});
   }
 
   void setPrompt(String prompt) {
@@ -299,25 +279,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget checkBackup() {
     if (autoBackup) {
       final List<String> checked = [
-        AppLocalizations.of(
-          context,
-        )!
-            .settings,
+        AppLocalizations.of(context)!.settings,
       ];
 
       final Map<String, List> boxNames = {
-        AppLocalizations.of(
-          context,
-        )!
-            .settings: ['settings'],
-        AppLocalizations.of(
-          context,
-        )!
-            .imageHistory: ['imageHistory'],
-        AppLocalizations.of(
-          context,
-        )!
-            .cache: ['cache'],
+        AppLocalizations.of(context)!.settings: ['settings'],
+        AppLocalizations.of(context)!.imageHistory: ['imageHistory'],
+        AppLocalizations.of(context)!.cache: ['cache'],
       };
       final String autoBackPath = Hive.box('settings').get(
         'autoBackPath',
@@ -349,7 +317,6 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
-    // downloadChecker();
     return const SizedBox();
   }
 
@@ -375,19 +342,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Uint8List? image;
-
     List<Map<String, dynamic>> paymentOptions = [
       {
         'name': 'Card Payment',
         'image': 'assets/icons/stripe_method.svg',
         'onTap': () {
-          // print(packages);
-          // showPaymentDialog(context, revenueCatWidget(packages));
           showPaymentDialog(context, stripePayWidget());
         },
       },
-
       {
         'name': 'Binance Pay',
         'image': 'assets/icons/binancePay_method.svg',
@@ -395,10 +357,8 @@ class _HomeScreenState extends State<HomeScreen> {
           showPaymentDialog(context, binancePayWidget());
         }
       },
-      // Add more payment options as needed
     ];
 
-    /// The size of the container for the generated image.
     final double size = Platform.isAndroid || Platform.isIOS
         ? MediaQuery.of(context).size.width
         : MediaQuery.of(context).size.height / 2;
@@ -413,13 +373,11 @@ class _HomeScreenState extends State<HomeScreen> {
             dialogStyle: Platform.isIOS
                 ? UpgradeDialogStyle.cupertino
                 : UpgradeDialogStyle.material,
-            // canDismissDialog: true,
             shouldPopScope: () {
               return true;
             }),
-        child: BlocProvider(
-          create: (context) => _imageCubit,
-          child: Scaffold(
+        child: Consumer<img_provider.ImageProvider>(
+          builder: (context, imageProvider, child) => Scaffold(
             key: scaffoldKey,
             drawer: AppDrawer(
               appVersion: _appVersion,
@@ -431,10 +389,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    AppLocalizations.of(
-                      context,
-                    )!
-                        .appTitle,
+                    AppLocalizations.of(context)!.appTitle,
                     style: const TextStyle(
                       fontSize: 40,
                       fontWeight: FontWeight.bold,
@@ -445,24 +400,20 @@ class _HomeScreenState extends State<HomeScreen> {
                     stream: getUserDataStream(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        // While waiting for data, you can show a loading indicator or a default value.
                         return const SizedBox(
                             width: 40,
                             child: Center(child: DefaultProgressIndicator()));
                       }
 
                       if (snapshot.hasError) {
-                        // If there's an error, you can display an error message.
                         return Text(AppLocalizations.of(context)!.error +
                             snapshot.error.toString());
                       }
 
                       if (!snapshot.hasData || !snapshot.data!.exists) {
-                        // If there's no data or the document doesn't exist, handle it accordingly.
                         return Text(AppLocalizations.of(context)!.noData);
                       }
 
-                      // Cast the data to Map<String, dynamic>
                       final Map<String, dynamic>? userData =
                           snapshot.data!.data() as Map<String, dynamic>?;
 
@@ -470,12 +421,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         return Text(AppLocalizations.of(context)!.nullUserData);
                       }
 
-                      // Update the credits from Firestore
                       double credits = double.parse(
                           (userData['credits'] ?? 0.0).toStringAsFixed(2));
                       userCredits = credits;
-                      Hive.box('user_data')
-                          .put('credits', credits); // Update the cache
+                      Hive.box('user_data').put('credits', credits);
 
                       return GestureDetector(
                         onTap: () {
@@ -507,9 +456,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
-                                            const SizedBox(
-                                              height: 16,
-                                            ),
+                                            const SizedBox(height: 16),
                                             const Divider(),
                                             ListView.builder(
                                               shrinkWrap: true,
@@ -537,8 +484,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                         const EdgeInsets.all(
                                                             16.0),
                                                     child: Container(
-                                                      height:
-                                                          100, // Adjust the height as needed
+                                                      height: 100,
                                                       padding:
                                                           const EdgeInsets.all(
                                                               16.0),
@@ -560,7 +506,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     );
                                   } else {
                                     showPaymentDialog(
-                                        context, RevenueCatPayWidget());
+                                        context, const RevenueCatPayWidget());
                                   }
                                 },
                                 credits: credits,
@@ -570,12 +516,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                         child: Row(
                           children: [
-                            // Replace the text with an icon (e.g., Icons.monetization_on)
                             const Icon(Icons.monetization_on_outlined,
                                 size: 30),
-                            const SizedBox(
-                                width:
-                                    4), // Adjust the spacing between icon and credits
+                            const SizedBox(width: 4),
                             SizedBox(
                               width: 40,
                               child: SingleChildScrollView(
@@ -604,10 +547,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     checkBackup(),
-
-                    const SizedBox(
-                      height: 10,
-                    ),
+                    const SizedBox(height: 10),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: DefaultTextFormField(
@@ -624,9 +564,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                       ),
                     ),
-                    const SizedBox(
-                      height: 10,
-                    ),
+                    const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
@@ -682,24 +620,31 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
-                    BlocBuilder<ImageCubit, ImageState>(
-                        builder: (context, state) {
-                      if (state is ImageLoading) {
-                        const SizedBox();
-                      } else {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                          child: SizedBox(
-                            height: 60,
-                            width: MediaQuery.of(context).size.width * 0.9,
-                            child: DefaultButton(
-                              press: () async {
+                    // Generate Button
+                    if (imageProvider.status !=
+                        img_provider.ImageGenerationStatus.loading)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        child: SizedBox(
+                          height: 60,
+                          width: MediaQuery.of(context).size.width * 0.9,
+                          child: DefaultButton(
+                            press: () async {
+                              // Prevent multiple simultaneous generations
+                              if (!buttonIsEnabled) {
+                                return;
+                              }
+
+                              // Immediately disable the button to prevent multiple presses
+                              setState(() {
+                                buttonIsEnabled = false;
+                              });
+
+                              try {
+                                // Check user verification
                                 bool allowed = AuthentificationService()
                                     .currentUserVerified;
-                                // Immediately disable the button to prevent multiple presses:
-                                buttonIsEnabled = false;
 
-                                // Check user verification (if applicable):
                                 if (!allowed) {
                                   final reverify = await showConfirmationDialog(
                                     context,
@@ -730,7 +675,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 .sendingVerificationEmailFailed);
                                       }
                                     } catch (error) {
-                                      // Handle other exceptions
                                       if (kDebugMode) {
                                         print(
                                             'Error during email verification: $error');
@@ -741,290 +685,135 @@ class _HomeScreenState extends State<HomeScreen> {
                                               .verificationEmailError);
                                     }
                                   }
-                                  return; // Exit if user needs to verify email
+                                  return;
                                 }
 
-                                // Check input:
-                                if (_textEditingController.text.isEmpty) {
+                                // Check input
+                                if (_textEditingController.text
+                                    .trim()
+                                    .isEmpty) {
                                   ShowSnackBar().showSnackBar(
                                       context,
                                       AppLocalizations.of(context)!
                                           .inputSomeText);
-                                  buttonIsEnabled =
-                                      true; // Re-enable button after error message
                                   return;
                                 }
 
-                                // Display loading indicator:
-                                setState(() {
-                                  state is ImageLoading;
-                                });
+                                // Check user credits
+                                double debitValue = await getDebitValue();
+                                if (userCredits < debitValue) {
+                                  ShowSnackBar().showSnackBar(
+                                      context,
+                                      AppLocalizations.of(context)!
+                                          .insufficientCredits);
+                                  return;
+                                }
 
-                                try {
-                                  double debitValue = await getDebitValue();
+                                // Start generation
+                                if (kDebugMode) {
+                                  print('Starting image generation...');
+                                  print(
+                                      'Prompt: ${_textEditingController.text}');
+                                  print('Style: $_selectedStyle');
+                                  print('Resolution: $_selectedResolution');
+                                }
 
-                                  // Check user credits (if applicable):
-                                  if (userCredits < debitValue) {
+                                Uint8List image =
+                                    await imageProvider.generateImage(
+                                  _textEditingController.text.trim(),
+                                  _selectedStyle,
+                                  _selectedResolution,
+                                );
+
+                                // Handle successful generation
+                                if (image.isNotEmpty) {
+                                  bool deductionResult =
+                                      await UserDatabaseHelper()
+                                          .deductCreditsForUser(
+                                              userUid, debitValue);
+
+                                  // Save to history
+                                  Hive.box('imageHistory').add(HiveImageInfo(
+                                      image,
+                                      _textEditingController.text.trim(),
+                                      DateTime.now()));
+
+                                  if (deductionResult) {
+                                    if (kDebugMode) {
+                                      print(
+                                          'Image generated successfully and credits deducted');
+                                    }
+                                  } else {
                                     ShowSnackBar().showSnackBar(
                                         context,
                                         AppLocalizations.of(context)!
                                             .insufficientCredits);
-                                    buttonIsEnabled =
-                                        true; // Re-enable button after error message
-                                    return;
                                   }
-
-                                  // Generate image:
-                                  Uint8List image = await _imageCubit.generate(
-                                    _textEditingController.text,
-                                    _selectedStyle,
-                                    _selectedResolution,
-                                  );
-
-                                  // Add the generated image to the history list
-                                  // imageHistory.add(image);
-                                  drawerKey.currentState?.updateDrawer();
-
-                                  // Handle successful image generation (if applicable):
-                                  if (image.isNotEmpty) {
-                                    bool deductionResult =
-                                        await UserDatabaseHelper()
-                                            .deductCreditsForUser(
-                                                userUid, debitValue);
-                                    // Save image to Hive
-                                    // Save image information to Hive
-                                    Hive.box('imageHistory').add(HiveImageInfo(
-                                        image,
-                                        _textEditingController.text,
-                                        DateTime.now()));
-
-                                    if (deductionResult) {
-                                      // Handle successful image generation and credit deduction
-                                      // (display image, perform other actions)
-                                    } else {
-                                      // Handle insufficient credits after image generation
-                                      ShowSnackBar().showSnackBar(
-                                          context,
-                                          AppLocalizations.of(context)!
-                                              .insufficientCredits);
-                                    }
-                                  } else {
-                                    // Handle failed image generation
-                                    ShowSnackBar().showSnackBar(
-                                        context,
-                                        AppLocalizations.of(context)!
-                                            .failedGeneration);
-                                  }
-                                } catch (error) {
-                                  // Handle other image generation errors
-                                  if (kDebugMode) {
-                                    print(
-                                        'Error during image generation: $error');
-                                  }
+                                } else {
                                   ShowSnackBar().showSnackBar(
                                       context,
                                       AppLocalizations.of(context)!
-                                          .errorImageGeneration);
-                                } finally {
-                                  // Re-enable button after completing any actions:
-                                  buttonIsEnabled = true;
+                                          .failedGeneration);
                                 }
-                              },
-                              text: AppLocalizations.of(context)!.create,
-                            ),
+                              } catch (error) {
+                                if (kDebugMode) {
+                                  print(
+                                      'Error during image generation: $error');
+                                }
+                                ShowSnackBar().showSnackBar(
+                                    context,
+                                    AppLocalizations.of(context)!
+                                        .errorImageGeneration);
+                              } finally {
+                                // Always re-enable the button
+                                if (mounted) {
+                                  setState(() {
+                                    buttonIsEnabled = true;
+                                  });
+                                }
+                              }
+                            },
+                            text: AppLocalizations.of(context)!.create,
                           ),
-                        );
-                      }
-                      return const SizedBox();
-                    }),
-                    // : const SizedBox(),
+                        ),
+                      ),
+
+                    // Image Display Container
                     Padding(
                       padding: const EdgeInsets.all(20),
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .secondary, // Set the border color
-                            width: 2.0, // Set the border width
+                            color: Theme.of(context).colorScheme.secondary,
+                            width: 2.0,
                           ),
                         ),
                         height: size,
                         width: size,
-                        child: BlocBuilder<ImageCubit, ImageState>(
-                          builder: (context, state) {
-                            if (state is ImageLoading) {
-                              return Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                // crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  const PlanetSpinnerAnimation(),
-                                  Text(
-                                    '${AppLocalizations.of(context)!.generatingImage}...',
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  TextButton(
-                                      onPressed: () {
-                                        context
-                                            .read<ImageCubit>()
-                                            .cancelGeneration();
-                                        //
-                                      },
-                                      child: Text(
-                                        AppLocalizations.of(context)!.cancel,
-                                        style: const TextStyle(
-                                            decoration:
-                                                TextDecoration.underline),
-                                      ))
-                                ],
-                              );
-                            } else if (state is ImageStopped) {
-                              const SizedBox();
-                            } else if (state is ImageLoaded) {
-                              image = state.image;
-
-                              if (Platform.isAndroid) {
-                                if (MediaQuery.of(context).orientation ==
-                                    Orientation.portrait) {
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 10.0),
-                                    child: SizedBox(
-                                      width: MediaQuery.of(context).size.width *
-                                          0.9,
-                                      child: FadeInImage(
-                                        placeholder: const AssetImage(
-                                            'assets/images/imagen_black.png'),
-                                        image: MemoryImage(image!),
-                                        fit: BoxFit.contain,
-                                      ),
-                                    ),
-                                  );
-                                } else {
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 10),
-                                    child: SizedBox(
-                                      width:
-                                          MediaQuery.of(context).size.height *
-                                              0.7,
-                                      child: FadeInImage(
-                                        placeholder: const AssetImage(
-                                            'assets/images/imagen_black.png'),
-                                        image: MemoryImage(image!),
-                                        fit: BoxFit.contain,
-                                      ),
-                                    ),
-                                  );
-                                }
-                              } else {
-                                if (MediaQuery.of(context).size.width >
-                                    MediaQuery.of(context).size.height) {
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 10),
-                                    child: SizedBox(
-                                      width:
-                                          MediaQuery.of(context).size.height *
-                                              0.7,
-                                      child: FadeInImage(
-                                        placeholder: const AssetImage(
-                                            'assets/images/imagen_black.png'),
-                                        image: MemoryImage(image!),
-                                        fit: BoxFit.contain,
-                                      ),
-                                    ),
-                                  );
-                                } else {
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 10.0),
-                                    child: Column(
-                                      children: [
-                                        SizedBox(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.9,
-                                          child: FadeInImage(
-                                            placeholder: const AssetImage(
-                                                'assets/images/imagen_black.png'),
-                                            image: MemoryImage(image!),
-                                            fit: BoxFit.contain,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }
-                              }
-                            } else if (state is ImageError) {
-                              final error = state.error;
-                              if (kDebugMode) {
-                                print(error);
-                              }
-                              return Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(50.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    // crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      const DefaultErrorIndicator(),
-                                      // SizedBox(height: 10,),
-                                      Text(
-                                        AppLocalizations.of(context)!
-                                            .failedGenerationTryAgain,
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }
-                            return Container();
-                          },
-                        ),
+                        child: _buildImageWidget(imageProvider, size),
                       ),
                     ),
-                    BlocBuilder<ImageCubit, ImageState>(
-                      builder: (context, state) {
-                        if (state is ImageLoaded) {
-                          image = state.image;
 
-                          if (image != null) {
-                            return Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: SizedBox(
-                                height: 60,
-                                width: MediaQuery.of(context).size.width * 0.9,
-                                child: DefaultButton(
-                                  press: () {
-                                    _downloadImage(
-                                      image!,
-                                      _textEditingController.text,
-                                    );
-                                  },
-                                  text: AppLocalizations.of(context)!.download,
-                                ),
-                              ),
-                            );
-                          } else {
-                            // Handle the case where 'image' is null
-                            return const SizedBox();
-                          }
-                        }
-                        return const SizedBox();
-                      },
-                    )
+                    // Download Button
+                    if (imageProvider.status ==
+                            img_provider.ImageGenerationStatus.loaded &&
+                        imageProvider.generatedImage != null)
+                      Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: SizedBox(
+                          height: 60,
+                          width: MediaQuery.of(context).size.width * 0.9,
+                          child: DefaultButton(
+                            press: () {
+                              _downloadImage(
+                                imageProvider.generatedImage!,
+                                _textEditingController.text,
+                              );
+                            },
+                            text: AppLocalizations.of(context)!.download,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -1033,5 +822,142 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildImageWidget(
+      img_provider.ImageProvider imageProvider, double size) {
+    switch (imageProvider.status) {
+      case img_provider.ImageGenerationStatus.loading:
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const PlanetSpinnerAnimation(),
+            Text(
+              '${AppLocalizations.of(context)!.generatingImage}...',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                imageProvider.cancelGeneration();
+              },
+              child: Text(
+                AppLocalizations.of(context)!.cancel,
+                style: const TextStyle(decoration: TextDecoration.underline),
+              ),
+            )
+          ],
+        );
+
+      case img_provider.ImageGenerationStatus.loaded:
+        if (imageProvider.generatedImage != null) {
+          return _buildImageDisplay(imageProvider.generatedImage!);
+        }
+        return Container();
+
+      case img_provider.ImageGenerationStatus.error:
+        if (kDebugMode) {
+          print('Image generation error: ${imageProvider.errorMessage}');
+        }
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(50.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const DefaultErrorIndicator(),
+                Text(
+                  AppLocalizations.of(context)!.failedGenerationTryAgain,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+
+      case img_provider.ImageGenerationStatus.stopped:
+        return Center(
+          child: Text(
+            AppLocalizations.of(context)!.cancel,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        );
+
+      case img_provider.ImageGenerationStatus.initial:
+      default:
+        return Container();
+    }
+  }
+
+  Widget _buildImageDisplay(Uint8List image) {
+    if (Platform.isAndroid) {
+      if (MediaQuery.of(context).orientation == Orientation.portrait) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10.0),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.9,
+            child: FadeInImage(
+              placeholder: const AssetImage('assets/images/imagen_black.png'),
+              image: MemoryImage(image),
+              fit: BoxFit.contain,
+            ),
+          ),
+        );
+      } else {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.height * 0.7,
+            child: FadeInImage(
+              placeholder: const AssetImage('assets/images/imagen_black.png'),
+              image: MemoryImage(image),
+              fit: BoxFit.contain,
+            ),
+          ),
+        );
+      }
+    } else {
+      if (MediaQuery.of(context).size.width >
+          MediaQuery.of(context).size.height) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.height * 0.7,
+            child: FadeInImage(
+              placeholder: const AssetImage('assets/images/imagen_black.png'),
+              image: MemoryImage(image),
+              fit: BoxFit.contain,
+            ),
+          ),
+        );
+      } else {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10.0),
+          child: Column(
+            children: [
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.9,
+                child: FadeInImage(
+                  placeholder:
+                      const AssetImage('assets/images/imagen_black.png'),
+                  image: MemoryImage(image),
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    }
   }
 }

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:imagen/l10n/app_localizations.dart';
 
 import 'size_config.dart';
-
 
 // const kPrimaryColor = Colors.blue;
 // const kPrimaryLightColor = Color(0xFFFFECDF);
@@ -25,10 +24,12 @@ final headingStyle = TextStyle(
 );
 
 const defaultDuration = Duration(milliseconds: 250);
+
 class AppStrings {
   static String getEmailNullError(BuildContext context) {
     return AppLocalizations.of(context)!.pleaseEnterEmail;
   }
+
   static String getInvalidEmailError(BuildContext context) {
     return AppLocalizations.of(context)!.pleaseEnterValidEmail;
   }

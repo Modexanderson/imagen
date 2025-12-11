@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:imagen/widgets/snack_bar.dart';
 import 'package:logger/logger.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:imagen/l10n/app_localizations.dart';
 
 import '../exceptions/firebase_sign_in_exceptions.dart';
 import '../exceptions/messaged_firebase_auth_exception.dart';
@@ -163,7 +163,7 @@ class _SignInFormState extends State<SignInForm> {
           if (snackbarMessage == null) {
             throw FirebaseSignInAuthUnknownReasonFailure(context);
           } else {
-            throw FirebaseSignInAuthUnknownReasonFailure( context,
+            throw FirebaseSignInAuthUnknownReasonFailure(context,
                 message: snackbarMessage!);
           }
         }

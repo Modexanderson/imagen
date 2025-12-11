@@ -8,7 +8,7 @@ class PlanetSpinnerAnimation extends StatelessWidget {
   Widget build(BuildContext context) {
     return Lottie.asset(
       'assets/animations/planet-loader.json',
-      frameRate: FrameRate(60),
+      frameRate: const FrameRate(60),
       repeat: true,
       reverse: true,
       alignment: Alignment.center,

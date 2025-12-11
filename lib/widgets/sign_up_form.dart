@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:imagen/widgets/snack_bar.dart';
 import 'package:logger/logger.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:imagen/l10n/app_localizations.dart';
 
 import '../exceptions/firebase_sign_up_exception.dart';
 import '../exceptions/messaged_firebase_auth_exception.dart';
@@ -210,10 +210,10 @@ class _SignUpFormState extends State<SignUpForm> {
         if (signUpStatus == true) {
           snackbarMessage =
               AppLocalizations.of(context)!.successfulRegistration;
-              Navigator.pop(context);
+          Navigator.pop(context);
         } else {
           throw FirebaseSignUpAuthUnknownReasonFailureException(context);
-                }
+        }
       } on MessagedFirebaseAuthException catch (e) {
         snackbarMessage = e.message;
       } catch (e) {
@@ -223,7 +223,6 @@ class _SignUpFormState extends State<SignUpForm> {
       } finally {
         Logger().i(snackbarMessage);
         ShowSnackBar().showSnackBar(context, snackbarMessage!);
-        
       }
     }
   }

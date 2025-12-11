@@ -97,22 +97,6 @@ class UserDatabaseHelper {
     });
   }
 
-//   Future<void> createNewUser(String uid, String userEmail) async {
-//   // Retrieve the value from Firebase
-//   final existingUser = await UserDatabaseHelper().getUserByEmail(userEmail);
-//   double initialCreditValue = await getInitialCreditValue();
-  
-//   // Check if the existing user already has a CREDITS field
-//   double credits = existingUser != null ? existingUser[CREDITS] ?? 0.0 : initialCreditValue;
-
-//   // Create or update the user document in Firestore
-//   await firestore.collection(USERS_COLLECTION_NAME).doc(uid).set({
-//     USER_EMAIL: userEmail,
-//     CREDITS: credits, // Use existing credits or initialCreditValue
-//   });
-// }
-
-
   Future<DocumentSnapshot> getUserData(String uid) async {
     try {
       return await firestore.collection(USERS_COLLECTION_NAME).doc(uid).get();
@@ -153,37 +137,6 @@ class UserDatabaseHelper {
       return false;
     }
   }
-
-  // Future<void> updateRevenueCatPayment(String uid, Package package) async {
-  //   try {
-  //     final userDocRef = firestore.collection(USERS_COLLECTION_NAME).doc(uid);
-
-  //     // Get the current credits value
-  //   final DocumentSnapshot userSnapshot = await userDocRef.get();
-  //   final double currentCredits =
-  //       (userSnapshot.data() as Map<String, dynamic>?)?[CREDITS] ?? 0;
-
-  //   switch (package.offeringIdentifier) {
-  //     case Coins.idCoins10:
-  //     // Update the user's credits
-  //       await userDocRef.update({
-  //         CREDITS: currentCredits + 10});
-  //         break;
-  //     case Coins.idCoins5:
-  //     // Update the user's credits
-  //       await userDocRef.update({
-  //         CREDITS: currentCredits + 5});
-  //         break;
-  //     default:
-  //       break;
-  //   }
-  //   } catch (e) {
-  //   // Handle exceptions (e.g., Firestore errors)
-  //   if (kDebugMode) {
-  //     print('Error updating user credits after payment: $e');
-  //   }
-  // }
-  // }
 
   Future<void> updateCreditsAfterPayment(String uid, double amount) async {
     try {

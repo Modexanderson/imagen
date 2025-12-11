@@ -8,7 +8,7 @@ class DefaultErrorIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Lottie.asset(
       'assets/animations/error-indicator.json',
-      frameRate: FrameRate(20),
+      frameRate: const FrameRate(20),
       alignment: Alignment.center,
       height: 100,
       width: 100,

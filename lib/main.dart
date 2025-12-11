@@ -1,7 +1,7 @@
 import 'dart:io' show Platform;
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide ImageProvider;
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:provider/provider.dart';
@@ -12,6 +12,7 @@ import 'app.dart';
 import 'firebase_options.dart';
 import 'models/.env.dart';
 import 'models/image_info.dart';
+import 'providers/image_provider.dart'; // Import the new ImageProvider
 import 'widgets/binance_pay_widget.dart';
 import 'widgets/stripe_pay_widget.dart';
 import 'widgets/revenue_cat_widget.dart';
@@ -55,6 +56,8 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (context) => BinancePayState()),
         ChangeNotifierProvider(create: (context) => RevenueCatPayState()),
         ChangeNotifierProvider(create: (context) => StripePayState()),
+        ChangeNotifierProvider(
+            create: (context) => ImageProvider()), // Add ImageProvider
         // Add other providers as needed
       ],
       child: const MyApp(),

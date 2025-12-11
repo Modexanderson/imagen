@@ -1,7 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:imagen/l10n/app_localizations.dart';
 
 class ShowSnackBar {
   void showSnackBar(
@@ -23,7 +23,8 @@ class ShowSnackBar {
           behavior: SnackBarBehavior.floating,
           content: Text(
             title,
-            style:  TextStyle(color: Theme.of(context).textTheme.bodySmall!.color),
+            style:
+                TextStyle(color: Theme.of(context).textTheme.bodySmall!.color),
           ),
           action: noAction
               ? null

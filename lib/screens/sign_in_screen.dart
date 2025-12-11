@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:imagen/l10n/app_localizations.dart';
 import 'package:logger/logger.dart';
 import 'package:sign_in_button/sign_in_button.dart';
 
@@ -13,7 +13,6 @@ import '../widgets/async_progress_dialog.dart';
 import '../widgets/no_account_text.dart';
 import '../widgets/sign_in_form.dart';
 import '../widgets/snack_bar.dart';
-
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -64,7 +63,6 @@ class _SignInScreenState extends State<SignInScreen> {
       }
     }
   }
-
 
   Future<void> signUpWithAppleCallback(BuildContext context) async {
     final AuthentificationService authService = AuthentificationService();
@@ -128,7 +126,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: SizeConfig.screenHeight! * 0.08),
-                  SignInForm(),
+                  const SignInForm(),
                   SizedBox(height: SizeConfig.screenHeight! * 0.02),
                   const NoAccountText(),
                   SizedBox(height: getProportionateScreenHeight(10)),

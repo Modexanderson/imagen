@@ -15,25 +15,26 @@ class DefaultButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double doubleValue = MediaQuery.of(context).orientation == Orientation.landscape
-        ? 150.0 // Set your double value for landscape
-        : 56.0;
+    double doubleValue =
+        MediaQuery.of(context).orientation == Orientation.landscape
+            ? 150.0 // Set your double value for landscape
+            : 56.0;
     return SizedBox(
       width: double.infinity,
       height: getProportionateScreenHeight(doubleValue),
       child: ElevatedButton(
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.all<Color>(
+          backgroundColor: WidgetStateProperty.all<Color>(
               Theme.of(context).colorScheme.secondary),
-          elevation: MaterialStateProperty.all(10),
+          elevation: WidgetStateProperty.all(10),
           fixedSize:
-              MaterialStateProperty.all(const Size.fromWidth(double.maxFinite)),
-          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              WidgetStateProperty.all(const Size.fromWidth(double.maxFinite)),
+          shape: WidgetStateProperty.all<RoundedRectangleBorder>(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8.0),
             ),
           ),
-          padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+          padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
             const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
           ),
         ),

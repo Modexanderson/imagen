@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:imagen/l10n/app_localizations.dart';
 
 Future<void> showTextInputDialog({
   required BuildContext context,
@@ -52,7 +52,7 @@ Future<void> showTextInputDialog({
             onPressed: () {
               Navigator.pop(context);
             },
-            child: Text( AppLocalizations.of(context)!.cancel),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             style: TextButton.styleFrom(
